@@ -1,0 +1,46 @@
+@model Ecommerce_site.Email.Msg.EmailVerificationMsg
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activation</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+<div
+    style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+    <div style="padding: 20px; text-align: center;">
+        <h1 style="color: #333333; margin-bottom: 20px; font-size: 24px; font-weight: bold;">
+            Account Activation
+        </h1>
+        <h2 style="color: #555555; font-size: 20px; margin-top: 10px;">
+            Dear User-san, Welcome to our application.
+        </h2>
+        <p style="color: #666666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+            Thank you for signing up for our service.<br>
+            To activate your account, please enter the 6-digit code below:
+        </p>
+        <div
+            style="margin: 20px auto; padding: 15px 20px; background-color: #1e1e1e; color: #9cdcfe; font-family: 'Courier New', Courier, monospace; font-size: 28px; font-weight: bold; border-radius: 5px; text-align: center; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); max-width: 300px; border: 1px solid #333;">
+            @Model.VerificationCode
+        </div>
+        <p style="color: #666666; font-size: 14px; line-height: 1.6;">
+            This code is valid for the next <strong>@Model.VerificationExpTime minutes</strong>.<br>
+            For security purposes, please do not share this code with anyone.
+        </p>
+        <p style="margin-top: 30px; color: #333333; font-size: 16px;">
+            <strong
+                style="background: linear-gradient(49deg, rgba(55, 189, 167, 1), rgba(14, 214, 178, 1)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                RTE Team
+            </strong>
+        </p>
+    </div>
+    <div style="background-color: #f9f9f9; padding: 10px; text-align: center; font-size: 13px; color: #999999;">
+        <p style="margin: 0;">
+            If you did not sign up for this service, please ignore this email.
+        </p>
+    </div>
+</div>
+</body>
+</html>
