@@ -5,6 +5,7 @@ using Ecommerce_site.Dto.Request.CustomerDto;
 using Ecommerce_site.Dto.response.CustomerDto;
 using Ecommerce_site.Email;
 using Ecommerce_site.Email.Msg;
+using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Repo.IRepo;
@@ -71,6 +72,44 @@ public class CustomerService : ICustomerService
         }
     }
 
+    public async Task<ApiStandardResponse<CustomerGetByIdResponse?>> GetCustomerByIdAsync(long id)
+    {
+        try
+        {
+            var customer = await _userRepo.GetSelectedColumnsByConditionAsync(u => u.UserId == id,
+                u => new
+                {
+                    u.Email,
+                    u.UserId,
+                    u.Customer!.PhoneNumber,
+                    u.Customer.Dob,
+                    u.FirstName,
+                    u.LastName,
+                    u.MiddleName,
+                    u.Gender,
+                }, include => include.Include(u => u.Customer)!
+            );
+
+            CustomerGetByIdResponse response = new CustomerGetByIdResponse
+            {
+                Dob = customer.Dob,
+                Email = customer.Email,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                MiddleName = customer.MiddleName,
+                Gender = customer.Gender,
+                PhoneNumber = customer.PhoneNumber, CustomerId = customer.UserId
+            };
+            return new ApiStandardResponse<CustomerGetByIdResponse?>(StatusCodes.Status200OK, response);
+        }
+        catch (EntityNotFoundException e)
+        {
+            _logger.Error(e, $"The user with the id : {id} not found");
+            return new ApiStandardResponse<CustomerGetByIdResponse?>(StatusCodes.Status404NotFound,
+                "the registration session has ended", null);
+        }
+    }
+
 
     public async Task<ApiStandardResponse<CustomerRegisterResponse?>> RegisterCustomerAsync(
         CustomerRegisterRequestUap request)
@@ -80,13 +119,15 @@ public class CustomerService : ICustomerService
             if (await _userRepo.EntityExistByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             {
                 _logger.Warning("The user already exist.");
-                return new ApiStandardResponse<CustomerRegisterResponse?>(409, "The user Already exist", null);
+                return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status409Conflict,
+                    "The user Already exist", null);
             }
 
             if (request.Password != request.ConfirmPassword)
             {
                 _logger.Warning("The password does not match.");
-                return new ApiStandardResponse<CustomerRegisterResponse?>(400, "The  password does not match", null);
+                return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status400BadRequest,
+                    "The  password does not match", null);
             }
 
             uint otp = _otpGenerator.GenerateSecureOtp();
@@ -95,6 +136,7 @@ public class CustomerService : ICustomerService
             await _cache.SetAsync($"{OtpVerificationKey}{session}", otp, TimeSpan.FromMinutes(15));
             await _cache.SetAsync($"{RegisterAccountKey}{session}", new UserCreationCache
             {
+                Gender = request.Gender ?? GenderEnum.Male.ToString().ToLower(),
                 Dob = request.Dob,
                 Email = request.Email,
                 Password = request.Password,
@@ -108,7 +150,7 @@ public class CustomerService : ICustomerService
             {
                 Subject = "Email Verification",
                 ToAddress = request.Email,
-                TemplatePath = "EmailVerification"
+                TemplatePath = nameof(EmailVerification)
             };
 
             EmailVerificationMsg emailMsg = new EmailVerificationMsg
@@ -118,16 +160,18 @@ public class CustomerService : ICustomerService
             };
 
             await SendEmailAsync(emailMetadata, emailMsg);
-            return new ApiStandardResponse<CustomerRegisterResponse?>(202, new CustomerRegisterResponse
-            {
-                Session = session,
-                SignUpSessionExpAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
-            });
+            return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status202Accepted,
+                new CustomerRegisterResponse
+                {
+                    Session = session,
+                    SignUpSessionExpAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
+                });
         }
         catch (ExternalException e)
         {
             _logger.Error(e, "The email service not responding");
-            return new ApiStandardResponse<CustomerRegisterResponse?>(503, "External service not responding", null);
+            return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status503ServiceUnavailable,
+                "External service not responding", null);
         }
     }
 
@@ -140,18 +184,21 @@ public class CustomerService : ICustomerService
         if (otp == 0)
         {
             _logger.Debug("The otp code has expired");
-            return new ApiStandardResponse<CustomerCreationResponse?>(404, "The otp has expired", null);
+            return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
+                "The otp has expired", null);
         }
 
         if (otp != request.Otp)
         {
             _logger.Debug("The otp code does not match");
-            return new ApiStandardResponse<CustomerCreationResponse?>(400, "The code does not match", null);
+            return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status400BadRequest,
+                "The code does not match", null);
         }
 
         if (customerRegisterObj == null)
         {
-            return new ApiStandardResponse<CustomerCreationResponse?>(404, "the registration session has ended", null);
+            return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
+                "the registration session has ended", null);
         }
 
         var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
@@ -161,6 +208,7 @@ public class CustomerService : ICustomerService
         User createdUser = await _userRepo.AddAsync(
             new User
             {
+                Gender = customerRegisterObj.Gender,
                 FirstName = customerRegisterObj.FirstName,
                 MiddleName = customerRegisterObj.MiddleName,
                 LastName = customerRegisterObj.LastName,
@@ -187,19 +235,69 @@ public class CustomerService : ICustomerService
         await _cache.RemoveAsync($"{RegisterAccountKey}{session}");
         await _cache.SetAsync($"{RedisRefreshKey}{createdUser.UserId}", refreshToken);
 
-        return new ApiStandardResponse<CustomerCreationResponse?>(201, new CustomerCreationResponse
-        {
-            Dob = customerRegisterObj.Dob,
-            Email = customerRegisterObj.Email,
-            FirstName = customerRegisterObj.FirstName,
-            MiddleName = customerRegisterObj.MiddleName,
-            LastName = customerRegisterObj.LastName,
-            PhoneNumber = customerRegisterObj.PhoneNumber,
-            Token = new TokenResponse
+        return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status201Created,
+            new CustomerCreationResponse
             {
-                Token = accessToken,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
+                UserId  = createdUser.UserId,
+                Gender = createdUser.Gender,
+                Dob = customerRegisterObj.Dob,
+                Email = createdUser.Email,
+                FirstName = createdUser.FirstName,
+                MiddleName = createdUser.MiddleName,
+                LastName = createdUser.LastName,
+                PhoneNumber = customerRegisterObj.PhoneNumber,
+                Token = new TokenResponse
+                {
+                    Token = accessToken,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
+                }
+            });
+    }
+
+    public async Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequest request)
+    {
+        try
+        {
+            var user = await _userRepo.GetSelectedColumnsByConditionAsync(u => u.Email == request.Email,
+                res => new { res.DisplayName, res.UserId, res.PasswordHashed, res.Role.RoleName },
+                egu => egu.Include(u => u.Role));
+
+            if (user.PasswordHashed == null)
+            {
+                return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status404NotFound,
+                    "The account does not exist",
+                    null);
             }
-        });
+
+            if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHashed))
+            {
+                return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status401Unauthorized,
+                    "The user credential is not valid",
+                    null);
+            }
+
+            string accessToken =
+                _jwtGenerator.GenerateAccessToken(user.UserId.ToString(), request.Email, user.RoleName);
+            string refreshToken = _jwtGenerator.GenerateRefreshToken();
+
+            await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
+
+            return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status200OK, new LoginResponse
+            {
+                Token = new TokenResponse
+                {
+                    Token = accessToken,
+                    ExpiresAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
+                },
+                Message = "Login success",
+                DisplayName = user.DisplayName,
+                CustomerId = user.UserId
+            });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status404NotFound,
+                "The account does not exist", null);
+        }
     }
 }

@@ -28,8 +28,25 @@ public interface IGenericRepo<T> where T : class
     Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector);
 
+    Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        bool asNoTracking = true);
+
+    Task<TResult> GetSelectedColumnsAsync<TResult>(
+        Expression<Func<T, TResult>> selector,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        bool asNoTracking = true);
+
     Task<TResult> GetSelectedColumnsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector);
+
+    Task<TResult> GetSelectedColumnsByConditionAsync<TResult>(
+        Expression<Func<T, bool>> predicate,
+        Expression<Func<T, TResult>> selector,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        bool asNoTracking = true);
 
     Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate);
 }

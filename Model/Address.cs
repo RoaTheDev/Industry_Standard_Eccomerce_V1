@@ -8,7 +8,7 @@ public  class Address
 
     public string FirstAddressLine { get; set; } = null!;
 
-    public string SecondAddressLine { get; set; } = null!;
+    public string? SecondAddressLine { get; set; }
 
     public string City { get; set; } = null!;
 

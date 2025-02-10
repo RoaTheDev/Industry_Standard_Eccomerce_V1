@@ -7,4 +7,10 @@ namespace Ecommerce_site.Service.IService;
 public interface ICustomerService
 {
     Task<ApiStandardResponse<CustomerRegisterResponse?>> RegisterCustomerAsync(CustomerRegisterRequestUap request);
+    Task<ApiStandardResponse<CustomerGetByIdResponse?>> GetCustomerByIdAsync(long id);
+
+    Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerification(Guid session,
+        EmailVerificationRequest request);
+
+    Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequest request);
 }

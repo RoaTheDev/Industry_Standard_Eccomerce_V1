@@ -10,6 +10,10 @@ public  class Product
 
     public bool IsAvailable { get; set; }
 
+    public int Quantity { get; set; }
+
+    public int DiscountPercentage { get; set; }
+
     public long CategoryId { get; set; }
 
     public long CreatedBy { get; set; }
@@ -19,10 +23,6 @@ public  class Product
     public DateTime UpdatedAt { get; set; }
 
     public bool IsDeleted { get; set; }
-
-    public int DiscountPercentage { get; set; }
-
-    public int Quantity { get; set; }
 
     public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
 

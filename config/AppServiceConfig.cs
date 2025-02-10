@@ -55,9 +55,9 @@ public static class AppServiceConfig
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "Personal Finance Tracker API",
+                Title = "Ecommerce API",
                 Version = "v1",
-                Description = "API documentation for Personal Finance Tracker",
+                Description = "API documentation for Ecommerce APP",
             });
         });
 
@@ -105,7 +105,7 @@ public static class AppServiceConfig
                     ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidIssuer = "roa.io",
-                    ValidAudience = "financial-goals-app",
+                    ValidAudience = "ecommerce-app",
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
             });

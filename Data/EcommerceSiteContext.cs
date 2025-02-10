@@ -45,8 +45,7 @@ public  class EcommerceSiteContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Address>(entity =>
@@ -232,7 +231,7 @@ public  class EcommerceSiteContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__CD65CB856C9B8C88");
+            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__CD65CB855054F45F");
 
             entity.ToTable("Customers", "orders");
 
@@ -532,6 +531,10 @@ public  class EcommerceSiteContext : DbContext
             entity.Property(e => e.FirstName)
                 .HasMaxLength(50)
                 .HasColumnName("first_name");
+            entity.Property(e => e.Gender)
+                .HasMaxLength(10)
+                .HasDefaultValue("male")
+                .HasColumnName("gender");
             entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.LastName)
                 .HasMaxLength(50)

@@ -10,6 +10,8 @@ public  class User
 
     public string LastName { get; set; } = null!;
 
+    public string Gender { get; set; } = null!;
+
     public long RoleId { get; set; }
 
     public string DisplayName { get; set; } = null!;
