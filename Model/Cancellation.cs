@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public  class Cancellation
+public class Cancellation
 {
     public int CancellationId { get; set; }
 

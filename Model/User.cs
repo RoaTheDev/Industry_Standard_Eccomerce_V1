@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public  class User
+public class User
 {
     public long UserId { get; set; }
 

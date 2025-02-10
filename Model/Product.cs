@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public  class Product
+public class Product
 {
     public long ProductId { get; set; }
 

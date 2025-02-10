@@ -21,20 +21,19 @@ public class CustomPasswordHasher
         return Convert.ToBase64String(hashBytes);
     }
 
-    public  bool VerifyPassword(string password, string storedHash)
+    public bool VerifyPassword(string password, string storedHash)
     {
         var hashBytes = Convert.FromBase64String(storedHash);
 
-        var salt = new byte[SaltSize]; 
+        var salt = new byte[SaltSize];
         Buffer.BlockCopy(hashBytes, 0, salt, 0, SaltSize);
 
         using var pdkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA256);
         var hash = pdkdf2.GetBytes(HashSize);
 
-        for (int i = 0; i < HashSize; i++)
-        {
-            if (hashBytes[i + SaltSize] != hash[i]) return false;
-        }
+        for (var i = 0; i < HashSize; i++)
+            if (hashBytes[i + SaltSize] != hash[i])
+                return false;
 
         return true;
     }

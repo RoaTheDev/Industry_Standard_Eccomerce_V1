@@ -9,12 +9,12 @@ public interface IGenericRepo<T> where T : class
     Task<T> UpdateAsync(T entity);
     Task DeleteAsync(T entity);
     Task<T> GetByIdAsync(long id);
-    Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = false);
+    Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true);
 
     Task<T> GetByConditionAsync(
         Expression<Func<T, bool>> predicate,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
-        bool asNoTracking = false);
+        bool asNoTracking = true);
 
     Task<IEnumerable<T>> GetAllAsync();
     Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include);

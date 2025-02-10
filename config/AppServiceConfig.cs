@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using StackExchange.Redis;
 
 namespace Ecommerce_site.config;
 
@@ -13,19 +14,19 @@ public static class AppServiceConfig
 {
     public static IServiceCollection AddDbConfig(this IServiceCollection service, IConfiguration configuration)
     {
-        string? dbConStr = configuration["DB_CONNECTION_STR"];
+        var dbConStr = configuration["DB_CONNECTION_STR"];
         return service.AddDbContext<EcommerceSiteContext>(opt => opt.UseSqlServer(dbConStr));
     }
 
     public static IServiceCollection AddRedisConfig(this IServiceCollection service, IConfiguration configuration)
     {
-        string? redisConStr = configuration["REDIS_CONNECTION"];
+        var redisConStr = configuration["REDIS_CONNECTION"];
         return service.AddStackExchangeRedisCache(opt =>
         {
             opt.Configuration = redisConStr;
             opt.InstanceName = "_Ecom";
             if (opt.Configuration != null)
-                opt.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions()
+                opt.ConfigurationOptions = new ConfigurationOptions
                 {
                     AbortOnConnectFail = true,
                     DefaultDatabase = 15,
@@ -34,8 +35,10 @@ public static class AppServiceConfig
         });
     }
 
-    public static IServiceCollection MapperConfig(this IServiceCollection service) =>
-        service.AddAutoMapper(typeof(AppMapper));
+    public static IServiceCollection MapperConfig(this IServiceCollection service)
+    {
+        return service.AddAutoMapper(typeof(AppMapper));
+    }
 
     public static IServiceCollection LoggingConfig(this IServiceCollection services)
     {
@@ -57,7 +60,7 @@ public static class AppServiceConfig
             {
                 Title = "Ecommerce API",
                 Version = "v1",
-                Description = "API documentation for Ecommerce APP",
+                Description = "API documentation for Ecommerce APP"
             });
         });
 
@@ -66,12 +69,12 @@ public static class AppServiceConfig
 
     public static IServiceCollection AddEmailConfig(this IServiceCollection service, IConfiguration config)
     {
-        string? username = config["DEFAULT_SMTP_USERNAME"];
-        string? user = config["SMTP_EMAIL"];
-        string? password = config["SMTP_PASSWORD"];
+        var username = config["DEFAULT_SMTP_USERNAME"];
+        var user = config["SMTP_EMAIL"];
+        var password = config["SMTP_PASSWORD"];
         Console.WriteLine(user);
         Console.WriteLine(password);
-        SmtpClientOptions smtpClientOptions = new SmtpClientOptions
+        var smtpClientOptions = new SmtpClientOptions
         {
             Server = config["SMTP_PROVIDER"],
             Port = Convert.ToInt32(config["SMTP_PORT"]),
@@ -112,10 +115,12 @@ public static class AppServiceConfig
         return service;
     }
 
-    public static IServiceCollection AddAuthorizationConfig(this IServiceCollection service) =>
-        service.AddAuthorization(opt =>
+    public static IServiceCollection AddAuthorizationConfig(this IServiceCollection service)
+    {
+        return service.AddAuthorization(opt =>
         {
             opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
             opt.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
         });
+    }
 }

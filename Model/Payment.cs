@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public  class Payment
+public class Payment
 {
     public long PaymentId { get; set; }
 

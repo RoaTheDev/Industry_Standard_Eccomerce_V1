@@ -25,7 +25,6 @@ public static class DependencyConfig
 
     public static IServiceCollection FluentValidationConfig(this IServiceCollection service)
     {
-        
         return service;
     }
 }

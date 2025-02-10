@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Caching.Distributed;
 using ILogger = Serilog.ILogger;
+
 namespace Ecommerce_site.Util;
 
 public class RedisCaching
@@ -10,8 +11,8 @@ public class RedisCaching
     private const int DefaultSlidingExpirationMinutes = 10;
 
     private readonly IDistributedCache _cache;
-    private readonly JsonSerializerOptions _serializer;
     private readonly ILogger _logger;
+    private readonly JsonSerializerOptions _serializer;
 
     public RedisCaching(IDistributedCache cache, ILogger logger)
     {
@@ -31,7 +32,7 @@ public class RedisCaching
         if (string.IsNullOrWhiteSpace(key))
             throw new ArgumentException("Cache key cannot be null or empty.", nameof(key));
     }
-    
+
     public async Task SetAsync<T>(string key, T value, TimeSpan? absoluteExpiration = null,
         TimeSpan? slidingExpiration = null)
     {
@@ -45,7 +46,7 @@ public class RedisCaching
                 SlidingExpiration = slidingExpiration ?? TimeSpan.FromMinutes(DefaultSlidingExpirationMinutes)
             };
 
-            string serializedValue = JsonSerializer.Serialize(value, _serializer);
+            var serializedValue = JsonSerializer.Serialize(value, _serializer);
             await _cache.SetStringAsync(key, serializedValue, options);
             _logger.Information("Cache set for key: {Key}", key);
         }
@@ -62,7 +63,7 @@ public class RedisCaching
 
         try
         {
-            string? cacheData = await _cache.GetStringAsync(key);
+            var cacheData = await _cache.GetStringAsync(key);
             if (cacheData == null)
             {
                 _logger.Information("Cache miss for key: {Key}", key);

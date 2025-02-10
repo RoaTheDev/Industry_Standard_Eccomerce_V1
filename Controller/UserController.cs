@@ -21,23 +21,17 @@ public class UserController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<CustomerGetByIdResponse>>> GetCustomerById([FromRoute] long id)
     {
         var response = await _customerService.GetCustomerByIdAsync(id);
-        if (response.StatusCode != StatusCodes.Status200OK)
-        {
-            return StatusCode(response.StatusCode, response);
-        }
+        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
 
         return Ok(response);
     }
-    
+
     [HttpPost("register/")]
     public async Task<ActionResult<ApiStandardResponse<CustomerRegisterRequestUap>>> Register(
         CustomerRegisterRequestUap request)
     {
         var response = await _customerService.RegisterCustomerAsync(request);
-        if (response.StatusCode != StatusCodes.Status202Accepted)
-        {
-            return StatusCode(response.StatusCode, response);
-        }
+        if (response.StatusCode != StatusCodes.Status202Accepted) return StatusCode(response.StatusCode, response);
 
         return Accepted(response);
     }
@@ -48,10 +42,7 @@ public class UserController : ControllerBase
         Guid session, [FromBody] EmailVerificationRequest request)
     {
         var response = await _customerService.EmailVerification(session, request);
-        if (response.StatusCode != StatusCodes.Status201Created)
-        {
-            return StatusCode(response.StatusCode, response);
-        }
+        if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
 
         HttpContext.Response.Cookies.Append("AuthToken", response.Data.Token.Token, new CookieOptions
         {
@@ -62,14 +53,12 @@ public class UserController : ControllerBase
         });
         return CreatedAtAction(nameof(GetCustomerById), new { Id = response.Data.UserId }, response);
     }
+
     [HttpPost("login/")]
     public async Task<ActionResult<ApiStandardResponse<LoginResponse>>> Login(LoginRequest request)
     {
         var response = await _customerService.LoginAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK)
-        {
-            return StatusCode(response.StatusCode, response);
-        }
+        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
 
         HttpContext.Response.Cookies.Append("AuthToken", response.Data.Token.Token, new CookieOptions
         {

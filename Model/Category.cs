@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public  class Category
+public class Category
 {
     public long CategoryId { get; set; }
 

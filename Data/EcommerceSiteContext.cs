@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce_site.Data;
 
-public  class EcommerceSiteContext : DbContext
+public class EcommerceSiteContext : DbContext
 {
     public EcommerceSiteContext()
     {
@@ -45,7 +45,7 @@ public  class EcommerceSiteContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Address>(entity =>
@@ -555,7 +555,5 @@ public  class EcommerceSiteContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Users_Roles");
         });
-
     }
-
 }

@@ -19,19 +19,19 @@ namespace Ecommerce_site.Service;
 
 public class CustomerService : ICustomerService
 {
-    private readonly IGenericRepo<Customer> _customerRepo;
-    private readonly IGenericRepo<User> _userRepo;
-    private readonly IGenericRepo<Role> _roleRepo;
-    private readonly OtpGenerator _otpGenerator;
-    private readonly ILogger _logger;
-    private readonly CustomPasswordHasher _passwordHasher;
-    private readonly RedisCaching _cache;
-    private readonly IFluentEmail _fluentEmail;
-    private readonly RazorPageRenderer _razorPageRenderer;
-    private readonly JwtGenerator _jwtGenerator;
     private const string RegisterAccountKey = "_customer.payload.";
     private const string RedisRefreshKey = "_customer.";
     private const string OtpVerificationKey = "_email.otp.";
+    private readonly RedisCaching _cache;
+    private readonly IGenericRepo<Customer> _customerRepo;
+    private readonly IFluentEmail _fluentEmail;
+    private readonly JwtGenerator _jwtGenerator;
+    private readonly ILogger _logger;
+    private readonly OtpGenerator _otpGenerator;
+    private readonly CustomPasswordHasher _passwordHasher;
+    private readonly RazorPageRenderer _razorPageRenderer;
+    private readonly IGenericRepo<Role> _roleRepo;
+    private readonly IGenericRepo<User> _userRepo;
 
     public CustomerService(IGenericRepo<Customer> customerRepo, ILogger logger, CustomPasswordHasher passwordHasher,
         RedisCaching cache, IGenericRepo<User> userRepo, IGenericRepo<Role> roleRepo, OtpGenerator otpGenerator,
@@ -49,29 +49,6 @@ public class CustomerService : ICustomerService
         _jwtGenerator = jwtGenerator;
     }
 
-    private async Task SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model)
-    {
-        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
-        var email = await _fluentEmail.To(emailMetadata.ToAddress)
-            .Subject(emailMetadata.Subject)
-            .Body(emailBody, isHtml: true)
-            .SendAsync();
-
-        if (email.Successful)
-        {
-            _logger.Information("Email sent successfully!");
-        }
-        else
-        {
-            _logger.Error("Failed to send email.");
-            foreach (var error in email.ErrorMessages)
-            {
-                _logger.Error(error);
-                throw new ExternalException("External service not responding");
-            }
-        }
-    }
-
     public async Task<ApiStandardResponse<CustomerGetByIdResponse?>> GetCustomerByIdAsync(long id)
     {
         try
@@ -86,11 +63,11 @@ public class CustomerService : ICustomerService
                     u.FirstName,
                     u.LastName,
                     u.MiddleName,
-                    u.Gender,
+                    u.Gender
                 }, include => include.Include(u => u.Customer)!
             );
 
-            CustomerGetByIdResponse response = new CustomerGetByIdResponse
+            var response = new CustomerGetByIdResponse
             {
                 Dob = customer.Dob,
                 Email = customer.Email,
@@ -130,8 +107,8 @@ public class CustomerService : ICustomerService
                     "The  password does not match", null);
             }
 
-            uint otp = _otpGenerator.GenerateSecureOtp();
-            Guid session = Guid.NewGuid();
+            var otp = _otpGenerator.GenerateSecureOtp();
+            var session = Guid.NewGuid();
 
             await _cache.SetAsync($"{OtpVerificationKey}{session}", otp, TimeSpan.FromMinutes(15));
             await _cache.SetAsync($"{RegisterAccountKey}{session}", new UserCreationCache
@@ -146,14 +123,14 @@ public class CustomerService : ICustomerService
                 PhoneNumber = request.PhoneNumber
             }, TimeSpan.FromMinutes(15));
 
-            EmailMetadata emailMetadata = new EmailMetadata
+            var emailMetadata = new EmailMetadata
             {
                 Subject = "Email Verification",
                 ToAddress = request.Email,
                 TemplatePath = nameof(EmailVerification)
             };
 
-            EmailVerificationMsg emailMsg = new EmailVerificationMsg
+            var emailMsg = new EmailVerificationMsg
             {
                 VerificationCode = otp,
                 VerificationExpTime = 15
@@ -175,10 +152,11 @@ public class CustomerService : ICustomerService
         }
     }
 
+
     public async Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerification(Guid session,
         EmailVerificationRequest request)
     {
-        uint otp = await _cache.GetAsync<uint>($"{OtpVerificationKey}{session}");
+        var otp = await _cache.GetAsync<uint>($"{OtpVerificationKey}{session}");
         var customerRegisterObj = await _cache.GetAsync<UserCreationCache>($"{RegisterAccountKey}{session}");
 
         if (otp == 0)
@@ -196,16 +174,14 @@ public class CustomerService : ICustomerService
         }
 
         if (customerRegisterObj == null)
-        {
             return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
                 "the registration session has ended", null);
-        }
 
         var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
             r => EF.Functions.Like(r.RoleName, RoleEnums.Customer.ToString()),
             r => new { r.RoleName, r.RoleId });
 
-        User createdUser = await _userRepo.AddAsync(
+        var createdUser = await _userRepo.AddAsync(
             new User
             {
                 Gender = customerRegisterObj.Gender,
@@ -227,9 +203,9 @@ public class CustomerService : ICustomerService
             Dob = customerRegisterObj.Dob
         });
 
-        string accessToken =
+        var accessToken =
             _jwtGenerator.GenerateAccessToken(createdUser.UserId.ToString(), createdUser.Email, role.RoleName);
-        string refreshToken = _jwtGenerator.GenerateRefreshToken();
+        var refreshToken = _jwtGenerator.GenerateRefreshToken();
 
         await _cache.RemoveAsync($"{OtpVerificationKey}{session}");
         await _cache.RemoveAsync($"{RegisterAccountKey}{session}");
@@ -238,7 +214,7 @@ public class CustomerService : ICustomerService
         return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status201Created,
             new CustomerCreationResponse
             {
-                UserId  = createdUser.UserId,
+                UserId = createdUser.UserId,
                 Gender = createdUser.Gender,
                 Dob = customerRegisterObj.Dob,
                 Email = createdUser.Email,
@@ -263,22 +239,18 @@ public class CustomerService : ICustomerService
                 egu => egu.Include(u => u.Role));
 
             if (user.PasswordHashed == null)
-            {
                 return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status404NotFound,
                     "The account does not exist",
                     null);
-            }
 
             if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHashed))
-            {
                 return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status401Unauthorized,
                     "The user credential is not valid",
                     null);
-            }
 
-            string accessToken =
+            var accessToken =
                 _jwtGenerator.GenerateAccessToken(user.UserId.ToString(), request.Email, user.RoleName);
-            string refreshToken = _jwtGenerator.GenerateRefreshToken();
+            var refreshToken = _jwtGenerator.GenerateRefreshToken();
 
             await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
 
@@ -298,6 +270,116 @@ public class CustomerService : ICustomerService
         {
             return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status404NotFound,
                 "The account does not exist", null);
+        }
+    }
+
+    public async Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(
+        CustomerUpdateRequest request)
+    {
+        try
+        {
+            var user =
+                await _userRepo.GetByConditionAsync(u => u.Customer!.CustomerId == request.CustomerId,
+                    egl => egl.Include(u => u.Customer)!,
+                    false);
+
+
+            if (!string.IsNullOrWhiteSpace(request.FirstName) && request.FirstName != user.FirstName)
+                user.FirstName = request.FirstName;
+            if (request.MiddleName != null && request.MiddleName != user.MiddleName)
+                user.MiddleName = request.MiddleName;
+            if (!string.IsNullOrWhiteSpace(request.LastName) && request.LastName != user.LastName)
+                user.LastName = request.LastName;
+            if (!string.IsNullOrWhiteSpace(request.Email) && request.Email != user.Email)
+            {
+                if (user.Email != request.Email &&
+                    await _userRepo.EntityExistByConditionAsync(u => u.Email == request.Email))
+                {
+                    return new ApiStandardResponse<CustomerUpdateResponse?>(StatusCodes.Status400BadRequest,
+                        "The email already exist", null);
+                }
+
+                user.Email = request.Email;
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.Gender) && request.Gender != user.Gender)
+                user.Gender = request.Gender;
+            if (DateOnly.TryParse(request.Dob, out DateOnly parsedDob))
+            {
+                if (!string.IsNullOrWhiteSpace(request.Dob) && parsedDob != user.Customer!.Dob)
+                {
+                    user.Customer.Dob = parsedDob;
+                }
+            }
+
+            await _userRepo.UpdateAsync(user);
+
+            return new ApiStandardResponse<CustomerUpdateResponse?>(StatusCodes.Status200OK,
+                new CustomerUpdateResponse
+                {
+                    Dob = user.Customer!.Dob.ToString(),
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    MiddleName = user.MiddleName,
+                    LastName = user.LastName,
+                    PhoneNUmber = user.Customer.PhoneNumber,
+                    Gender = user.Gender
+                });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<CustomerUpdateResponse?>(StatusCodes.Status404NotFound,
+                "The account does not exist", null);
+        }
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(PasswordChangeRequest request)
+    {
+        try
+        {
+            var user = await _userRepo.GetByConditionAsync(u => u.UserId == request.UserId);
+
+            if (user.IsActive == false)
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
+                    "The account is locked",
+                    null);
+            if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHashed!))
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
+                    "The current password does not match",
+                    null);
+            user.PasswordHashed = _passwordHasher.HashPassword(request.NewPassword);
+            await _userRepo.UpdateAsync(user);
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status200OK,
+                new ConfirmationResponse { Message = "password changed successfully" });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
+                "The account does not exist", null);
+        }
+    }
+
+    private async Task SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model)
+    {
+        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
+        var email = await _fluentEmail.To(emailMetadata.ToAddress)
+            .Subject(emailMetadata.Subject)
+            .Body(emailBody, true)
+            .SendAsync();
+
+        if (email.Successful)
+        {
+            _logger.Information("Email sent successfully!");
+        }
+        else
+        {
+            _logger.Error("Failed to send email.");
+            foreach (var error in email.ErrorMessages)
+            {
+                _logger.Error(error);
+                throw new ExternalException("External service not responding");
+            }
         }
     }
 }

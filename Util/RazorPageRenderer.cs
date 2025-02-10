@@ -8,7 +8,7 @@ public class RazorPageRenderer
 
     public RazorPageRenderer()
     {
-        string templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Email");
+        var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Email");
         _engine = new RazorLightEngineBuilder()
             .UseFileSystemProject(templatePath)
             .UseMemoryCachingProvider()
@@ -17,7 +17,7 @@ public class RazorPageRenderer
 
     public async Task<string> RenderTemplateAsync<T>(string templateName, T model)
     {
-        string template = $"{templateName}.cshtml";
+        var template = $"{templateName}.cshtml";
         try
         {
             return await _engine.CompileRenderAsync(template, model);

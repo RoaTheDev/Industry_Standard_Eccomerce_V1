@@ -15,7 +15,7 @@ public class JwtGenerator
         _symmetricKey = config["JWT_KEY"] ?? string.Empty;
     }
 
-    public  string GenerateAccessToken(string userId, string email, string role)
+    public string GenerateAccessToken(string userId, string email, string role)
     {
         var credential = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_symmetricKey)),
             SecurityAlgorithms.HmacSha256Signature);
@@ -25,7 +25,7 @@ public class JwtGenerator
             new(ClaimTypes.Email, email),
             new(ClaimTypes.Role, role)
         };
-        ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims);
+        var claimsIdentity = new ClaimsIdentity(claims);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claimsIdentity,

@@ -6,6 +6,5 @@ public class EmailVerification : PageModel
 {
     public void OnGet()
     {
-        
     }
 }

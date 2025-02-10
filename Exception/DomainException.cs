@@ -6,4 +6,3 @@ public class EntityAlreadyExistException(string? message) : DomainException(mess
 
 public class EntityNotFoundException(Type entity, object id)
     : DomainException($"{nameof(entity.Name)} by {id} not found.");
-    
