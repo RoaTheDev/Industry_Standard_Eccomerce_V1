@@ -1,4 +1,4 @@
-namespace Ecommerce_site.Dto.Request.CustomerDto;
+namespace Ecommerce_site.Dto.Request.CustomerRequest;
 
 public class CustomerUpdateRequest
 {

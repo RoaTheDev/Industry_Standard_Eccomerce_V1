@@ -1,6 +1,6 @@
 using Ecommerce_site.Dto;
-using Ecommerce_site.Dto.Request.CustomerDto;
-using Ecommerce_site.Dto.response.CustomerDto;
+using Ecommerce_site.Dto.Request.CustomerRequest;
+using Ecommerce_site.Dto.response.CustomerResponse;
 
 namespace Ecommerce_site.Service.IService;
 

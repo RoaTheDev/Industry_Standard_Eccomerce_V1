@@ -42,7 +42,7 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
 
     public async Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.AnyAsync(predicate);
+        return await _dbSet.AsNoTracking().AnyAsync(predicate);
     }
 
     public async Task<IEnumerable<TResult>> GetSelectedColumnsListsAsync<TResult>(

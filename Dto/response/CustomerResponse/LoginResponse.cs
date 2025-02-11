@@ -1,4 +1,4 @@
-namespace Ecommerce_site.Dto.response.CustomerDto;
+namespace Ecommerce_site.Dto.response.CustomerResponse;
 
 public class LoginResponse
 {

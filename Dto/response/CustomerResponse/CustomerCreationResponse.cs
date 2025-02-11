@@ -1,8 +1,8 @@
-﻿namespace Ecommerce_site.Dto.response.CustomerDto;
+namespace Ecommerce_site.Dto.response.CustomerResponse;
 
-public class CustomerGetByIdResponse
+public class CustomerCreationResponse
 {
-    public required long CustomerId { get; set; }
+    public required long UserId { get; set; }
     public required string FirstName { get; set; }
     public string? MiddleName { get; set; }
     public required string LastName { get; set; }
@@ -12,4 +12,5 @@ public class CustomerGetByIdResponse
     public required string Email { get; set; }
     public required DateOnly Dob { get; set; }
     public required string PhoneNumber { get; set; }
+    public required TokenResponse Token { get; set; }
 }

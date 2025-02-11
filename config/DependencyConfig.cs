@@ -1,10 +1,11 @@
-using Ecommerce_site.Dto.Request.CustomerDto;
+using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Repo;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
 using Ecommerce_site.Validation;
+using Ecommerce_site.Validation.CustomerValidation;
 using FluentValidation;
 
 namespace Ecommerce_site.config;

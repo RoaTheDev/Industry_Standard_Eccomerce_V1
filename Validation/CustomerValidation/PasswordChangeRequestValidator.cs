@@ -1,7 +1,7 @@
-﻿using Ecommerce_site.Dto.Request.CustomerDto;
+﻿using Ecommerce_site.Dto.Request.CustomerRequest;
 using FluentValidation;
 
-namespace Ecommerce_site.Validation;
+namespace Ecommerce_site.Validation.CustomerValidation;
 
 public class PasswordChangeRequestValidator : AbstractValidator<PasswordChangeRequest>
 {
