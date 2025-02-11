@@ -93,6 +93,7 @@ public class CustomerService : ICustomerService
     {
         try
         {
+            
             if (await _userRepo.EntityExistByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             {
                 _logger.Warning("The user already exist.");
@@ -230,11 +231,11 @@ public class CustomerService : ICustomerService
             });
     }
 
-    public async Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequest request)
+    public async Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequestUap requestUap)
     {
         try
         {
-            var user = await _userRepo.GetSelectedColumnsByConditionAsync(u => u.Email == request.Email,
+            var user = await _userRepo.GetSelectedColumnsByConditionAsync(u => u.Email == requestUap.Email,
                 res => new { res.DisplayName, res.UserId, res.PasswordHashed, res.Role.RoleName },
                 egu => egu.Include(u => u.Role));
 
@@ -243,13 +244,13 @@ public class CustomerService : ICustomerService
                     "The account does not exist",
                     null);
 
-            if (!_passwordHasher.VerifyPassword(request.Password, user.PasswordHashed))
+            if (!_passwordHasher.VerifyPassword(requestUap.Password, user.PasswordHashed))
                 return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status401Unauthorized,
                     "The user credential is not valid",
                     null);
 
             var accessToken =
-                _jwtGenerator.GenerateAccessToken(user.UserId.ToString(), request.Email, user.RoleName);
+                _jwtGenerator.GenerateAccessToken(user.UserId.ToString(), requestUap.Email, user.RoleName);
             var refreshToken = _jwtGenerator.GenerateRefreshToken();
 
             await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
@@ -284,12 +285,6 @@ public class CustomerService : ICustomerService
                     false);
 
 
-            if (!string.IsNullOrWhiteSpace(request.FirstName) && request.FirstName != user.FirstName)
-                user.FirstName = request.FirstName;
-            if (request.MiddleName != null && request.MiddleName != user.MiddleName)
-                user.MiddleName = request.MiddleName;
-            if (!string.IsNullOrWhiteSpace(request.LastName) && request.LastName != user.LastName)
-                user.LastName = request.LastName;
             if (!string.IsNullOrWhiteSpace(request.Email) && request.Email != user.Email)
             {
                 if (user.Email != request.Email &&
@@ -302,14 +297,18 @@ public class CustomerService : ICustomerService
                 user.Email = request.Email;
             }
 
+            if (!string.IsNullOrWhiteSpace(request.FirstName) && request.FirstName != user.FirstName)
+                user.FirstName = request.FirstName;
+            if (request.MiddleName != null && request.MiddleName != user.MiddleName)
+                user.MiddleName = request.MiddleName;
+            if (!string.IsNullOrWhiteSpace(request.LastName) && request.LastName != user.LastName)
+                user.LastName = request.LastName;
+
             if (!string.IsNullOrWhiteSpace(request.Gender) && request.Gender != user.Gender)
                 user.Gender = request.Gender;
-            if (DateOnly.TryParse(request.Dob, out DateOnly parsedDob))
+            if (request.Dob != null)
             {
-                if (!string.IsNullOrWhiteSpace(request.Dob) && parsedDob != user.Customer!.Dob)
-                {
-                    user.Customer.Dob = parsedDob;
-                }
+                user.Customer!.Dob = request.Dob.Value;
             }
 
             await _userRepo.UpdateAsync(user);
@@ -382,4 +381,7 @@ public class CustomerService : ICustomerService
             }
         }
     }
+
+   
+
 }

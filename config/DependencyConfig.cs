@@ -1,8 +1,11 @@
+using Ecommerce_site.Dto.Request.CustomerDto;
 using Ecommerce_site.Repo;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
+using Ecommerce_site.Validation;
+using FluentValidation;
 
 namespace Ecommerce_site.config;
 
@@ -25,6 +28,10 @@ public static class DependencyConfig
 
     public static IServiceCollection FluentValidationConfig(this IServiceCollection service)
     {
+        service.AddTransient<IValidator<CustomerRegisterRequestUap>, CustomerRegisterRequestUapValidator>();
+        service.AddTransient<IValidator<CustomerUpdateRequest>, CustomerUpdateRequestValidator>();
+        service.AddTransient<IValidator<LoginRequestUap>, LoginRequestValidator>();
+        service.AddTransient<IValidator<PasswordChangeRequest>, PasswordChangeRequestValidator>();
         return service;
     }
 }

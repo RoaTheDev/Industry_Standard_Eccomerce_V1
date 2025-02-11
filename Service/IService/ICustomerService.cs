@@ -12,7 +12,7 @@ public interface ICustomerService
     Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerification(Guid session,
         EmailVerificationRequest request);
 
-    Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequest request);
+    Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequestUap requestUap);
     Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(CustomerUpdateRequest request);
     Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(PasswordChangeRequest request);
 }
