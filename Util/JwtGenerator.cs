@@ -30,7 +30,7 @@ public class JwtGenerator
         {
             Subject = claimsIdentity,
             Issuer = "roa.io",
-            Audience = "financial-goals-app",
+            Audience = "ecommerce-app",
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = credential
         };

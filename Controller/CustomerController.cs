@@ -9,13 +9,13 @@ namespace Ecommerce_site.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;
     private readonly IValidator<CustomerUpdateRequest> _updateValidator;
     private readonly IValidator<PasswordChangeRequest> _passwordChangeValidator;
 
-    public UserController(IValidator<CustomerUpdateRequest> updateValidator, ICustomerService customerService,
+    public CustomerController(IValidator<CustomerUpdateRequest> updateValidator, ICustomerService customerService,
         IValidator<PasswordChangeRequest> passwordChangeValidator)
     {
         _updateValidator = updateValidator;
@@ -45,7 +45,7 @@ public class UserController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPatch("{id:long}/password-change")]
+    [HttpPatch("{id:long}/password-change/")]
     public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> PasswordChange([FromRoute] long id,
         [FromBody] PasswordChangeRequest request)
     {

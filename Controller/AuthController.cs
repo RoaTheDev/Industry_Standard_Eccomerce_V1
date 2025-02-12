@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
         var response = await _customerService.EmailVerification(session, request);
         if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
 
-        HttpContext.Response.Cookies.Append("AuthToken", response.Data.Token.Token, new CookieOptions
+        HttpContext.Response.Cookies.Append("AuthToken", response.Data!.Token.Token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -91,7 +91,7 @@ public class AuthController : ControllerBase
         var response = await _customerService.LoginAsync(request);
         if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
 
-        HttpContext.Response.Cookies.Append("AuthToken", response.Data.Token.Token, new CookieOptions
+        HttpContext.Response.Cookies.Append("AuthToken", response.Data!.Token.Token, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
