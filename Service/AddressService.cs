@@ -22,12 +22,12 @@ public class AddressService : IAddressService
         _customerRepo = customerRepo;
     }
 
-    public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long addressId)
+    public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long customerId, long addressId)
     {
         try
         {
             var address = await _addressRepo.GetSelectedColumnsByConditionAsync(
-                addr => addr.AddressId == addressId,
+                addr => addr.AddressId == addressId && addr.CustomerId == customerId,
                 addr => new
                 {
                     addr.AddressId,
@@ -37,8 +37,13 @@ public class AddressService : IAddressService
                     addr.State,
                     addr.PostalCode,
                     addr.FirstAddressLine,
-                    addr.SecondAddressLine
+                    addr.SecondAddressLine,
+                    addr.IsDeleted
                 });
+            if (address.IsDeleted)
+                return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
+                    "The address does not exist", null);
+          
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, new AddressResponse
             {
                 AddressId = address.AddressId,
@@ -101,19 +106,20 @@ public class AddressService : IAddressService
         return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status200OK, response);
     }
 
-    public async Task<ApiStandardResponse<AddressResponse?>> CreateAddressAsync(AddressCreationRequest request)
+    public async Task<ApiStandardResponse<AddressResponse?>> CreateAddressAsync(long customerId,
+        AddressCreationRequest request)
     {
-        if (!await _customerRepo.EntityExistByConditionAsync(c => c.CustomerId == request.CustomerId))
+        if (!await _customerRepo.EntityExistByConditionAsync(c => c.CustomerId == customerId))
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
                 "the user does not exist", null);
 
         bool hasDefaultAddress =
             await _addressRepo.EntityExistByConditionAsync(addr =>
-                addr.CustomerId == request.CustomerId && addr.IsDefault == true);
+                addr.CustomerId == customerId && addr.IsDefault == true);
 
         Address address = await _addressRepo.AddAsync(new Address
         {
-            CustomerId = request.CustomerId,
+            CustomerId = customerId,
             Country = request.Country,
             State = request.State,
             City = request.City,
@@ -137,11 +143,14 @@ public class AddressService : IAddressService
         });
     }
 
-    public async Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(AddressUpdateRequest request)
+    public async Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId,
+        AddressUpdateRequest request)
     {
         try
         {
-            var address = await _addressRepo.GetByConditionAsync(addr => addr.AddressId == request.AddressId, false);
+            var address =
+                await _addressRepo.GetByConditionAsync(
+                    addr => addr.AddressId == request.AddressId && addr.CustomerId == customerId, false);
 
             if (!string.IsNullOrWhiteSpace(request.FirstAddressLine) &&
                 request.FirstAddressLine != address.FirstAddressLine)
@@ -178,13 +187,13 @@ public class AddressService : IAddressService
         }
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(AddressDeleteRequest request)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(long customerId, long addressId)
     {
         try
         {
             var address =
                 await _addressRepo.GetByConditionAsync(
-                    addr => addr.AddressId == request.AddressId && addr.CustomerId == request.CustomerId,
+                    addr => addr.AddressId == addressId && addr.CustomerId == customerId,
                     false);
 
             address.IsDeleted = true;

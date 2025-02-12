@@ -18,7 +18,6 @@ builder.Services.AddSwaggerConfig();
 builder.Services.MapperConfig();
 builder.Services.CustomDependencyConfig();
 builder.Services.AddControllers();
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

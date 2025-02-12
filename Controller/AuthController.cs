@@ -9,23 +9,19 @@ namespace Ecommerce_site.Controller;
 
 [ApiController]
 [Route("api/[controller]")]
-public class CustomerController : ControllerBase
+public class AuthController : ControllerBase
 {
     private readonly ICustomerService _customerService;
     private readonly IValidator<CustomerRegisterRequestUap> _registerValidator;
-    private readonly IValidator<CustomerUpdateRequest> _updateValidator;
     private readonly IValidator<LoginRequestUap> _loginValidator;
-    private readonly IValidator<PasswordChangeRequest> _passwordChangeValidator;
 
-    public CustomerController(ICustomerService customerService,
-        IValidator<CustomerRegisterRequestUap> registerValidator, IValidator<CustomerUpdateRequest> updateValidator,
-        IValidator<LoginRequestUap> loginValidator, IValidator<PasswordChangeRequest> passwordChangeValidator)
+    public AuthController(ICustomerService customerService,
+        IValidator<CustomerRegisterRequestUap> registerValidator,
+        IValidator<LoginRequestUap> loginValidator)
     {
         _customerService = customerService;
         _registerValidator = registerValidator;
-        _updateValidator = updateValidator;
         _loginValidator = loginValidator;
-        _passwordChangeValidator = passwordChangeValidator;
     }
 
     [HttpGet("{id:long}")]
@@ -102,49 +98,6 @@ public class CustomerController : ControllerBase
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
-        return Ok(response);
-    }
-
-    [HttpPatch("update-info/")]
-    public async Task<ActionResult<ApiStandardResponse<CustomerUpdateResponse>>> UpdateInfo(
-        CustomerUpdateRequest request)
-    {
-        var validationResult = await _updateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<CustomerUpdateResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
-        }
-
-        var response = await _customerService.UpdateCustomerInfoAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
-
-        return Ok(response);
-    }
-
-    [HttpPatch("password-change/")]
-    public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> PasswordChange(
-        PasswordChangeRequest request)
-    {
-        var validationResult = await _passwordChangeValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
-        }
-
-        var response = await _customerService.PasswordChangeAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
         return Ok(response);
     }
 }

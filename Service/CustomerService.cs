@@ -93,7 +93,6 @@ public class CustomerService : ICustomerService
     {
         try
         {
-            
             if (await _userRepo.EntityExistByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             {
                 _logger.Warning("The user already exist.");
@@ -274,13 +273,13 @@ public class CustomerService : ICustomerService
         }
     }
 
-    public async Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(
+    public async Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(long id,
         CustomerUpdateRequest request)
     {
         try
         {
             var user =
-                await _userRepo.GetByConditionAsync(u => u.Customer!.CustomerId == request.CustomerId,
+                await _userRepo.GetByConditionAsync(u => u.Customer!.CustomerId == id,
                     egl => egl.Include(u => u.Customer)!,
                     false);
 
@@ -332,11 +331,11 @@ public class CustomerService : ICustomerService
         }
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(PasswordChangeRequest request)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id ,PasswordChangeRequest request)
     {
         try
         {
-            var user = await _userRepo.GetByConditionAsync(u => u.UserId == request.UserId);
+            var user = await _userRepo.GetByConditionAsync(u => u.UserId == id);
 
             if (user.IsActive == false)
                 return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
@@ -381,7 +380,4 @@ public class CustomerService : ICustomerService
             }
         }
     }
-
-   
-
 }

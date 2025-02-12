@@ -24,12 +24,12 @@ public class AddressUpdateRequestValidation : AbstractValidator<AddressUpdateReq
         RuleFor(x => x.FirstAddressLine)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Country name cannot be empty")
-            .Matches(@"^[a-zA-Z\d]{5,}$").WithMessage("Country can't contain any special character")
+            .Matches(@"^[a-zA-Z\d\s]{5,}$").WithMessage("First Address can't contain any special character")
             .Length(5, 100).WithMessage("First address can only be between 5 to 100");
 
         RuleFor(x => x.SecondAddressLine)
             .Cascade(CascadeMode.Stop)
-            .Matches(@"^[a-zA-Z\d]{0,}$").WithMessage("Second address line can't contain any special character")
+            .Matches(@"^[a-zA-Z\d\s]{0,}$").WithMessage("Second address line can't contain any special character")
             .Length(0, 100).WithMessage("Second address can only be between 0 to 100");
     }
 }

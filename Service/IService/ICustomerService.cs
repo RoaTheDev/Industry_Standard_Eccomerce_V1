@@ -13,6 +13,6 @@ public interface ICustomerService
         EmailVerificationRequest request);
 
     Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequestUap requestUap);
-    Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(CustomerUpdateRequest request);
-    Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(PasswordChangeRequest request);
+    Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(long id, CustomerUpdateRequest request);
+    Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id, PasswordChangeRequest request);
 }

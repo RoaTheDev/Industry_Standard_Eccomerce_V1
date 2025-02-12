@@ -2,7 +2,6 @@ namespace Ecommerce_site.Dto.Request.CustomerRequest;
 
 public class CustomerUpdateRequest
 {
-    public required long CustomerId { get; set; }
     public string? FirstName { get; set; }
     public string? MiddleName { get; set; }
     public string? Gender { get; set; }

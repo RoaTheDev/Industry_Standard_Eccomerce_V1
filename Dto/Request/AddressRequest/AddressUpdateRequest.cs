@@ -3,9 +3,7 @@
 public class AddressUpdateRequest
 {
     public required long AddressId { get; set; }
-
-    public required long CustomerId { get; set; }
-
+    
     public required string FirstAddressLine { get; set; }
 
     public string? SecondAddressLine { get; set; }
