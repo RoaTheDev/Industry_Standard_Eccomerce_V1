@@ -22,7 +22,7 @@ public class AddressService : IAddressService
         _customerRepo = customerRepo;
     }
 
-    public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByCustomerIdAsync(long addressId)
+    public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long addressId)
     {
         try
         {
@@ -194,7 +194,7 @@ public class AddressService : IAddressService
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK,
                 new ConfirmationResponse { Message = "The address is deleted" });
         }
-        catch (EntityNotFoundException e)
+        catch (EntityNotFoundException)
         {
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
                 "the address does not exist", null);

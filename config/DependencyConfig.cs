@@ -1,10 +1,11 @@
+using Ecommerce_site.Dto.Request.AddressRequest;
 using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Repo;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
-using Ecommerce_site.Validation;
+using Ecommerce_site.Validation.AddressValidation;
 using Ecommerce_site.Validation.CustomerValidation;
 using FluentValidation;
 
@@ -23,7 +24,7 @@ public static class DependencyConfig
 
         service.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
         service.AddScoped<ICustomerService, CustomerService>();
-
+        service.AddScoped<IAddressService, AddressService>();
         return service;
     }
 
@@ -33,6 +34,9 @@ public static class DependencyConfig
         service.AddTransient<IValidator<CustomerUpdateRequest>, CustomerUpdateRequestValidator>();
         service.AddTransient<IValidator<LoginRequestUap>, LoginRequestValidator>();
         service.AddTransient<IValidator<PasswordChangeRequest>, PasswordChangeRequestValidator>();
+        service.AddTransient<IValidator<AddressCreationRequest>, AddressCreateRequestValidation>();
+        service.AddTransient<IValidator<AddressUpdateRequest>, AddressUpdateRequestValidation>();
+
         return service;
     }
 }
