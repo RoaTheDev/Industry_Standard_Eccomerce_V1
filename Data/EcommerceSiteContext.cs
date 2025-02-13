@@ -46,6 +46,7 @@ public class EcommerceSiteContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Address>(entity =>
@@ -217,7 +218,9 @@ public class EcommerceSiteContext : DbContext
                 .HasMaxLength(255)
                 .IsUnicode(false)
                 .HasColumnName("description");
-            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true)
+                .HasColumnName("is_active");
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -231,7 +234,7 @@ public class EcommerceSiteContext : DbContext
 
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__CD65CB855054F45F");
+            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__CD65CB857BD049D9");
 
             entity.ToTable("Customers", "orders");
 
@@ -533,9 +536,8 @@ public class EcommerceSiteContext : DbContext
                 .HasColumnName("first_name");
             entity.Property(e => e.Gender)
                 .HasMaxLength(10)
-                .HasDefaultValue("male")
+                .HasDefaultValue("Male")
                 .HasColumnName("gender");
-            entity.Property(e => e.IsActive).HasColumnName("is_active");
             entity.Property(e => e.LastName)
                 .HasMaxLength(50)
                 .HasColumnName("last_name");

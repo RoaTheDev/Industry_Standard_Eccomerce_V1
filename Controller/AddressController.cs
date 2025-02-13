@@ -83,6 +83,7 @@ public class AddressController : ControllerBase
         [FromRoute(Name = "customerId")] long id)
     {
         var response = await _addressService.GetAddressListByCustomerIdAsync(id);
+        
         if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
 
         return Ok(response);

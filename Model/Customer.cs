@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Customer
+public  class Customer
 {
     public long CustomerId { get; set; }
 

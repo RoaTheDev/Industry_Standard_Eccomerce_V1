@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Address
+public  class Address
 {
     public long AddressId { get; set; }
 

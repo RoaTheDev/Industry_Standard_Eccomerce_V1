@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class ProductImage
+public  class ProductImage
 {
     public long ImageId { get; set; }
 

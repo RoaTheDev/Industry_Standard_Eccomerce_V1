@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Role
+public  class Role
 {
     public long RoleId { get; set; }
 

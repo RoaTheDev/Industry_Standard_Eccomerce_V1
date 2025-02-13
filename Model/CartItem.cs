@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class CartItem
+public  class CartItem
 {
     public long CartItemId { get; set; }
 

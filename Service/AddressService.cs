@@ -180,7 +180,7 @@ public class AddressService : IAddressService
                 SecondAddressLine = address.SecondAddressLine
             });
         }
-        catch (EntityNotFoundException e)
+        catch (EntityNotFoundException)
         {
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
                 "the address does not exist", null);

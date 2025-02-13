@@ -191,7 +191,6 @@ public class CustomerService : ICustomerService
                 Email = customerRegisterObj.Email,
                 DisplayName =
                     $"{customerRegisterObj.FirstName} {customerRegisterObj.MiddleName} {customerRegisterObj.LastName}",
-                IsActive = true,
                 PasswordHashed = _passwordHasher.HashPassword(customerRegisterObj.Password),
                 RoleId = role.RoleId
             });
@@ -331,13 +330,14 @@ public class CustomerService : ICustomerService
         }
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id ,PasswordChangeRequest request)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id,
+        PasswordChangeRequest request)
     {
         try
         {
             var user = await _userRepo.GetByConditionAsync(u => u.UserId == id);
 
-            if (user.IsActive == false)
+            if (user.IsDeleted)
                 return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
                     "The account is locked",
                     null);

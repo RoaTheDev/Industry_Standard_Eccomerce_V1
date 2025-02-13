@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class AuthProvider
+public  class AuthProvider
 {
     public long AuthId { get; set; }
 

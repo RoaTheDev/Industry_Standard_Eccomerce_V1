@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class User
+public  class User
 {
     public long UserId { get; set; }
 
@@ -19,8 +19,6 @@ public class User
     public string Email { get; set; } = null!;
 
     public string? PasswordHashed { get; set; }
-
-    public bool IsActive { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

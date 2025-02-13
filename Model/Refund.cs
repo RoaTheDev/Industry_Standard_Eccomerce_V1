@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Refund
+public  class Refund
 {
     public int RefundId { get; set; }
 

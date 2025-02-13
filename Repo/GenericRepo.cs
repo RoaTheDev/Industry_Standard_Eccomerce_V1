@@ -45,19 +45,29 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         return await _dbSet.AsNoTracking().AnyAsync(predicate);
     }
 
-    public async Task<IEnumerable<TResult>> GetSelectedColumnsListsAsync<TResult>(
+    public async Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include)
+    {
+        IQueryable<T> query = _dbSet;
+
+        query = include(query);
+        
+        return await query.AsNoTracking().AnyAsync(predicate);
+    }
+
+    public async Task<List<TResult>> GetSelectedColumnsListsAsync<TResult>(
         Expression<Func<T, TResult>> selector)
     {
         return await _dbSet.AsNoTracking().Select(selector).ToListAsync();
     }
 
-    public async Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
+    public async Task<List<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
         Expression<Func<T, bool>> predicate, Expression<Func<T, TResult>> selector)
     {
         return await _dbSet.AsNoTracking().Where(predicate).Select(selector).ToListAsync();
     }
 
-    public async Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
+    public async Task<List<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
@@ -129,7 +139,6 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         return await _dbSet.FindAsync(id) ?? throw new EntityNotFoundException(typeof(T), id);
     }
 
-
     public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true)
     {
         var query = _dbSet.Where(predicate);
@@ -156,12 +165,12 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
     }
 
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<List<T>> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include)
+    public async Task<List<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include)
     {
         IQueryable<T> query = _dbSet;
 

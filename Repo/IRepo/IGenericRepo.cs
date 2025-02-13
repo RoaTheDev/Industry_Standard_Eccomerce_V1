@@ -16,19 +16,19 @@ public interface IGenericRepo<T> where T : class
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
         bool asNoTracking = true);
 
-    Task<IEnumerable<T>> GetAllAsync();
-    Task<IEnumerable<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include);
+    Task<List<T>> GetAllAsync();
+    Task<List<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include);
 
-    Task<IEnumerable<TResult>> GetSelectedColumnsListsAsync<TResult>(
+    Task<List<TResult>> GetSelectedColumnsListsAsync<TResult>(
         Expression<Func<T, TResult>> selector);
 
     Task<TResult> GetSelectedColumnsAsync<TResult>(
         Expression<Func<T, TResult>> selector);
 
-    Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
+    Task<List<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector);
 
-    Task<IEnumerable<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
+    Task<List<TResult>> GetSelectedColumnsListsByConditionAsync<TResult>(
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
@@ -49,4 +49,7 @@ public interface IGenericRepo<T> where T : class
         bool asNoTracking = true);
 
     Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate);
+
+    Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include);
 }

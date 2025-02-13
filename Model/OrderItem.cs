@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class OrderItem
+public  class OrderItem
 {
     public long OrderItemId { get; set; }
 

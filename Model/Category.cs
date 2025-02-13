@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Category
+public  class Category
 {
     public long CategoryId { get; set; }
 
@@ -15,8 +15,6 @@ public class Category
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
-
-    public bool IsDeleted { get; set; }
 
     public virtual User CreatedByNavigation { get; set; } = null!;
 
