@@ -71,11 +71,11 @@ public class CategoryService : ICategoryService
         }
     }
 
-    public async Task<ApiStandardResponse<List<CategoryListResponse>?>> GetCategoryListByIdAsync(long id)
+    public async Task<ApiStandardResponse<List<CategoryListResponse>?>> GetCategoryListByIdAsync()
     {
         try
         {
-            var categories = await _categoryRepo.GetSelectedColumnsListsByConditionAsync(cate => cate.CategoryId == id,
+            var categories = await _categoryRepo.GetSelectedColumnsListsAsync(
                 cate => new { cate.CategoryName, cate.Description, cate.IsActive });
 
             if (!categories.Any())
@@ -179,16 +179,24 @@ public class CategoryService : ICategoryService
     {
         try
         {
-            Category category = await _categoryRepo.GetByIdAsync(request.CategoryId);
-
-            bool isAdmin = await _userRepo.EntityExistByConditionAsync(
+            var user = await _userRepo.GetByConditionAsync(
                 ua => ua.UserId == request.AdminId &&
                       ua.Role.RoleName.ToUpper() != RoleEnums.Admin.ToString().ToUpper(),
-                uIn => uIn.Include(ur => ur.Role));
+                uIn =>
+                    uIn.Include(ur => ur.Role)
+                        .Include(ur => ur.Categories),
+                false);
 
-            if (!isAdmin)
-                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status403Forbidden,
-                    "Only the admin can modify the category", null);
+            Category? category = null;
+            foreach (var c in user.Categories)
+            {
+                if (c.CategoryId == request.CategoryId)
+                    category = c;
+            }
+
+            if (category is null)
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
+                    "The category does not exist", null);
 
             category.IsActive = !category.IsActive;
             category.UpdatedAt = DateTime.UtcNow;
@@ -203,9 +211,9 @@ public class CategoryService : ICategoryService
         }
         catch (EntityNotFoundException e)
         {
-            _logger.Error(e, $"the category with the id {request.CategoryId} does not exist");
+            _logger.Error(e, $"the admin with the id {request.AdminId} does not exist");
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
-                "The category does not exist", null);
+                $"Please contact the admin", null);
         }
     }
 }

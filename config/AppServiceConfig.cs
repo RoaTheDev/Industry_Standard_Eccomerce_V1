@@ -62,6 +62,30 @@ public static class AppServiceConfig
                 Version = "v1",
                 Description = "API documentation for Ecommerce APP"
             });
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "Enter 'Bearer {your token}'",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            };
+
+            options.AddSecurityDefinition("Bearer", securityScheme);
+
+            var securityRequirement = new OpenApiSecurityRequirement
+            {
+                { securityScheme, new List<string>() }
+            };
+
+            options.AddSecurityRequirement(securityRequirement);
         });
 
         return services;
@@ -91,6 +115,8 @@ public static class AppServiceConfig
 
     public static IServiceCollection AddAuthenticationConfig(this IServiceCollection service, IConfiguration config)
     {
+        Console.WriteLine($"JWT_KEY: {config["JWT_KEY"]}");
+
         service.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -100,7 +126,7 @@ public static class AppServiceConfig
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidAlgorithms = [SecurityAlgorithms.HmacSha256Signature],
+                    // ValidAlgorithms = [SecurityAlgorithms.HmacSha256Signature], Note to self never put this
                     IssuerSigningKey =
                         new SymmetricSecurityKey(Encoding.ASCII.GetBytes(config["JWT_KEY"] ?? string.Empty)),
                     ValidateIssuerSigningKey = true,
@@ -109,7 +135,21 @@ public static class AppServiceConfig
                     ValidateLifetime = true,
                     ValidIssuer = "roa.io",
                     ValidAudience = "ecommerce-app",
-                    ClockSkew = TimeSpan.FromMinutes(5)
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var token = context.Request.Cookies["AuthToken"];
+                        if (!string.IsNullOrEmpty(token))
+                        {
+                            context.Token = token;
+                        }
+
+                        return Task.CompletedTask;
+                    }
                 };
             });
         return service;

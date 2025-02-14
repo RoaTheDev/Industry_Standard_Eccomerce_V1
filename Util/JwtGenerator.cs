@@ -23,14 +23,16 @@ public class JwtGenerator
         {
             new(ClaimTypes.NameIdentifier, userId),
             new(ClaimTypes.Email, email),
-            new(ClaimTypes.Role, role)
+            new(ClaimTypes.Role, role),
+            new(JwtRegisteredClaimNames.Iss, "roa.io"),
+            new(JwtRegisteredClaimNames.Aud, "ecommerce-app")
         };
         var claimsIdentity = new ClaimsIdentity(claims);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claimsIdentity,
-            Issuer = "roa.io",
-            Audience = "ecommerce-app",
+            // Issuer = "roa.io",
+            // Audience = "ecommerce-app",
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = credential
         };

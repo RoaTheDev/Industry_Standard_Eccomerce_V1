@@ -25,6 +25,7 @@ public static class DependencyConfig
         service.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
         service.AddScoped<ICustomerService, CustomerService>();
         service.AddScoped<IAddressService, AddressService>();
+        service.AddScoped<ICategoryService, CategoryService>();
         return service;
     }
 

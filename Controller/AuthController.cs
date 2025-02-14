@@ -3,6 +3,7 @@ using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
 using Ecommerce_site.Service.IService;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_site.Controller;
@@ -24,6 +25,7 @@ public class AuthController : ControllerBase
         _loginValidator = loginValidator;
     }
 
+    [Authorize]
     [HttpGet("{id:long}")]
     public async Task<ActionResult<ApiStandardResponse<CustomerGetByIdResponse>>> GetCustomerById([FromRoute] long id)
     {
@@ -32,6 +34,7 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+
 
     [HttpPost("register/")]
     public async Task<ActionResult<ApiStandardResponse<CustomerRegisterRequestUap>>> Register(

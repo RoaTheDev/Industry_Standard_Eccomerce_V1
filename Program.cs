@@ -4,7 +4,7 @@ using Serilog;
 
 DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
-
+// Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 builder.Host.UseSerilog();
 builder.Services.FluentValidationConfig();
 builder.Services.AddAuthenticationConfig(builder.Configuration);
