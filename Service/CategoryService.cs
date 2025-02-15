@@ -76,7 +76,7 @@ public class CategoryService : ICategoryService
         try
         {
             var categories = await _categoryRepo.GetSelectedColumnsListsAsync(
-                cate => new { cate.CategoryName, cate.Description, cate.IsActive });
+                cate => new { cate.CategoryId, cate.CategoryName, cate.Description, cate.IsActive });
 
             if (!categories.Any())
                 return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status404NotFound,
@@ -88,6 +88,7 @@ public class CategoryService : ICategoryService
             {
                 categoryResponses.Add(new CategoryListResponse
                 {
+                    CategoryId = category.CategoryId,
                     CategoryName = category.CategoryName,
                     Description = category.Description,
                     IsActive = category.IsActive
@@ -111,7 +112,7 @@ public class CategoryService : ICategoryService
                 "The category already exist", null);
 
         bool isAdmin = await _userRepo.EntityExistByConditionAsync(
-            ua => ua.UserId == request.CreateBy && ua.Role.RoleName.ToUpper() != RoleEnums.Admin.ToString().ToUpper(),
+            ua => ua.UserId == request.CreateBy && ua.Role.RoleName.ToUpper() == RoleEnums.Admin.ToString().ToUpper(),
             uIn => uIn.Include(ur => ur.Role));
 
         if (!isAdmin)

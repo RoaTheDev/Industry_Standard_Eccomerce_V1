@@ -26,12 +26,15 @@ public static class DependencyConfig
         service.AddScoped<ICustomerService, CustomerService>();
         service.AddScoped<IAddressService, AddressService>();
         service.AddScoped<ICategoryService, CategoryService>();
+        service.AddScoped<IProductService, ProductService>();
         return service;
     }
+
     public static IServiceCollection MapperConfig(this IServiceCollection service)
     {
         return service.AddAutoMapper(typeof(AppMapper));
     }
+
     public static IServiceCollection FluentValidationConfig(this IServiceCollection service)
     {
         service.AddTransient<IValidator<CustomerRegisterRequestUap>, CustomerRegisterRequestUapValidator>();

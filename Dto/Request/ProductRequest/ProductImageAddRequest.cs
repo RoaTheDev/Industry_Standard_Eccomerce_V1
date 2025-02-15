@@ -1,7 +1,7 @@
 namespace Ecommerce_site.Dto.Request.ProductRequest;
 
-public class ProductCreateRequest : ProductRequest
+public class ProductImageAddRequest
 {
-    public required long CreateBy { get; set; }
+    public required long ProductId { get; set; }
     public required IEnumerable<string> ImageUrls { get; set; }
 }
