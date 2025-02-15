@@ -410,6 +410,13 @@ public class EcommerceSiteContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.DiscountPercentage).HasColumnName("discount_percentage");
             entity.Property(e => e.IsAvailable).HasColumnName("is_available");
+        
+            entity.Property(e => e.Description)
+                .HasColumnName("description")
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .IsRequired();
+
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("price");
@@ -432,6 +439,7 @@ public class EcommerceSiteContext : DbContext
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_CreatedBy");
+            
         });
 
         modelBuilder.Entity<ProductImage>(entity =>

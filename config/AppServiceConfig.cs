@@ -35,10 +35,7 @@ public static class AppServiceConfig
         });
     }
 
-    public static IServiceCollection MapperConfig(this IServiceCollection service)
-    {
-        return service.AddAutoMapper(typeof(AppMapper));
-    }
+
 
     public static IServiceCollection LoggingConfig(this IServiceCollection services)
     {
@@ -115,7 +112,6 @@ public static class AppServiceConfig
 
     public static IServiceCollection AddAuthenticationConfig(this IServiceCollection service, IConfiguration config)
     {
-        Console.WriteLine($"JWT_KEY: {config["JWT_KEY"]}");
 
         service.AddAuthentication(opt =>
             {
