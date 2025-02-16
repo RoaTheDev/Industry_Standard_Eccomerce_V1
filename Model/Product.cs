@@ -36,4 +36,6 @@ public class Product
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
+
+    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

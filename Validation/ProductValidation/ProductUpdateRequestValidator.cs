@@ -16,10 +16,14 @@ public class ProductUpdateRequestValidator : AbstractValidator<ProductUpdateRequ
         _categoryRepo = categoryRepo;
 
         Include(new ProductRequestValidator<ProductUpdateRequest>());
-
+        
         RuleFor(x => x).CustomAsync(ValidUpdateAsync);
+        
+        
     }
 
+    
+    
     private async Task ValidUpdateAsync(ProductUpdateRequest request,
         ValidationContext<ProductUpdateRequest> validationContext, CancellationToken _)
     {

@@ -410,7 +410,7 @@ public class EcommerceSiteContext : DbContext
             entity.Property(e => e.CreatedBy).HasColumnName("created_by");
             entity.Property(e => e.DiscountPercentage).HasColumnName("discount_percentage");
             entity.Property(e => e.IsAvailable).HasColumnName("is_available");
-        
+
             entity.Property(e => e.Description)
                 .HasColumnName("description")
                 .HasMaxLength(255)
@@ -439,8 +439,8 @@ public class EcommerceSiteContext : DbContext
                 .HasForeignKey(d => d.CreatedBy)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_CreatedBy");
-            
         });
+
 
         modelBuilder.Entity<ProductImage>(entity =>
         {
@@ -564,6 +564,50 @@ public class EcommerceSiteContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Users_Roles");
+        });
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.ToTable("Tags", "inventory");
+            entity.HasKey(t => t.TagId);
+            entity.Property(t => t.TagName)
+                .IsRequired()
+                .HasColumnName("tag")
+                .HasMaxLength(100)
+                .IsUnicode(false);
+
+            entity.HasIndex(t => t.TagName, "UQ_Tag");
+
+            entity.Property(t => t.IsDeleted).HasDefaultValue(true).HasColumnName("is_deleted");
+
+            entity.Property(t => t.CreateAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("created_at");
+
+            entity.Property(t => t.UpdateAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("updated_at");
+
+            entity.HasMany(t => t.Products)
+                .WithMany(p => p.Tags)
+                .UsingEntity(
+                    jt => jt.HasOne(typeof(Tag))
+                        .WithMany()
+                        .HasForeignKey("tag_id")
+                        .HasConstraintName("FK_ProductTag_TagId")
+                        .OnDelete(DeleteBehavior.Restrict),
+                    jp => jp.HasOne(typeof(Product))
+                        .WithMany()
+                        .HasForeignKey("product_id")
+                        .HasConstraintName("FK_ProductTag_ProductId")
+                        .OnDelete(DeleteBehavior.Restrict),
+                    j =>
+                    {
+                        j.HasKey("tag_id", "product_id");
+                        j.ToTable("ProductTag", "inventory");
+                    }
+                );
         });
     }
 }
