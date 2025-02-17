@@ -1,4 +1,5 @@
-﻿namespace Ecommerce_site.Model;
+﻿
+namespace Ecommerce_site.Model;
 
 public  class Address
 {

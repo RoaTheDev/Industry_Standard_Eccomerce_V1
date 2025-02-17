@@ -1,13 +1,14 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Product
+public  class Product
 {
     public long ProductId { get; set; }
 
     public string ProductName { get; set; } = null!;
 
-    public string Description { get; set; } = null!;
     public decimal Price { get; set; }
+
+    public string Description { get; set; } = null!;
 
     public bool IsAvailable { get; set; }
 
@@ -18,6 +19,8 @@ public class Product
     public long CategoryId { get; set; }
 
     public long CreatedBy { get; set; }
+
+    public long UpdatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -37,5 +40,7 @@ public class Product
 
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 
-    public ICollection<Tag> Tags { get; set; } = new List<Tag>();
+    public virtual User UpdatedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

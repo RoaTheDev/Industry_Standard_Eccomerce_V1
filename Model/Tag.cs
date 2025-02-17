@@ -1,11 +1,16 @@
-namespace Ecommerce_site.Model;
+﻿namespace Ecommerce_site.Model;
 
-public class Tag
+public partial class Tag
 {
     public long TagId { get; set; }
-    public string TagName { get; set; } = null!;
-    public DateTime CreateAt { get; set; }
-    public DateTime UpdateAt { get; set; }
+
+    public string Tag1 { get; set; } = null!;
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
     public bool IsDeleted { get; set; }
-    public ICollection<Product> Products { get; set; } = new List<Product>();
+
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 }

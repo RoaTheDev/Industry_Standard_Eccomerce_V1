@@ -113,7 +113,7 @@ public class CustomerService : ICustomerService
             await _cache.SetAsync($"{OtpVerificationKey}{session}", otp, TimeSpan.FromMinutes(15));
             await _cache.SetAsync($"{RegisterAccountKey}{session}", new UserCreationCache
             {
-                Gender = request.Gender ?? GenderEnum.Male.ToString().ToLower(),
+                Gender = request.Gender ?? GenderEnums.Male.ToString().ToLower(),
                 Dob = request.Dob,
                 Email = request.Email,
                 Password = request.Password,

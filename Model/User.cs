@@ -30,11 +30,15 @@ public  class User
 
     public virtual ICollection<Cancellation> Cancellations { get; set; } = new List<Cancellation>();
 
-    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+    public virtual ICollection<Category> CategoryCreatedByNavigations { get; set; } = new List<Category>();
+
+    public virtual ICollection<Category> CategoryUpdatedByNavigations { get; set; } = new List<Category>();
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
+    public virtual ICollection<Product> ProductCreatedByNavigations { get; set; } = new List<Product>();
+
+    public virtual ICollection<Product> ProductUpdatedByNavigations { get; set; } = new List<Product>();
 
     public virtual Role Role { get; set; } = null!;
 }

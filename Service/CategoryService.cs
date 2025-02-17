@@ -185,11 +185,11 @@ public class CategoryService : ICategoryService
                       ua.Role.RoleName.ToUpper() != RoleEnums.Admin.ToString().ToUpper(),
                 uIn =>
                     uIn.Include(ur => ur.Role)
-                        .Include(ur => ur.Categories),
+                        .Include(ur => ur.CategoryCreatedByNavigations),
                 false);
 
             Category? category = null;
-            foreach (var c in user.Categories)
+            foreach (var c in user.CategoryCreatedByNavigations)
             {
                 if (c.CategoryId == request.CategoryId)
                     category = c;
