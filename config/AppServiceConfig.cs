@@ -1,5 +1,6 @@
 using System.Text;
 using Ecommerce_site.Data;
+using Ecommerce_site.Middleware;
 using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,8 @@ public static class AppServiceConfig
     }
 
 
+    public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services) =>
+        services.AddExceptionHandler<GlobalExceptionMiddleware>();
 
     public static IServiceCollection LoggingConfig(this IServiceCollection services)
     {
@@ -112,7 +115,6 @@ public static class AppServiceConfig
 
     public static IServiceCollection AddAuthenticationConfig(this IServiceCollection service, IConfiguration config)
     {
-
         service.AddAuthentication(opt =>
             {
                 opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

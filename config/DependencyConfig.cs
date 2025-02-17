@@ -1,5 +1,6 @@
 using Ecommerce_site.Dto.Request.AddressRequest;
 using Ecommerce_site.Dto.Request.CustomerRequest;
+using Ecommerce_site.Dto.Request.ProductRequest;
 using Ecommerce_site.Repo;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service;
@@ -7,6 +8,7 @@ using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
 using Ecommerce_site.Validation.AddressValidation;
 using Ecommerce_site.Validation.CustomerValidation;
+using Ecommerce_site.Validation.ProductValidation;
 using FluentValidation;
 
 namespace Ecommerce_site.config;
@@ -44,6 +46,10 @@ public static class DependencyConfig
         service.AddTransient<IValidator<AddressCreationRequest>, AddressCreateRequestValidation>();
         service.AddTransient<IValidator<AddressUpdateRequest>, AddressUpdateRequestValidation>();
 
+        service.AddScoped<IValidator<ProductCreateRequest>, ProductCreateRequestValidator>();
+        service.AddScoped<IValidator<ProductUpdateRequest>, ProductUpdateRequestValidator>();
+        service.AddScoped<IValidator<ProductImageAddRequest>, ProductImageAddRequestValidator>();
+        service.AddScoped<IValidator<ProductImageChangeRequest>, ProductImageChangeValidator>();
         return service;
     }
 }

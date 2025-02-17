@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 builder.Host.UseSerilog();
 builder.Services.FluentValidationConfig();
+builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddAuthenticationConfig(builder.Configuration);
 builder.Services.AddAuthorizationConfig();
 builder.Services.AddEmailConfig(builder.Configuration);
@@ -19,6 +20,8 @@ builder.Services.MapperConfig();
 builder.Services.CustomDependencyConfig();
 builder.Services.AddControllers();
 var app = builder.Build();
+
+app.UseExceptionHandler(_ => { });
 
 if (app.Environment.IsDevelopment())
 {
