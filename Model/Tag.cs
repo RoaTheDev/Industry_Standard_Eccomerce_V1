@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public partial class Tag
+public  class Tag
 {
     public long TagId { get; set; }
 

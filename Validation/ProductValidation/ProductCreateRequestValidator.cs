@@ -13,19 +13,24 @@ public class ProductCreateRequestValidator : AbstractValidator<ProductCreateRequ
 {
     public ProductCreateRequestValidator(
         IGenericRepo<Category> categoryRepository,
-        IGenericRepo<User> userRepository)
+        IGenericRepo<User> userRepository,
+        IGenericRepo<Tag> tagRepository)
     {
         Include(new ProductRequestValidator<ProductCreateRequest>());
 
-        RuleFor(x => x).CustomAsync(async (dto, validationContext, _) =>
+        RuleFor(x => x).CustomAsync(async (dto, _, _) =>
         {
             if (!await categoryRepository.EntityExistByConditionAsync(c => c.CategoryId == dto.CategoryId))
                 throw new EntityNotFoundException(typeof(Category), dto.CategoryId);
-            
+
             if (!await userRepository.EntityExistByConditionAsync(
                     u => u.UserId == dto.CreateBy && u.Role.RoleName == RoleEnums.Admin.ToString(),
                     include: u => u.Include(ur => ur.Role)))
                 throw new EntityNotFoundException(typeof(User), dto.CreateBy);
+
+            // var existingTagCount = await tagRepository.CountByConditionAsync(t => dto.TagIds.Contains(t.TagId));
+            // if (existingTagCount != dto.TagIds.Count())
+            //     throw new EntityNotFoundException("One or more tags do not exist.");
         });
 
         RuleFor(x => x.ImageUrls)

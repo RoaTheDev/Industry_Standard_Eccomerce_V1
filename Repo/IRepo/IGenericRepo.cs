@@ -17,6 +17,7 @@ public interface IGenericRepo<T> where T : class
         bool asNoTracking = true);
 
     Task<List<T>> GetAllAsync();
+    Task<List<T>> GetAllByConditionAsync(Expression<Func<T, bool>> predicate);
     Task<List<T>> GetAllAsync(Func<IQueryable<T>, IIncludableQueryable<T, object>> include);
 
     Task<List<TResult>> GetSelectedColumnsListsAsync<TResult>(
@@ -52,4 +53,9 @@ public interface IGenericRepo<T> where T : class
 
     Task<bool> EntityExistByConditionAsync(Expression<Func<T, bool>> predicate,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include);
+
+    Task<IList<T>> AddBulkAsync(IList<T> entities);
+    Task<IList<T>> UpdateBulk(IList<T> entities);
+    Task<IList<T>> DeleteBulk(IList<T> entities);
+    Task<int> CountByConditionAsync(Expression<Func<T, bool>> predicate);
 }

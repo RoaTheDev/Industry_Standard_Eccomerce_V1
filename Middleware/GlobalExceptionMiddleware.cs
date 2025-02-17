@@ -23,8 +23,9 @@ public class GlobalExceptionMiddleware(ILogger logger) : IExceptionHandler
         logger.Error(exception, "Exception occurred with status code {StatusCode}: {Message}", statusCode, message);
 
         httpContext.Response.ContentType = "application/json";
+        
         await httpContext.Response.WriteAsJsonAsync(new ApiStandardResponse<string?>(statusCode, message, null),
-            cancellationToken: cancellationToken);
+            cancellationToken);
 
         return true;
     }

@@ -51,7 +51,7 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         IQueryable<T> query = _dbSet;
 
         query = include(query);
-        
+
         return await query.AsNoTracking().AnyAsync(predicate);
     }
 
@@ -177,5 +177,36 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         query = include(query);
 
         return await query.ToListAsync();
+    }
+
+    public async Task<IList<T>> AddBulkAsync(IList<T> entities)
+    {
+        await _dbSet.AddRangeAsync(entities);
+        await _context.SaveChangesAsync();
+        return entities;
+    }
+
+    public async Task<IList<T>> UpdateBulk(IList<T> entities)
+    {
+        _dbSet.UpdateRange(entities);
+        await _context.SaveChangesAsync();
+        return entities;
+    }
+
+    public async Task<IList<T>> DeleteBulk(IList<T> entities)
+    {
+        _dbSet.RemoveRange(entities);
+        await _context.SaveChangesAsync();
+        return entities;
+    }
+
+    public async Task<int> CountByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.AsNoTracking().Where(predicate).CountAsync();
+    }
+
+    public async Task<List<T>> GetAllByConditionAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
     }
 }
