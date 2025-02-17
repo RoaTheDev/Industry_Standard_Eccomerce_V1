@@ -1,4 +1,5 @@
 using Ecommerce_site.Dto.Request.ProductRequest;
+using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Util;
@@ -29,6 +30,6 @@ public class ProductImageAddRequestValidator : AbstractValidator<ProductImageAdd
         ValidationContext<ProductImageAddRequest> validationContext, CancellationToken _)
     {
         if (!await _productRepo.EntityExistByConditionAsync(p => p.ProductId == request.ProductId))
-            validationContext.AddFailure(nameof(Product), "The product does not exist");
+            throw new EntityNotFoundException(typeof(Product), request.ProductId);
     }
 }

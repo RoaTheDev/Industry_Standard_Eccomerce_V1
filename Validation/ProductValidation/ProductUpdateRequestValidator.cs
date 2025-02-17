@@ -1,4 +1,5 @@
 using Ecommerce_site.Dto.Request.ProductRequest;
+using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using FluentValidation;
@@ -16,20 +17,18 @@ public class ProductUpdateRequestValidator : AbstractValidator<ProductUpdateRequ
         _categoryRepo = categoryRepo;
 
         Include(new ProductRequestValidator<ProductUpdateRequest>());
-        
+
         RuleFor(x => x).CustomAsync(ValidUpdateAsync);
-        
-        
     }
 
-    
-    
+
     private async Task ValidUpdateAsync(ProductUpdateRequest request,
         ValidationContext<ProductUpdateRequest> validationContext, CancellationToken _)
     {
         if (!await _productRepo.EntityExistByConditionAsync(p => p.ProductId == request.ProductId))
-            validationContext.AddFailure(nameof(Product), "The product does not exist");
+            throw new EntityNotFoundException(typeof(Product), request.ProductId);
+
         if (!await _categoryRepo.EntityExistByConditionAsync(c => c.CategoryId == request.CategoryId))
-            validationContext.AddFailure(nameof(Category), "The new category does not exist");
+            throw new EntityNotFoundException(typeof(Category), request.CategoryId);
     }
 }

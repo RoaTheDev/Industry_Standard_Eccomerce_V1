@@ -1,4 +1,5 @@
 using Ecommerce_site.Dto.Request.ProductRequest;
+using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Util;
@@ -23,8 +24,9 @@ public class ProductImageChangeValidator : AbstractValidator<ProductImageChangeR
         ValidationContext<ProductImageChangeRequest> validationContext, CancellationToken _)
     {
         if (!await _pImageRepo.EntityExistByConditionAsync(p => p.ProductId == request.ProductId))
-            validationContext.AddFailure(nameof(Product), "The product does not exist");
+            throw new EntityNotFoundException(typeof(Product), request.ProductId);
+
         if (!await _pImageRepo.EntityExistByConditionAsync(p => p.ImageId == request.ImageId))
-            validationContext.AddFailure(nameof(ProductImage), "The image does not exist");
+            throw new EntityNotFoundException(typeof(ProductImage), request.ImageId);
     }
 }

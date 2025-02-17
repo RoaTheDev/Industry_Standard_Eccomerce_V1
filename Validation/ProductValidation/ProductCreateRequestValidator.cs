@@ -1,4 +1,5 @@
 using Ecommerce_site.Dto.Request.ProductRequest;
+using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Repo.IRepo;
@@ -19,12 +20,12 @@ public class ProductCreateRequestValidator : AbstractValidator<ProductCreateRequ
         RuleFor(x => x).CustomAsync(async (dto, validationContext, _) =>
         {
             if (!await categoryRepository.EntityExistByConditionAsync(c => c.CategoryId == dto.CategoryId))
-                validationContext.AddFailure(nameof(Category), "The category does not exist");
-
+                throw new EntityNotFoundException(typeof(Category), dto.CategoryId);
+            
             if (!await userRepository.EntityExistByConditionAsync(
                     u => u.UserId == dto.CreateBy && u.Role.RoleName == RoleEnums.Admin.ToString(),
                     include: u => u.Include(ur => ur.Role)))
-                validationContext.AddFailure(nameof(User), "Only admins can create products");
+                throw new EntityNotFoundException(typeof(User), dto.CreateBy);
         });
 
         RuleFor(x => x.ImageUrls)

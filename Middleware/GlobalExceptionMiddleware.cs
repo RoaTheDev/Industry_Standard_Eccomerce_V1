@@ -15,7 +15,7 @@ public class GlobalExceptionMiddleware(ILogger logger) : IExceptionHandler
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Access denied, please contact admin."),
             EntityNotFoundException notFoundEx => (StatusCodes.Status404NotFound, notFoundEx.Message),
             EntityAlreadyExistException existEx => (StatusCodes.Status409Conflict, existEx.Message),
-            RepoException repoEx => (StatusCodes.Status500InternalServerError, repoEx.Message),
+            RepoException repoEx => (StatusCodes.Status503ServiceUnavailable, repoEx.Message),
             ServiceException serviceEx => (StatusCodes.Status400BadRequest, serviceEx.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
