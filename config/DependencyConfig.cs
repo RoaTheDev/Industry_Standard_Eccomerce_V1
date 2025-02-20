@@ -6,6 +6,7 @@ using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
+using Ecommerce_site.Util.storage;
 using Ecommerce_site.Validation.AddressValidation;
 using Ecommerce_site.Validation.CustomerValidation;
 using Ecommerce_site.Validation.ProductValidation;
@@ -29,6 +30,9 @@ public static class DependencyConfig
         service.AddScoped<IAddressService, AddressService>();
         service.AddScoped<ICategoryService, CategoryService>();
         service.AddScoped<IProductService, ProductService>();
+        
+        service.AddKeyedTransient<IStorageProvider, LocalStorageProvider>("local");
+        service.AddKeyedTransient<IStorageProvider, AzureBlobStorageProvider>("azure");
         return service;
     }
 
@@ -48,8 +52,7 @@ public static class DependencyConfig
 
         service.AddScoped<IValidator<ProductCreateRequest>, ProductCreateRequestValidator>();
         service.AddScoped<IValidator<ProductUpdateRequest>, ProductUpdateRequestValidator>();
-        service.AddScoped<IValidator<ProductImageAddRequest>, ProductImageAddRequestValidator>();
-        service.AddScoped<IValidator<ProductImageChangeRequest>, ProductImageChangeValidator>();
+
         return service;
     }
 }

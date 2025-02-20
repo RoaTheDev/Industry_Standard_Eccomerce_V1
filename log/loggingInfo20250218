@@ -1,0 +1,604 @@
+2025-02-18 15:51:42.896 +07:00 [INF] User profile is available. Using '/home/roa/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-02-18 15:51:42.995 +07:00 [INF] Now listening on: http://localhost:5297
+2025-02-18 15:51:42.996 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-18 15:51:42.997 +07:00 [INF] Hosting environment: Development
+2025-02-18 15:51:42.997 +07:00 [INF] Content root path: /home/roa/Documents/Asp/Ecommerce_site
+2025-02-18 15:52:09.981 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/ - null null
+2025-02-18 15:52:10.030 +07:00 [WRN] Failed to determine the https port for redirect.
+2025-02-18 15:52:10.032 +07:00 [INF] Executing endpoint 'HTTP: GET /'
+2025-02-18 15:52:10.032 +07:00 [INF] Executed endpoint 'HTTP: GET /'
+2025-02-18 15:52:10.035 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/ - 302 0 null 56.2272ms
+2025-02-18 15:52:10.046 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/index.html - null null
+2025-02-18 15:52:10.087 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/index.html - 200 null text/html;charset=utf-8 40.8155ms
+2025-02-18 15:52:10.115 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/index.js - null null
+2025-02-18 15:52:10.118 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/index.js - 200 null application/javascript;charset=utf-8 3.0291ms
+2025-02-18 15:52:10.303 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/v1/swagger.json - null null
+2025-02-18 15:52:10.416 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 113.3129ms
+2025-02-18 15:56:54.231 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/register - application/json 242
+2025-02-18 15:56:54.235 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 15:56:54.265 +07:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap]]] Register(Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 15:56:55.061 +07:00 [INF] Executing BadRequestObjectResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 15:56:55.073 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.Register (Ecommerce_site) in 805.564ms
+2025-02-18 15:56:55.074 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 15:56:55.080 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/register - 400 null application/json; charset=utf-8 848.2182ms
+2025-02-18 15:57:46.619 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/register - application/json 246
+2025-02-18 15:57:46.622 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 15:57:46.623 +07:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap]]] Register(Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 15:57:46.672 +07:00 [INF] Executing BadRequestObjectResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 15:57:46.672 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.Register (Ecommerce_site) in 49.5825ms
+2025-02-18 15:57:46.672 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 15:57:46.673 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/register - 400 null application/json; charset=utf-8 53.4673ms
+2025-02-18 16:00:33.037 +07:00 [INF] Application is shutting down...
+2025-02-18 16:00:40.849 +07:00 [INF] User profile is available. Using '/home/roa/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-02-18 16:00:40.941 +07:00 [INF] Now listening on: http://localhost:5297
+2025-02-18 16:00:40.943 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-18 16:00:40.943 +07:00 [INF] Hosting environment: Development
+2025-02-18 16:00:40.943 +07:00 [INF] Content root path: /home/roa/Documents/Asp/Ecommerce_site
+2025-02-18 16:00:43.318 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/register - application/json 246
+2025-02-18 16:00:43.371 +07:00 [WRN] Failed to determine the https port for redirect.
+2025-02-18 16:00:43.373 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 16:00:43.385 +07:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap]]] Register(Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 16:00:44.704 +07:00 [INF] Executed DbCommand (40ms) [Parameters=[@__ToLower_0='?' (Size = 255)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [auth].[Users] AS [u]
+        WHERE LOWER([u].[email]) = @__ToLower_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-02-18 16:00:44.828 +07:00 [INF] Cache set for key: _email.otp.20c36cf3-0053-41c2-8440-bc32b8b04524
+2025-02-18 16:00:44.835 +07:00 [INF] Cache set for key: _customer.payload.20c36cf3-0053-41c2-8440-bc32b8b04524
+2025-02-18 16:03:03.549 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/index.html - null null
+2025-02-18 16:03:03.628 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/index.html - 200 null text/html;charset=utf-8 80.869ms
+2025-02-18 16:03:03.706 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/index.js - null null
+2025-02-18 16:03:03.710 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/index.js - 200 null application/javascript;charset=utf-8 3.8209ms
+2025-02-18 16:03:03.826 +07:00 [INF] Request starting HTTP/1.1 GET http://localhost:5297/swagger/v1/swagger.json - null null
+2025-02-18 16:03:03.940 +07:00 [INF] Request finished HTTP/1.1 GET http://localhost:5297/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 114.3564ms
+2025-02-18 16:03:12.165 +07:00 [ERR] Failed to send email.
+2025-02-18 16:03:12.169 +07:00 [ERR] A task was canceled.
+2025-02-18 16:03:12.170 +07:00 [ERR] The email service not responding
+System.Runtime.InteropServices.ExternalException (0x80004005): External service not responding
+   at Ecommerce_site.Service.CustomerService.SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model) in /home/roa/Documents/Asp/Ecommerce_site/Service/CustomerService.cs:line 379
+   at Ecommerce_site.Service.CustomerService.RegisterCustomerAsync(CustomerRegisterRequestUap request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CustomerService.cs:line 139
+2025-02-18 16:03:12.215 +07:00 [INF] Executing ObjectResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.response.CustomerResponse.CustomerRegisterResponse, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 16:03:12.244 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.Register (Ecommerce_site) in 148855.2365ms
+2025-02-18 16:03:12.246 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 16:03:12.277 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/register - 499 null application/json; charset=utf-8 148960.4659ms
+2025-02-18 16:03:35.136 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/register - application/json 246
+2025-02-18 16:03:35.169 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 16:03:35.177 +07:00 [INF] Route matched with {action = "Register", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap]]] Register(Ecommerce_site.Dto.Request.CustomerRequest.CustomerRegisterRequestUap) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 16:03:35.315 +07:00 [INF] Executed DbCommand (33ms) [Parameters=[@__ToLower_0='?' (Size = 255)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [auth].[Users] AS [u]
+        WHERE LOWER([u].[email]) = @__ToLower_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-02-18 16:03:35.324 +07:00 [INF] Cache set for key: _email.otp.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:03:35.326 +07:00 [INF] Cache set for key: _customer.payload.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:03:41.413 +07:00 [INF] Email sent successfully!
+2025-02-18 16:03:41.426 +07:00 [INF] Executing AcceptedResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.response.CustomerResponse.CustomerRegisterResponse, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 16:03:41.445 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.Register (Ecommerce_site) in 6267.2174ms
+2025-02-18 16:03:41.448 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.Register (Ecommerce_site)'
+2025-02-18 16:03:41.452 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/register - 202 null application/json; charset=utf-8 6317.1247ms
+2025-02-18 16:04:24.854 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/email-verification - application/json 19
+2025-02-18 16:04:24.875 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site)'
+2025-02-18 16:04:24.906 +07:00 [INF] Route matched with {action = "EmailVerification", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.response.CustomerResponse.CustomerCreationResponse]]] EmailVerification(System.Guid, Ecommerce_site.Dto.Request.CustomerRequest.EmailVerificationRequest) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 16:04:24.994 +07:00 [INF] Cache hit for key: _email.otp.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:04:24.998 +07:00 [INF] Cache hit for key: _customer.payload.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:04:25.047 +07:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[role_name] AS [RoleName], [r].[role_id] AS [RoleId]
+FROM [auth].[Roles] AS [r]
+WHERE [r].[role_name] LIKE 'Customer'
+2025-02-18 16:04:25.052 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site) in 145.006ms
+2025-02-18 16:04:25.052 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site)'
+2025-02-18 16:04:25.056 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+Ecommerce_site.Exception.EntityNotFoundException: Name by r => new <>f__AnonymousType7`2(RoleName = r.RoleName, RoleId = r.RoleId) not found.
+   at Ecommerce_site.Repo.GenericRepo`1.GetSelectedColumnsByConditionAsync[TResult](Expression`1 predicate, Expression`1 selector) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 91
+   at Ecommerce_site.Service.CustomerService.EmailVerification(Guid session, EmailVerificationRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CustomerService.cs:line 180
+   at Ecommerce_site.Controller.AuthController.EmailVerification(Guid session, EmailVerificationRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/AuthController.cs:line 66
+   at lambda_method45(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2025-02-18 16:04:25.070 +07:00 [ERR] Exception occurred with status code 404: Name by r => new <>f__AnonymousType7`2(RoleName = r.RoleName, RoleId = r.RoleId) not found.
+Ecommerce_site.Exception.EntityNotFoundException: Name by r => new <>f__AnonymousType7`2(RoleName = r.RoleName, RoleId = r.RoleId) not found.
+   at Ecommerce_site.Repo.GenericRepo`1.GetSelectedColumnsByConditionAsync[TResult](Expression`1 predicate, Expression`1 selector) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 91
+   at Ecommerce_site.Service.CustomerService.EmailVerification(Guid session, EmailVerificationRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CustomerService.cs:line 180
+   at Ecommerce_site.Controller.AuthController.EmailVerification(Guid session, EmailVerificationRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/AuthController.cs:line 66
+   at lambda_method45(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2025-02-18 16:04:25.077 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/email-verification - 500 null application/json; charset=utf-8 223.2251ms
+2025-02-18 16:05:14.812 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Auth/email-verification - application/json 19
+2025-02-18 16:05:14.823 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site)'
+2025-02-18 16:05:14.828 +07:00 [INF] Route matched with {action = "EmailVerification", controller = "Auth"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.response.CustomerResponse.CustomerCreationResponse]]] EmailVerification(System.Guid, Ecommerce_site.Dto.Request.CustomerRequest.EmailVerificationRequest) on controller Ecommerce_site.Controller.AuthController (Ecommerce_site).
+2025-02-18 16:05:14.869 +07:00 [INF] Cache hit for key: _email.otp.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:05:14.872 +07:00 [INF] Cache hit for key: _customer.payload.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:05:14.895 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [r].[role_name] AS [RoleName], [r].[role_id] AS [RoleId]
+FROM [auth].[Roles] AS [r]
+WHERE [r].[role_name] LIKE 'Customer'
+2025-02-18 16:05:15.099 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[@p0='?' (Size = 150), @p1='?' (Size = 255), @p2='?' (Size = 50), @p3='?' (Size = 10), @p4='?' (DbType = Boolean), @p5='?' (Size = 50), @p6='?' (Size = 50), @p7='?' (Size = 255), @p8='?' (DbType = Int64), @p9='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [auth].[Users] ([display_name], [email], [first_name], [gender], [IsDeleted], [last_name], [middle_name], [password_hashed], [role_id], [updated_at])
+OUTPUT INSERTED.[user_id], INSERTED.[created_at]
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+2025-02-18 16:05:15.160 +07:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Int64), @p1='?' (DbType = Date), @p2='?' (DbType = Boolean), @p3='?' (Size = 25)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [orders].[Customers] ([customer_id], [dob], [IsDeleted], [phone_number])
+VALUES (@p0, @p1, @p2, @p3);
+2025-02-18 16:05:15.191 +07:00 [INF] Cache removed for key: _email.otp.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:05:15.192 +07:00 [INF] Cache removed for key: _customer.payload.c75ad84a-d7bd-480e-8d13-74a8a4d6f8cc
+2025-02-18 16:05:15.200 +07:00 [INF] Cache set for key: _customer.1
+2025-02-18 16:05:15.205 +07:00 [INF] Executing CreatedAtActionResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.response.CustomerResponse.CustomerCreationResponse, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 16:05:15.230 +07:00 [INF] Executed action Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site) in 402.5068ms
+2025-02-18 16:05:15.231 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.AuthController.EmailVerification (Ecommerce_site)'
+2025-02-18 16:05:15.231 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Auth/email-verification - 201 null application/json; charset=utf-8 420.5896ms
+2025-02-18 16:06:11.043 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Category - application/json 81
+2025-02-18 16:06:11.143 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:06:11.174 +07:00 [INF] Route matched with {action = "CreateCategory", controller = "Category"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.response.CategoryResponse.CategoryCreateResponse]]] CreateCategory(Ecommerce_site.Dto.Request.CategoryRequest.CategoryCreateRequest) on controller Ecommerce_site.Controller.CategoryController (Ecommerce_site).
+2025-02-18 16:06:11.303 +07:00 [INF] Executed DbCommand (43ms) [Parameters=[@__request_CreateBy_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [auth].[Users] AS [u]
+        INNER JOIN [auth].[Roles] AS [r] ON [u].[role_id] = [r].[role_id]
+        WHERE [u].[user_id] = @__request_CreateBy_0 AND UPPER([r].[role_name]) = 'ADMIN') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-02-18 16:06:11.344 +07:00 [INF] Executed DbCommand (11ms) [Parameters=[@p0='?' (Size = 50) (DbType = AnsiString), @p1='?' (DbType = Int64), @p2='?' (Size = 255) (DbType = AnsiString), @p3='?' (DbType = Boolean), @p4='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [inventory].[Categories] ([category_name], [created_by], [description], [is_active], [updated_by])
+OUTPUT INSERTED.[category_id], INSERTED.[created_at], INSERTED.[updated_at]
+VALUES (@p0, @p1, @p2, @p3, @p4);
+2025-02-18 16:06:11.355 +07:00 [INF] Executing CreatedAtActionResult, writing value of type 'Ecommerce_site.Dto.ApiStandardResponse`1[[Ecommerce_site.Dto.response.CategoryResponse.CategoryCreateResponse, Ecommerce_site, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+2025-02-18 16:06:11.365 +07:00 [INF] Executed action Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site) in 191.6895ms
+2025-02-18 16:06:11.366 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:06:11.368 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Category - 201 null application/json; charset=utf-8 326.8998ms
+2025-02-18 16:06:24.502 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Category - application/json 81
+2025-02-18 16:06:24.523 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:06:24.525 +07:00 [INF] Route matched with {action = "CreateCategory", controller = "Category"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.response.CategoryResponse.CategoryCreateResponse]]] CreateCategory(Ecommerce_site.Dto.Request.CategoryRequest.CategoryCreateRequest) on controller Ecommerce_site.Controller.CategoryController (Ecommerce_site).
+2025-02-18 16:06:24.567 +07:00 [INF] Executed DbCommand (23ms) [Parameters=[@__request_CreateBy_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [auth].[Users] AS [u]
+        INNER JOIN [auth].[Roles] AS [r] ON [u].[role_id] = [r].[role_id]
+        WHERE [u].[user_id] = @__request_CreateBy_0 AND UPPER([r].[role_name]) = 'ADMIN') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-02-18 16:06:24.585 +07:00 [INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (Size = 50) (DbType = AnsiString), @p1='?' (DbType = Int64), @p2='?' (Size = 255) (DbType = AnsiString), @p3='?' (DbType = Boolean), @p4='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [inventory].[Categories] ([category_name], [created_by], [description], [is_active], [updated_by])
+OUTPUT INSERTED.[category_id], INSERTED.[created_at], INSERTED.[updated_at]
+VALUES (@p0, @p1, @p2, @p3, @p4);
+2025-02-18 16:06:24.625 +07:00 [ERR] An exception occurred in the database while saving changes for context type 'Ecommerce_site.Data.EcommerceSiteContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:7a588088-b70e-4e3d-b91a-368b2bac3b4b
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:7a588088-b70e-4e3d-b91a-368b2bac3b4b
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+2025-02-18 16:06:24.630 +07:00 [INF] Executed action Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site) in 104.2665ms
+2025-02-18 16:06:24.630 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:06:24.631 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:7a588088-b70e-4e3d-b91a-368b2bac3b4b
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Ecommerce_site.Repo.GenericRepo`1.AddAsync(T entity) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 24
+   at Ecommerce_site.Service.CategoryService.CreateCategoryAsync(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CategoryService.cs:line 122
+   at Ecommerce_site.Controller.CategoryController.CreateCategory(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/CategoryController.cs:line 51
+   at lambda_method337(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2025-02-18 16:06:24.638 +07:00 [ERR] Exception occurred with status code 500: An unexpected error occurred.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:7a588088-b70e-4e3d-b91a-368b2bac3b4b
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Ecommerce_site.Repo.GenericRepo`1.AddAsync(T entity) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 24
+   at Ecommerce_site.Service.CategoryService.CreateCategoryAsync(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CategoryService.cs:line 122
+   at Ecommerce_site.Controller.CategoryController.CreateCategory(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/CategoryController.cs:line 51
+   at lambda_method337(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2025-02-18 16:06:24.643 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Category - 500 null application/json; charset=utf-8 141.9143ms
+2025-02-18 16:06:46.567 +07:00 [INF] Application is shutting down...
+2025-02-18 16:06:54.996 +07:00 [INF] User profile is available. Using '/home/roa/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-02-18 16:06:55.120 +07:00 [INF] Now listening on: http://localhost:5297
+2025-02-18 16:06:55.122 +07:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-02-18 16:06:55.123 +07:00 [INF] Hosting environment: Development
+2025-02-18 16:06:55.123 +07:00 [INF] Content root path: /home/roa/Documents/Asp/Ecommerce_site
+2025-02-18 16:06:58.798 +07:00 [INF] Request starting HTTP/1.1 POST http://localhost:5297/api/Category - application/json 81
+2025-02-18 16:06:58.916 +07:00 [WRN] Failed to determine the https port for redirect.
+2025-02-18 16:06:58.917 +07:00 [INF] Executing endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:06:58.938 +07:00 [INF] Route matched with {action = "CreateCategory", controller = "Category"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Ecommerce_site.Dto.ApiStandardResponse`1[Ecommerce_site.Dto.response.CategoryResponse.CategoryCreateResponse]]] CreateCategory(Ecommerce_site.Dto.Request.CategoryRequest.CategoryCreateRequest) on controller Ecommerce_site.Controller.CategoryController (Ecommerce_site).
+2025-02-18 16:07:00.209 +07:00 [INF] Executed DbCommand (28ms) [Parameters=[@__request_CreateBy_0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [auth].[Users] AS [u]
+        INNER JOIN [auth].[Roles] AS [r] ON [u].[role_id] = [r].[role_id]
+        WHERE [u].[user_id] = @__request_CreateBy_0 AND UPPER([r].[role_name]) = 'ADMIN') THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-02-18 16:07:00.336 +07:00 [INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (Size = 50) (DbType = AnsiString), @p1='?' (DbType = Int64), @p2='?' (Size = 255) (DbType = AnsiString), @p3='?' (DbType = Boolean), @p4='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [inventory].[Categories] ([category_name], [created_by], [description], [is_active], [updated_by])
+OUTPUT INSERTED.[category_id], INSERTED.[created_at], INSERTED.[updated_at]
+VALUES (@p0, @p1, @p2, @p3, @p4);
+2025-02-18 16:07:00.361 +07:00 [ERR] An exception occurred in the database while saving changes for context type 'Ecommerce_site.Data.EcommerceSiteContext'.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:18b4d4aa-5fec-43b1-bc38-d784a8cb4c84
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:18b4d4aa-5fec-43b1-bc38-d784a8cb4c84
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+2025-02-18 16:07:00.366 +07:00 [INF] Executed action Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site) in 1425.1114ms
+2025-02-18 16:07:00.370 +07:00 [INF] Executed endpoint 'Ecommerce_site.Controller.CategoryController.CreateCategory (Ecommerce_site)'
+2025-02-18 16:07:00.372 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:18b4d4aa-5fec-43b1-bc38-d784a8cb4c84
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Ecommerce_site.Repo.GenericRepo`1.AddAsync(T entity) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 24
+   at Ecommerce_site.Service.CategoryService.CreateCategoryAsync(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CategoryService.cs:line 122
+   at Ecommerce_site.Controller.CategoryController.CreateCategory(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/CategoryController.cs:line 51
+   at lambda_method5(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+2025-02-18 16:07:00.380 +07:00 [ERR] An exception was thrown attempting to execute the error handler.
+System.Runtime.CompilerServices.SwitchExpressionException: Non-exhaustive switch expression failed to match its input.
+Unmatched value was Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:18b4d4aa-5fec-43b1-bc38-d784a8cb4c84
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Ecommerce_site.Repo.GenericRepo`1.AddAsync(T entity) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 24
+   at Ecommerce_site.Service.CategoryService.CreateCategoryAsync(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CategoryService.cs:line 122
+   at Ecommerce_site.Controller.CategoryController.CreateCategory(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/CategoryController.cs:line 51
+   at lambda_method5(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task).
+   at <PrivateImplementationDetails>.ThrowSwitchExpressionException(Object unmatchedValue)
+   at Ecommerce_site.Middleware.GlobalExceptionMiddleware.TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken) in /home/roa/Documents/Asp/Ecommerce_site/Middleware/GlobalExceptionMiddleware.cs:line 13
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.HandleException(HttpContext context, ExceptionDispatchInfo edi)
+2025-02-18 16:07:00.386 +07:00 [ERR] An unhandled exception has occurred while executing the request.
+Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
+ ---> Microsoft.Data.SqlClient.SqlException (0x80131904): Violation of UNIQUE KEY constraint 'UIX_CategoryName'. Cannot insert duplicate key in object 'inventory.Categories'. The duplicate key value is (Drinks).
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryHasMoreRows(Boolean& moreRows)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryReadInternal(Boolean setTimeout, Boolean& more)
+   at Microsoft.Data.SqlClient.SqlDataReader.ReadAsyncExecute(Task task, Object state)
+   at Microsoft.Data.SqlClient.SqlDataReader.InvokeAsyncCall[T](SqlDataReaderBaseAsyncCallContext`1 context)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+ClientConnectionId:18b4d4aa-5fec-43b1-bc38-d784a8cb4c84
+Error Number:2627,State:1,Class:14
+   --- End of inner exception stack trace ---
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeResultSetAsync(Int32 startCommandIndex, RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.AffectedCountModificationCommandBatch.ConsumeAsync(RelationalDataReader reader, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Update.Internal.SqlServerModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalDatabase.SaveChangesAsync(IList`1 entries, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal.SqlServerExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
+   at Ecommerce_site.Repo.GenericRepo`1.AddAsync(T entity) in /home/roa/Documents/Asp/Ecommerce_site/Repo/GenericRepo.cs:line 24
+   at Ecommerce_site.Service.CategoryService.CreateCategoryAsync(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Service/CategoryService.cs:line 122
+   at Ecommerce_site.Controller.CategoryController.CreateCategory(CategoryCreateRequest request) in /home/roa/Documents/Asp/Ecommerce_site/Controller/CategoryController.cs:line 51
+   at lambda_method5(Closure, Object)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.AwaitableObjectResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Swashbuckle.AspNetCore.SwaggerUI.SwaggerUIMiddleware.Invoke(HttpContext httpContext)
+   at Swashbuckle.AspNetCore.Swagger.SwaggerMiddleware.Invoke(HttpContext httpContext, ISwaggerProvider swaggerProvider)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.HandleException(HttpContext context, ExceptionDispatchInfo edi)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.HandleException(HttpContext context, ExceptionDispatchInfo edi)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddlewareImpl.<Invoke>g__Awaited|10_0(ExceptionHandlerMiddlewareImpl middleware, HttpContext context, Task task)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-02-18 16:07:00.408 +07:00 [INF] Request finished HTTP/1.1 POST http://localhost:5297/api/Category - 500 null text/plain; charset=utf-8 1613.5533ms
+2025-02-18 16:08:50.397 +07:00 [INF] Application is shutting down...

@@ -32,14 +32,5 @@ public class ProductCreateRequestValidator : AbstractValidator<ProductCreateRequ
             // if (existingTagCount != dto.TagIds.Count())
             //     throw new EntityNotFoundException("One or more tags do not exist.");
         });
-
-        RuleFor(x => x.ImageUrls)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("At least one image URL/path is required")
-            .ForEach(path =>
-            {
-                path.NotEmpty().WithMessage("Image path cannot be empty")
-                    .Must(ValidPath.BeValidPathOrUri).WithMessage("image must be from a valid URL or server path");
-            });
     }
 }

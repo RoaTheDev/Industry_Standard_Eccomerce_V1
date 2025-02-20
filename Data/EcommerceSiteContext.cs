@@ -554,14 +554,14 @@ public  class EcommerceSiteContext : DbContext
 
             entity.ToTable("Tags", "inventory");
 
-            entity.HasIndex(e => e.Tag1, "UQ__Tags__DC101C016B64A66B").IsUnique();
+            entity.HasIndex(e => e.TagName, "UQ__Tags__DC101C016B64A66B").IsUnique();
 
             entity.Property(e => e.TagId).HasColumnName("tag_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("created_at");
-            entity.Property(e => e.Tag1)
+            entity.Property(e => e.TagName)
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("tag");

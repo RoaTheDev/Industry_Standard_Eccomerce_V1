@@ -106,10 +106,10 @@ public class CategoryService : ICategoryService
 
     public async Task<ApiStandardResponse<CategoryCreateResponse?>> CreateCategoryAsync(CategoryCreateRequest request)
     {
-        if (await _categoryRepo.EntityExistByConditionAsync(c =>
-                c.CategoryName.ToLower() == request.CategoryName.ToLower()))
-            return new ApiStandardResponse<CategoryCreateResponse?>(StatusCodes.Status409Conflict,
-                "The category already exist", null);
+        // if (await _categoryRepo.EntityExistByConditionAsync(c =>
+        //         c.CategoryName.ToLower() == request.CategoryName.ToLower()))
+        //     return new ApiStandardResponse<CategoryCreateResponse?>(StatusCodes.Status409Conflict,
+        //         "The category already exist", null);
 
         bool isAdmin = await _userRepo.EntityExistByConditionAsync(
             ua => ua.UserId == request.CreateBy && ua.Role.RoleName.ToUpper() == RoleEnums.Admin.ToString().ToUpper(),

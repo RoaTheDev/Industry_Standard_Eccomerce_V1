@@ -25,15 +25,15 @@ public class CustomerRegisterRequestUapValidator : AbstractValidator<CustomerReg
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Your firstname cannot be empty")
             .Must(firstName => !firstName.Contains(' ')).WithMessage("Firstname can't contain spaces")
-            .Matches(@"^[a-zA-Z]{4,}$").WithMessage("Firstname can't contain any special character")
-            .Length(4, 50).WithMessage("Firstname can only be between 4 to 50");
+            .Matches(@"^[a-zA-Z]{3,}$").WithMessage("Firstname can't contain any special character")
+            .Length(3, 50).WithMessage("Firstname can only be between 4 to 50");
 
         RuleFor(x => x.LastName)
             .Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Your  lastname cannot be empty")
             .Must(lastName => !lastName.Contains(' ')).WithMessage("Lastname can't contain spaces")
-            .Matches(@"^[a-zA-Z]{4,}$").WithMessage("Lastname can't contain any special character")
-            .Length(4, 50).WithMessage("Lastname can only be between 4 to 50");
+            .Matches(@"^[a-zA-Z]{3,}$").WithMessage("Lastname can't contain any special character")
+            .Length(3, 50).WithMessage("Lastname can only be between 4 to 50");
 
         RuleFor(x => x.MiddleName)
             .Cascade(CascadeMode.Stop)

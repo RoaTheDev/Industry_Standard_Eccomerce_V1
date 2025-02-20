@@ -17,13 +17,15 @@ public class GlobalExceptionMiddleware(ILogger logger) : IExceptionHandler
             EntityAlreadyExistException existEx => (StatusCodes.Status409Conflict, existEx.Message),
             RepoException repoEx => (StatusCodes.Status503ServiceUnavailable, repoEx.Message),
             ServiceException serviceEx => (StatusCodes.Status400BadRequest, serviceEx.Message),
+            InvalidOperationException invalidEx => (StatusCodes.Status400BadRequest, invalidEx.Message),
+            ArgumentException argEx => (StatusCodes.Status400BadRequest, argEx.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 
         logger.Error(exception, "Exception occurred with status code {StatusCode}: {Message}", statusCode, message);
 
         httpContext.Response.ContentType = "application/json";
-        
+
         await httpContext.Response.WriteAsJsonAsync(new ApiStandardResponse<string?>(statusCode, message, null),
             cancellationToken);
 

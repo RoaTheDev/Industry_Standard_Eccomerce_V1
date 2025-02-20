@@ -4,7 +4,7 @@ public  class Tag
 {
     public long TagId { get; set; }
 
-    public string Tag1 { get; set; } = null!;
+    public string TagName { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 

@@ -1,4 +1,4 @@
-using Ecommerce_site.Data;
+using System.Collections.Immutable;
 using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.ProductRequest;
 using Ecommerce_site.Dto.response.ProductResponse;
@@ -6,6 +6,8 @@ using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service.IService;
+using Ecommerce_site.Util.storage;
+using Microsoft.EntityFrameworkCore;
 using ILogger = Serilog.ILogger;
 
 namespace Ecommerce_site.Service;
@@ -15,24 +17,22 @@ public class ProductService : IProductService
     private readonly IGenericRepo<Product> _productRepo;
     private readonly IGenericRepo<ProductImage> _imageRepo;
     private readonly ILogger _logger;
-    private readonly EcommerceSiteContext _ecommerceSiteContext;
     private readonly IGenericRepo<Tag> _tagRepo;
+    private readonly IStorageProvider _storageProvider;
 
     public ProductService(IGenericRepo<Product> productRepo, ILogger logger, IGenericRepo<ProductImage> imageRepo,
-        EcommerceSiteContext ecommerceSiteContext, IGenericRepo<Tag> tagRepo)
+        IGenericRepo<Tag> tagRepo, [FromKeyedServices("local")] IStorageProvider storageProvider)
     {
         _productRepo = productRepo;
         _logger = logger;
         _imageRepo = imageRepo;
-        _ecommerceSiteContext = ecommerceSiteContext;
         _tagRepo = tagRepo;
+        _storageProvider = storageProvider;
     }
 
 
     public async Task<ApiStandardResponse<ProductCreateResponse>> CreateProductAsync(ProductCreateRequest request)
     {
-        await using var transaction = await _ecommerceSiteContext.Database.BeginTransactionAsync();
-
         try
         {
             Product product = await _productRepo.AddAsync(new Product
@@ -50,31 +50,9 @@ public class ProductService : IProductService
             var tags = await _tagRepo.GetAllByConditionAsync(t => request.TagIds.Contains(t.TagId));
             product.Tags = tags;
 
-            _logger.Information("Product-Tag insert success");
 
             await _productRepo.AddAsync(product);
-            _logger.Information("Product insert success");
 
-
-            List<ProductImage> images = new List<ProductImage>();
-            int firstImgCount = 1;
-            bool isPrimeImg = true;
-
-            foreach (string image in request.ImageUrls)
-            {
-                images.Add(new ProductImage
-                {
-                    ImageUrl = image,
-                    ProductId = product.ProductId,
-                    IsPrimary = firstImgCount == 1 ? isPrimeImg : !isPrimeImg
-                });
-                firstImgCount++;
-            }
-            
-            await _imageRepo.AddBulkAsync(images);
-            _logger.Information("Image bulk insert success");
-
-            await transaction.CommitAsync();
 
             return new ApiStandardResponse<ProductCreateResponse>(StatusCodes.Status201Created,
                 new ProductCreateResponse
@@ -88,12 +66,10 @@ public class ProductService : IProductService
                     CreateAt = product.CreatedAt,
                     CreateBy = product.CreatedBy,
                     IsAvailable = product.IsAvailable,
-                    
                 });
         }
         catch (System.Exception ex)
         {
-            await transaction.RollbackAsync();
             _logger.Error($"Error inserting product: {ex.Message}");
             throw;
         }
@@ -139,34 +115,197 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task<ApiStandardResponse<ProductResponse>> GetProductByIdAsync(long id)
+    public async Task<ApiStandardResponse<ProductByIdResponse>> GetProductByIdAsync(long id)
     {
-        // var Product = await _productRepo.GetSelectedColumnsByConditionAsync(); 
-        throw new NotImplementedException();
+        var product = await _productRepo.GetSelectedColumnsByConditionAsync(
+            p => p.ProductId == id && !p.IsDeleted,
+            p => new
+            {
+                p.ProductId,
+                p.ProductName,
+                p.Price,
+                p.Description,
+                p.Category.CategoryName,
+                p.Quantity,
+                p.DiscountPercentage,
+                p.IsAvailable,
+                Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
+                ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToImmutableList()
+            },
+            p => p.Include(pt => pt.Tags)
+                .Include(pc => pc.Category)
+                .Include(pi => pi.ProductImages)
+        );
+
+        return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status200OK, new ProductByIdResponse
+        {
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            Description = product.Description,
+            Discount = product.DiscountPercentage,
+            Price = product.Price,
+            Quantity = product.Quantity,
+            CategoryName = product.CategoryName,
+            Tags = product.Tags,
+            ImageUrls = product.ImageUrls
+        });
     }
 
-    public Task<ApiStandardResponse<IEnumerable<ProductResponse>>> GetProductsLikeNameAsync(string name)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteProductImage(long productId, long imageId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var image = await _imageRepo.GetByConditionAsync(i => i.ImageId == imageId && i.ProductId == productId);
+
+            if (!string.IsNullOrWhiteSpace(image.ImageUrl))
+            {
+                await _storageProvider.DeleteFileAsync(image.ImageUrl);
+            }
+
+            await _imageRepo.DeleteAsync(image);
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK, new ConfirmationResponse
+            {
+                Message = "The image has been delete successfully"
+            });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
+                $"The product does not exist", null);
+        }
     }
 
-    public Task<ApiStandardResponse<ProductImageChangeResponse>> ChangeProductImageAsync(
-        ProductImageChangeRequest request)
+
+    public async Task<ApiStandardResponse<ProductImageChangeResponse?>> ChangeProductImageAsync(
+        long productId, long imageId, IFormFile file)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("An image file is required.");
+
+            var productImage = await _imageRepo.GetByConditionAsync(pi =>
+                pi.ProductId == productId && pi.ImageId == imageId);
+
+            if (productImage == null)
+                throw new EntityNotFoundException(typeof(ProductImage), $"{productId} and {imageId}");
+
+            string oldImagePath = productImage.ImageUrl;
+
+            IList<string> newImageUrls =
+                await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), [file]);
+
+            string newImageUrl = newImageUrls.FirstOrDefault() ??
+                                 throw new InvalidOperationException("Image upload failed.");
+
+            productImage.ImageUrl = newImageUrl;
+            await _imageRepo.UpdateAsync(productImage);
+
+            if (!string.IsNullOrWhiteSpace(oldImagePath))
+            {
+                await _storageProvider.DeleteFileAsync(oldImagePath);
+            }
+
+            await _imageRepo.UpdateAsync(productImage);
+            return new ApiStandardResponse<ProductImageChangeResponse?>(StatusCodes.Status200OK,
+                new ProductImageChangeResponse
+                {
+                    ImageId = productImage.ImageId,
+                    ProductId = productImage.ProductId,
+                    ImageUrl = productImage.ImageUrl
+                });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<ProductImageChangeResponse?>(StatusCodes.Status404NotFound,
+                $"The product does not exist", null);
+        }
     }
 
-    public Task ProductTagRemoveAsync(ProductTagRemoveRequest request)
+    public async Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(ProductTagRemoveRequest request)
     {
-        throw new NotImplementedException();
+        var product = await _productRepo.GetByConditionAsync(
+            p => p.ProductId == request.ProductId && !p.IsDeleted,
+            p => p.Include(pt => pt.Tags) // Load tags
+        );
+
+        var tagsToRemove = product.Tags.Where(t => request.TagIds.Contains(t.TagId)).ToList();
+        if (!tagsToRemove.Any())
+            throw new EntityNotFoundException(typeof(Tag), string.Join(", ", request.TagIds));
+        foreach (var tag in tagsToRemove)
+        {
+            product.Tags.Remove(tag);
+        }
+
+        await _productRepo.UpdateAsync(product);
+        return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status200OK, new ConfirmationResponse
+        {
+            Message = "Product tag remove successfully"
+        });
     }
 
-    public Task<ApiStandardResponse<ProductStatusResponse>> ChangeProductStatusAsync(ProductStatusChangeRequest request)
+    public async Task<ApiStandardResponse<ProductStatusResponse>> ChangeProductStatusAsync(long id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var product = await _productRepo.GetByIdAsync(id);
+
+            product.IsAvailable = !product.IsAvailable;
+            return new ApiStandardResponse<ProductStatusResponse>(StatusCodes.Status200OK, new ProductStatusResponse
+            {
+                ProductId = product.ProductId,
+                IsAvailable = product.IsAvailable
+            });
+        }
+        catch (EntityNotFoundException)
+        {
+            throw new EntityNotFoundException(typeof(Product), id);
+        }
     }
 
-    public Task<ApiStandardResponse<ProductImageAddResponse>> AddProductImageAsync(ProductImageAddRequest request)
+    public async Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id,
+        IList<IFormFile> files)
+    {
+        try
+        {
+            var product = await _productRepo.GetByConditionAsync(p => p.ProductId == id);
+            IList<ProductImage> productImages = new List<ProductImage>();
+            bool isPrimary = true;
+            int counter = 1;
+
+            var imageUrls = await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), files.ToList());
+            foreach (var url in imageUrls)
+            {
+                productImages.Add(new ProductImage
+                {
+                    ImageUrl = url,
+                    ProductId = product.ProductId,
+                    IsPrimary = counter == 1 ? isPrimary : !isPrimary
+                });
+                counter++;
+            }
+
+            IList<ProductImage> uploadedImages = await _imageRepo.AddBulkAsync(productImages);
+            return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status201Created,
+                new ProductImageResponse
+                {
+                    ProductId = product.ProductId,
+                    Images = uploadedImages.Select(img => new ImageResponse
+                    {
+                        ImageId = img.ImageId,
+                        ImageUrl = img.ImageUrl
+                    })
+                });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status404NotFound,
+                $"The product does not exist", null);
+        }
+    }
+
+
+    public Task<ApiStandardResponse<IEnumerable<ProductResponse>>> SearchProductAsync(string name)
     {
         throw new NotImplementedException();
     }

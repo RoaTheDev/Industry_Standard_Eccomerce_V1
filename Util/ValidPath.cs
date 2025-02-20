@@ -13,7 +13,7 @@ public class ValidPath
         var isLinuxPath = path.StartsWith("/")
                           && !path.Contains("://")
                           && path.IndexOfAny(Path.GetInvalidPathChars()) == -1;
-
+    
         // Check for Windows-style paths
         var isWindowsPath = (path.Length >= 3 && char.IsLetter(path[0]) && path[1] == ':' && path[2] == '\\')
                             || path.StartsWith(@"\\")
