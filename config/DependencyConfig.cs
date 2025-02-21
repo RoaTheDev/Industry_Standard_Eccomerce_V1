@@ -32,7 +32,7 @@ public static class DependencyConfig
         service.AddScoped<IProductService, ProductService>();
         
         service.AddKeyedTransient<IStorageProvider, LocalStorageProvider>("local");
-        service.AddKeyedTransient<IStorageProvider, AzureBlobStorageProvider>("azure");
+        // service.AddKeyedTransient<IStorageProvider, AzureBlobStorageProvider>("azure");
         return service;
     }
 

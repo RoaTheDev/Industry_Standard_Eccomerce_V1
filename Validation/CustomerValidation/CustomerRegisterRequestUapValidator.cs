@@ -27,6 +27,7 @@ public class CustomerRegisterRequestUapValidator : AbstractValidator<CustomerReg
             .Must(firstName => !firstName.Contains(' ')).WithMessage("Firstname can't contain spaces")
             .Matches(@"^[a-zA-Z]{3,}$").WithMessage("Firstname can't contain any special character")
             .Length(3, 50).WithMessage("Firstname can only be between 4 to 50");
+        
 
         RuleFor(x => x.LastName)
             .Cascade(CascadeMode.Stop)

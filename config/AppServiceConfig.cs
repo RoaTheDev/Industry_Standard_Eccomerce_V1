@@ -35,7 +35,8 @@ public static class AppServiceConfig
                 };
         });
     }
-
+    
+    // public static IServiceCollection AddControllerConfig(this IServiceCollection service) => 
 
     public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services) =>
         services.AddExceptionHandler<GlobalExceptionMiddleware>();

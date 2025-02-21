@@ -1,34 +1,40 @@
+using System.Text.Json;
 using Ecommerce_site.Dto;
 using Ecommerce_site.Exception;
 using Microsoft.AspNetCore.Diagnostics;
-using ILogger = Serilog.ILogger;
 
 namespace Ecommerce_site.Middleware;
 
-public class GlobalExceptionMiddleware(ILogger logger) : IExceptionHandler
+public class GlobalExceptionMiddleware : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, System.Exception exception,
         CancellationToken cancellationToken)
     {
-        var (statusCode, message) = exception switch
-        {
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Access denied, please contact admin."),
-            EntityNotFoundException notFoundEx => (StatusCodes.Status404NotFound, notFoundEx.Message),
-            EntityAlreadyExistException existEx => (StatusCodes.Status409Conflict, existEx.Message),
-            RepoException repoEx => (StatusCodes.Status503ServiceUnavailable, repoEx.Message),
-            ServiceException serviceEx => (StatusCodes.Status400BadRequest, serviceEx.Message),
-            InvalidOperationException invalidEx => (StatusCodes.Status400BadRequest, invalidEx.Message),
-            ArgumentException argEx => (StatusCodes.Status400BadRequest, argEx.Message),
-            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
-        };
+        ApiStandardResponse<string?> response;
 
-        logger.Error(exception, "Exception occurred with status code {StatusCode}: {Message}", statusCode, message);
+            var (statusCode, message) = exception switch
+            {
+                UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Access denied, please contact admin."),
+                EntityNotFoundException notFoundEx => (StatusCodes.Status404NotFound, notFoundEx.Message),
+                EntityAlreadyExistException existEx => (StatusCodes.Status409Conflict, existEx.Message),
+                RepoException repoEx => (StatusCodes.Status503ServiceUnavailable, repoEx.Message),
+                ServiceException serviceEx => (StatusCodes.Status400BadRequest, serviceEx.Message),
+                InvalidOperationException invalidEx => (StatusCodes.Status400BadRequest, invalidEx.Message),
+                ArgumentException argEx => (StatusCodes.Status400BadRequest, argEx.Message),
+                JsonException jsonEx => (StatusCodes.Status400BadRequest,jsonEx.Message),
+                ApiValidationException apiVEx => (StatusCodes.Status400BadRequest,apiVEx.Message),
+                _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+            };
+
+            response = new ApiStandardResponse<string?>(statusCode, message, null);
 
         httpContext.Response.ContentType = "application/json";
+        httpContext.Response.StatusCode = response.StatusCode;
 
-        await httpContext.Response.WriteAsJsonAsync(new ApiStandardResponse<string?>(statusCode, message, null),
-            cancellationToken);
+        await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 
         return true;
     }
+
+
 }
