@@ -6,6 +6,7 @@ riderModule.iml
 compose.yaml
 .env
 .idea
+log/
 Log
 Dockerfile
 Migrations
