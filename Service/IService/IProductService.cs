@@ -7,7 +7,7 @@ namespace Ecommerce_site.Service.IService;
 public interface IProductService
 {
     Task<ApiStandardResponse<ProductCreateResponse>> CreateProductAsync(ProductCreateRequest request);
-    Task<ApiStandardResponse<ProductUpdateResponse?>> UpdateProductAsync(ProductUpdateRequest request);
+    Task<ApiStandardResponse<ProductUpdateResponse?>> UpdateProductAsync(long id, ProductUpdateRequest request);
     Task<ApiStandardResponse<ProductByIdResponse>> GetProductByIdAsync(long id);
 
     Task<ApiStandardResponse<PaginatedProductResponse>> GetAllProductAsync(long cursorValue = 0,

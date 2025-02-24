@@ -74,11 +74,12 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task<ApiStandardResponse<ProductUpdateResponse?>> UpdateProductAsync(ProductUpdateRequest request)
+    public async Task<ApiStandardResponse<ProductUpdateResponse?>> UpdateProductAsync(long id,
+        ProductUpdateRequest request)
     {
         try
         {
-            var product = await _productRepo.GetByIdAsync(request.ProductId);
+            var product = await _productRepo.GetByIdAsync(id);
             if (!string.IsNullOrWhiteSpace(request.ProductName) && request.ProductName != product.ProductName)
                 product.ProductName = request.ProductName;
             if (!string.IsNullOrWhiteSpace(request.Description) && request.Description != product.Description)

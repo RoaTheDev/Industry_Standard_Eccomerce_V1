@@ -9,24 +9,16 @@ namespace Ecommerce_site.Controller;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class ProductController : ControllerBase
+public class ProductController(
+    IProductService productService,
+    IValidator<ProductCreateRequest> createValidator,
+    IValidator<ProductUpdateRequest> updateValidator)
+    : ControllerBase
 {
-    private readonly IProductService _productService;
-    private readonly IValidator<ProductCreateRequest> _createValidator;
-    private readonly IValidator<ProductUpdateRequest> _updateValidator;
-
-    public ProductController(IProductService productService, IValidator<ProductCreateRequest> createValidator,
-        IValidator<ProductUpdateRequest> updateValidator)
-    {
-        _productService = productService;
-        _createValidator = createValidator;
-        _updateValidator = updateValidator;
-    }
-
     [HttpGet("{id:long}/")]
     public async Task<ActionResult<ApiStandardResponse<ProductByIdResponse>>> GetProductById([FromRoute] long id)
     {
-        var response = await _productService.GetProductByIdAsync(id);
+        var response = await productService.GetProductByIdAsync(id);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -36,7 +28,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<ProductByIdResponse>>> GetAllProduct(
         [FromQuery] long cursorValue, [FromQuery] int pageSize)
     {
-        var response = await _productService.GetAllProductAsync(cursorValue, pageSize);
+        var response = await productService.GetAllProductAsync(cursorValue, pageSize);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -46,7 +38,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<ProductCreateResponse>>> CreateProduct(
         [FromBody] ProductCreateRequest request)
     {
-        var validationResult = await _createValidator.ValidateAsync(request);
+        var validationResult = await createValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             var errorList = validationResult.Errors
@@ -58,7 +50,7 @@ public class ProductController : ControllerBase
                 null));
         }
 
-        var response = await _productService.CreateProductAsync(request);
+        var response = await productService.CreateProductAsync(request);
         if (response.StatusCode != StatusCodes.Status201Created)
             return StatusCode(response.StatusCode, response);
 
@@ -67,10 +59,10 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id:long}/")]
-    public async Task<ActionResult<ApiStandardResponse<ProductUpdateRequest>>> UpdateProduct(
+    public async Task<ActionResult<ApiStandardResponse<ProductUpdateRequest>>> UpdateProduct([FromRoute] long id,
         [FromBody] ProductUpdateRequest request)
     {
-        var validationResult = await _updateValidator.ValidateAsync(request);
+        var validationResult = await updateValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
             var errorList = validationResult.Errors
@@ -83,7 +75,7 @@ public class ProductController : ControllerBase
                 null));
         }
 
-        var response = await _productService.UpdateProductAsync(request);
+        var response = await productService.UpdateProductAsync(id, request);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -93,7 +85,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> DeleteProductImage(
         [FromRoute] long productId, [FromRoute] long imageId)
     {
-        var response = await _productService.DeleteProductImage(productId, imageId);
+        var response = await productService.DeleteProductImage(productId, imageId);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -102,7 +94,7 @@ public class ProductController : ControllerBase
     [HttpPatch("{id:long}/")]
     public async Task<ActionResult<ApiStandardResponse<ProductStatusResponse>>> ChangeProductStatus([FromRoute] long id)
     {
-        var response = await _productService.ChangeProductStatusAsync(id);
+        var response = await productService.ChangeProductStatusAsync(id);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -113,7 +105,7 @@ public class ProductController : ControllerBase
         [FromRoute] long id,
         [FromForm] IList<IFormFile> files)
     {
-        var response = await _productService.AddProductImageAsync(id, files);
+        var response = await productService.AddProductImageAsync(id, files);
         if (response.StatusCode != StatusCodes.Status201Created)
             return StatusCode(response.StatusCode, response);
 
@@ -124,7 +116,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<ProductImageChangeResponse>>> ChangeProductImage(
         [FromRoute] long id, [FromRoute] long imageId)
     {
-        var response = await _productService.ChangeProductImageAsync(id, imageId);
+        var response = await productService.ChangeProductImageAsync(id, imageId);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
@@ -134,7 +126,7 @@ public class ProductController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> RemoveProductTag(
         [FromBody] ProductTagRemoveRequest request)
     {
-        var response = await _productService.ProductTagRemoveAsync(request);
+        var response = await productService.ProductTagRemoveAsync(request);
         if (response.StatusCode != StatusCodes.Status200OK)
             return StatusCode(response.StatusCode, response);
         return Ok(response);
