@@ -205,8 +205,116 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         return await _dbSet.AsNoTracking().Where(predicate).CountAsync();
     }
 
+    public async Task<int> CountAsync()
+    {
+        return await _dbSet.AsNoTracking().CountAsync();
+    }
+
     public async Task<List<T>> GetAllByConditionAsync(Expression<Func<T, bool>> predicate)
     {
         return await _dbSet.Where(predicate).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GetPaginatedSelectedColumnsAsync<TResult>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TResult>> order,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        int pageSize)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        query = include(query);
+
+        query = query.Where(filter);
+
+        query = query.OrderBy(order).Take(pageSize);
+
+        return await query.Select(selector).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GetPaginatedSelectedColumnsAsync<TResult>(
+        Expression<Func<T, bool>> filter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TResult>> order,
+        int pageSize)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        query = query.Where(filter);
+
+        query = query.OrderBy(order).Take(pageSize);
+
+        return await query.Select(selector).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, bool>> baseFilter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue,
+        int pageSize = 10,
+        bool ascending = true)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        query = query.Where(baseFilter);
+
+        // build a condition tree so we can make condition dynamically 
+        // basically we are using it to grab the value from the cursorSelector
+        //  like if the cursorSelector and the caller lambda is t => t.id then the id is the parameter
+        var parameter = cursorSelector.Parameters[0];
+        var memberAccess = cursorSelector.Body;
+        var constant = Expression.Constant(cursorValue);
+
+        BinaryExpression comparison = ascending
+            ? Expression.GreaterThan(memberAccess, constant)
+            : Expression.LessThan(memberAccess, constant);
+
+        var cursorCondition = Expression.Lambda<Func<T, bool>>(comparison, parameter);
+        query = query.Where(cursorCondition);
+
+        query = ascending
+            ? query.OrderBy(cursorSelector)
+            : query.OrderByDescending(cursorSelector);
+
+        query = query.Take(pageSize);
+
+        return await query.Select(selector).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, bool>> baseFilter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        int pageSize = 10,
+        bool ascending = true)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        query = include(query);
+
+        query = query.Where(baseFilter);
+
+        var parameter = cursorSelector.Parameters[0];
+        var memberAccess = cursorSelector.Body;
+        var constant = Expression.Constant(cursorValue);
+
+        BinaryExpression comparison = ascending
+            ? Expression.GreaterThan(memberAccess, constant)
+            : Expression.LessThan(memberAccess, constant);
+
+        var cursorCondition = Expression.Lambda<Func<T, bool>>(comparison, parameter);
+        query = query.Where(cursorCondition);
+
+        query = ascending
+            ? query.OrderBy(cursorSelector)
+            : query.OrderByDescending(cursorSelector);
+
+        query = query.Take(pageSize);
+
+        return await query.Select(selector).ToListAsync();
     }
 }

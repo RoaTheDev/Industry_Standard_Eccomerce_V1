@@ -1,8 +1,6 @@
 using dotenv.net;
 using Ecommerce_site.config;
 using Ecommerce_site.Middleware;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Serilog;
 
 DotEnv.Load();
@@ -21,9 +19,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddSwaggerConfig();
 builder.Services.MapperConfig();
 builder.Services.CustomDependencyConfig();
-// builder.Services.AddSingleton<CustomJsonConverterFactory>();
 
-// builder.Services.AddSingleton<IConfigureOptions<JsonOptions>, JsonOptionConfig>();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     {

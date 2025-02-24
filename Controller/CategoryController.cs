@@ -48,14 +48,6 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult<ApiStandardResponse<CategoryCreateResponse>>> CreateCategory(
         [FromBody] CategoryCreateRequest request)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new ApiStandardResponse<object>(
-                statusCode: StatusCodes.Status400BadRequest,
-                errors: ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList(),
-                data: null
-            ));
-        }
         
         var response = await _categoryService.CreateCategoryAsync(request);
         if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
@@ -63,7 +55,7 @@ public class CategoryController : ControllerBase
         return CreatedAtAction(nameof(GetCategoryById), new { Id = response.Data!.CategoryId }, response);
     }
 
-    [HttpPatch("{id:long}")]
+    [HttpPatch("{id:long}/")]
     public async Task<ActionResult<ApiStandardResponse<CategoryResponse>>> UpdateCategory(
         [FromBody] CategoryUpdateRequest request)
     {

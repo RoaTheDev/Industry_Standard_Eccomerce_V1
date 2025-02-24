@@ -14,8 +14,8 @@ namespace Ecommerce_site.config
                    || typeToConvert == typeof(double)
                    || typeToConvert == typeof(decimal)
                    || typeToConvert == typeof(bool)
-                   || typeToConvert == typeof(DateTime)
-                   || typeToConvert == typeof(string);
+                   || typeToConvert == typeof(string)
+                   || typeToConvert == typeof(DateTime);
         }
 
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)

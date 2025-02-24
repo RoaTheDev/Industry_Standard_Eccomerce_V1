@@ -12,7 +12,6 @@ public class IntToStringConverter : JsonConverter<string>
         {
             return reader.GetString()!;
         }
-
         if (reader.TokenType == JsonTokenType.Number)
         {
             return reader.GetInt32().ToString();

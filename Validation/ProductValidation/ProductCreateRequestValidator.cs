@@ -3,7 +3,6 @@ using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Repo.IRepo;
-using Ecommerce_site.Util;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,8 +12,8 @@ public class ProductCreateRequestValidator : AbstractValidator<ProductCreateRequ
 {
     public ProductCreateRequestValidator(
         IGenericRepo<Category> categoryRepository,
-        IGenericRepo<User> userRepository,
-        IGenericRepo<Tag> tagRepository)
+        IGenericRepo<User> userRepository
+        )
     {
         Include(new ProductRequestValidator<ProductCreateRequest>());
 

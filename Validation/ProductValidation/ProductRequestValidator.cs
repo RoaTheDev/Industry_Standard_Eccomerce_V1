@@ -25,6 +25,6 @@ public class ProductRequestValidator<T> : AbstractValidator<T> where T : Product
             .GreaterThanOrEqualTo(0).WithMessage("The quantity can't be a negative value.");
 
         RuleFor(x => x.ProductName)
-            .Matches(@"^a-zA-Z\d").WithMessage("The product name can only contain character and number");
+            .Matches(@"^[a-zA-Z\d]{3,}$").WithMessage("The product name can only contain character and number");
     }
 }

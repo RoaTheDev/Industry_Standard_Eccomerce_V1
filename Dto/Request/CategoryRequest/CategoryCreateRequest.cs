@@ -9,7 +9,5 @@ public class CategoryCreateRequest
 
     public required string Description { get; set; }
 
-    // [MustBeAValidInteger(ErrorMessage = "The value {0} is not a valid quantity")]
-    [JsonConverter(typeof(StringToNumberConverter<long>))]
     public required long CreateBy { get; set; }
 }

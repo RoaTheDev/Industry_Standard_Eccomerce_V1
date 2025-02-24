@@ -35,24 +35,23 @@ public class ProductService : IProductService
     {
         try
         {
-            Product product = await _productRepo.AddAsync(new Product
+            Product product = new Product
             {
                 ProductName = request.ProductName,
                 Price = request.Price,
                 Description = request.Description,
                 CreatedBy = request.CreateBy,
+                UpdatedBy = request.CreateBy,
                 Quantity = request.Quantity,
                 IsAvailable = request.IsAvailable!.Value,
                 DiscountPercentage = request.Discount,
                 CategoryId = request.CategoryId,
-            });
+            };
 
             var tags = await _tagRepo.GetAllByConditionAsync(t => request.TagIds.Contains(t.TagId));
             product.Tags = tags;
 
-
             await _productRepo.AddAsync(product);
-
 
             return new ApiStandardResponse<ProductCreateResponse>(StatusCodes.Status201Created,
                 new ProductCreateResponse
@@ -151,6 +150,44 @@ public class ProductService : IProductService
         });
     }
 
+    public async Task<ApiStandardResponse<PaginatedProductResponse>> GetAllProductAsync(long cursorValue = 0,
+        int pageSize = 10)
+    {
+        if (pageSize < 1) pageSize = 10;
+
+
+        var products = await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
+            p => true,
+            p => new ProductResponse
+            {
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                Description = p.Description,
+                Discount = p.DiscountPercentage,
+                Quantity = p.Quantity,
+                Price = p.Price
+            },
+            p => p.ProductId,
+            cursorValue,
+            pageSize
+        );
+
+        long? nextCursor = null;
+        if (products.Count == pageSize)
+        {
+            nextCursor = products.Last().ProductId;
+        }
+
+        var response = new PaginatedProductResponse
+        {
+            Products = products,
+            NextCursor = nextCursor,
+            PageSize = pageSize
+        };
+        return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
+    }
+
+
     public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteProductImage(long productId, long imageId)
     {
         try
@@ -176,14 +213,11 @@ public class ProductService : IProductService
     }
 
 
-    public async Task<ApiStandardResponse<ProductImageChangeResponse?>> ChangeProductImageAsync(
-        long productId, long imageId, IFormFile file)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(
+        long productId, long imageId)
     {
         try
         {
-            if (file == null || file.Length == 0)
-                throw new ArgumentException("An image file is required.");
-
             var productImage = await _imageRepo.GetByConditionAsync(pi =>
                 pi.ProductId == productId && pi.ImageId == imageId);
 
@@ -192,32 +226,22 @@ public class ProductService : IProductService
 
             string oldImagePath = productImage.ImageUrl;
 
-            IList<string> newImageUrls =
-                await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), [file]);
-
-            string newImageUrl = newImageUrls.FirstOrDefault() ??
-                                 throw new InvalidOperationException("Image upload failed.");
-
-            productImage.ImageUrl = newImageUrl;
-            await _imageRepo.UpdateAsync(productImage);
-
             if (!string.IsNullOrWhiteSpace(oldImagePath))
             {
                 await _storageProvider.DeleteFileAsync(oldImagePath);
             }
 
-            await _imageRepo.UpdateAsync(productImage);
-            return new ApiStandardResponse<ProductImageChangeResponse?>(StatusCodes.Status200OK,
-                new ProductImageChangeResponse
+            await _imageRepo.DeleteAsync(productImage);
+
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK,
+                new ConfirmationResponse()
                 {
-                    ImageId = productImage.ImageId,
-                    ProductId = productImage.ProductId,
-                    ImageUrl = productImage.ImageUrl
+                    Message = "The image has been removed successfully"
                 });
         }
         catch (EntityNotFoundException)
         {
-            return new ApiStandardResponse<ProductImageChangeResponse?>(StatusCodes.Status404NotFound,
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
                 $"The product does not exist", null);
         }
     }
@@ -243,6 +267,7 @@ public class ProductService : IProductService
             Message = "Product tag remove successfully"
         });
     }
+
 
     public async Task<ApiStandardResponse<ProductStatusResponse>> ChangeProductStatusAsync(long id)
     {
@@ -304,8 +329,7 @@ public class ProductService : IProductService
         }
     }
 
-
-    public Task<ApiStandardResponse<IEnumerable<ProductResponse>>> SearchProductAsync(string name)
+    Task<ApiStandardResponse<PaginatedProductResponse>> IProductService.SearchProductAsync(string name)
     {
         throw new NotImplementedException();
     }

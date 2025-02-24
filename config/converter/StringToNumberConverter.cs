@@ -8,23 +8,36 @@ namespace Ecommerce_site.config.converter
     {
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            switch (reader.TokenType)
+            try
             {
-                case JsonTokenType.String:
-                    var stringValue = reader.GetString();
+                // if (reader.TokenType != JsonTokenType.Number)
+                // {
+                //     throw new ApiValidationException("The value is either null or empty.");
+                // }
+
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    string stringValue = reader.GetString()!;
                     if (string.IsNullOrWhiteSpace(stringValue))
                     {
                         throw new ApiValidationException("The value is either null or empty.");
                     }
 
                     return ConvertStringToNumber(stringValue);
+                }
 
-                case JsonTokenType.Number:
+                if (reader.TokenType == JsonTokenType.Number)
+                {
                     return ConvertNumber(reader);
+                }
 
-                default:
-                    throw new ApiValidationException(
-                        $"Unexpected JSON token: {reader.TokenType} for type {typeof(T).Name}.");
+                throw new ApiValidationException(
+                    $"Unexpected JSON token: {reader.TokenType} for type {typeof(T).Name}.");
+            }
+            catch (System.Exception ex) when (ex is FormatException || ex is InvalidCastException ||
+                                              ex is OverflowException)
+            {
+                throw new JsonException($"Invalid {typeof(T).Name} format.");
             }
         }
 
@@ -37,53 +50,36 @@ namespace Ecommerce_site.config.converter
         {
             Type targetType = typeof(T);
 
-            switch (Type.GetTypeCode(targetType))
-            {
-                case TypeCode.Int32:
-                    return (T)(object)int.Parse(stringValue);
-                case TypeCode.Int64:
-                    return (T)(object)long.Parse(stringValue);
-                case TypeCode.Single:
-                    return (T)(object)float.Parse(stringValue);
-                case TypeCode.Double:
-                    return (T)(object)double.Parse(stringValue);
-                case TypeCode.Decimal:
-                    return (T)(object)decimal.Parse(stringValue);
-                default:
-                    throw new ApiValidationException($"Unsupported numeric type: {targetType.Name}");
-            }
+            if (targetType == typeof(int) && int.TryParse(stringValue, out int intValue))
+                return (T)(object)intValue;
+            if (targetType == typeof(long) && long.TryParse(stringValue, out long longValue))
+                return (T)(object)longValue;
+            if (targetType == typeof(float) && float.TryParse(stringValue, out float floatValue))
+                return (T)(object)floatValue;
+            if (targetType == typeof(double) && double.TryParse(stringValue, out double doubleValue))
+                return (T)(object)doubleValue;
+            if (targetType == typeof(decimal) && decimal.TryParse(stringValue, out decimal decimalValue))
+                return (T)(object)decimalValue;
+
+            throw new ApiValidationException($"The value '{stringValue}' is not a valid numeric value.");
         }
 
         private T ConvertNumber(Utf8JsonReader reader)
         {
             Type targetType = typeof(T);
 
-            try
-            {
-                switch (Type.GetTypeCode(targetType))
-                {
-                    case TypeCode.Int32:
-                        return (T)(object)reader.GetInt32();
-                    case TypeCode.Int64:
-                        return (T)(object)reader.GetInt64();
-                    case TypeCode.Single:
-                        return (T)(object)reader.GetSingle();
-                    case TypeCode.Double:
-                        return (T)(object)reader.GetDouble();
-                    case TypeCode.Decimal:
-                        return (T)(object)reader.GetDecimal();
-                    default:
-                        throw new ApiValidationException($"Unsupported numeric type: {targetType.Name}");
-                }
-            }
-            catch (InvalidOperationException)
-            {
-                throw new ApiValidationException($"The JSON token value is not compatible with {targetType.Name}.");
-            }
-            catch (OverflowException)
-            {
-                throw new ApiValidationException($"The JSON number is too large or too small for {targetType.Name}.");
-            }
+            if (targetType == typeof(int))
+                return (T)(object)reader.GetInt32();
+            if (targetType == typeof(long))
+                return (T)(object)reader.GetInt64();
+            if (targetType == typeof(float))
+                return (T)(object)reader.GetSingle();
+            if (targetType == typeof(double))
+                return (T)(object)reader.GetDouble();
+            if (targetType == typeof(decimal))
+                return (T)(object)reader.GetDecimal();
+
+            throw new ApiValidationException($"Unsupported numeric type: {targetType.Name}");
         }
     }
 }

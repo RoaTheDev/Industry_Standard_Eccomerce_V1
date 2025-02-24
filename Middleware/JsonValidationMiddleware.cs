@@ -40,26 +40,22 @@ namespace Ecommerce_site.Middleware
 
                         // Reset the stream position so later middleware can read it
                         context.Request.Body.Position = 0;
-
-                        // Only try parsing if there is content
-                        if (!string.IsNullOrWhiteSpace(body))
+                        try
                         {
-                            try
-                            {
-                                // Try parsing the JSON to catch malformed payloads early
-                                JsonDocument.Parse(body);
-                            }
-                            catch (JsonException ex)
-                            {
-                                _logger.LogError(ex, "Invalid JSON format in request body.");
+                            // Try parsing the JSON to catch malformed payloads early
+                            JsonDocument.Parse(body);
+                        }
+                        catch (JsonException ex)
+                        {
+                            _logger.LogError(ex, "Invalid JSON format in request body.");
 
-                                context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                                context.Response.ContentType = "application/json";
-                                var errorResponse = new ApiStandardResponse<object>(400, "Invalid JSON format.", null);
-                                var json = JsonSerializer.Serialize(errorResponse);
-                                await context.Response.WriteAsync(json);
-                                return;
-                            }
+                            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                            context.Response.ContentType = "application/json";
+                            var errorResponse =
+                                new ApiStandardResponse<object?>(400, "Invalid JSON format.", null);
+                            var json = JsonSerializer.Serialize(errorResponse);
+                            await context.Response.WriteAsync(json);
+                            return;
                         }
                     }
                 }

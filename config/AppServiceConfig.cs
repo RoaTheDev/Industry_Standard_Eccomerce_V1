@@ -13,6 +13,8 @@ namespace Ecommerce_site.config;
 
 public static class AppServiceConfig
 {
+
+
     public static IServiceCollection AddDbConfig(this IServiceCollection service, IConfiguration configuration)
     {
         var dbConStr = configuration["DB_CONNECTION_STR"];
@@ -35,8 +37,6 @@ public static class AppServiceConfig
                 };
         });
     }
-    
-    // public static IServiceCollection AddControllerConfig(this IServiceCollection service) => 
 
     public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services) =>
         services.AddExceptionHandler<GlobalExceptionMiddleware>();
@@ -46,7 +46,7 @@ public static class AppServiceConfig
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
             .WriteTo.Console()
-            .WriteTo.File("log/loggingInfo", rollingInterval: RollingInterval.Day)
+            .WriteTo.File("logs/loggingInfo", rollingInterval: RollingInterval.Day)
             .CreateLogger();
         services.AddSingleton(Log.Logger);
         return services;

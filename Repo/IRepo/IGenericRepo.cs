@@ -58,4 +58,22 @@ public interface IGenericRepo<T> where T : class
     Task<IList<T>> UpdateBulk(IList<T> entities);
     Task<IList<T>> DeleteBulk(IList<T> entities);
     Task<int> CountByConditionAsync(Expression<Func<T, bool>> predicate);
+    Task<int> CountAsync();
+
+    Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, bool>> baseFilter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue,
+        int pageSize = 10,
+        bool ascending = true);
+
+    Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, bool>> baseFilter,
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue,
+        Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
+        int pageSize = 10,
+        bool ascending = true);
 }

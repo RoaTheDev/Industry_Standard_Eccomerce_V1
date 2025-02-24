@@ -12,6 +12,6 @@ public class PaginationMaker
     {
         if (pageNumber < 1) throw new ArgumentException("Page number must be at least 1.");
 
-        if (pageSize < 1 || pageSize > 100) throw new ArgumentException("Page size must be between 1 and 100.");
+        if (pageSize < 1) throw new ArgumentException("Page size must be between 1 and 100.");
     }
 }
