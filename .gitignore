@@ -9,3 +9,4 @@ compose.yaml
 logs/
 Dockerfile
 Migrations
+/wwwroot
