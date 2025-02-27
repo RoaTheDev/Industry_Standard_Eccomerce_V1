@@ -18,19 +18,18 @@ public static class DependencyConfig
 {
     public static IServiceCollection CustomDependencyConfig(this IServiceCollection service)
     {
-        service.AddScoped<RedisCaching>();
-        service.AddTransient<OtpGenerator>();
         service.AddSingleton<RazorPageRenderer>();
-        service.AddTransient<CustomPasswordHasher>();
+        service.AddScoped<RedisCaching>();
         service.AddScoped<JwtGenerator>();
-        service.AddSingleton<PaginationMaker>();
+        service.AddTransient<OtpGenerator>();
+        service.AddTransient<CustomPasswordHasher>();
 
         service.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
         service.AddScoped<ICustomerService, CustomerService>();
         service.AddScoped<IAddressService, AddressService>();
         service.AddScoped<ICategoryService, CategoryService>();
         service.AddScoped<IProductService, ProductService>();
-        
+        service.AddScoped<ICartService, CartService>();
         service.AddKeyedTransient<IStorageProvider, LocalStorageProvider>("local");
         // service.AddKeyedTransient<IStorageProvider, AzureBlobStorageProvider>("azure");
         return service;

@@ -18,12 +18,12 @@ public class StringToDateTimeConverter : JsonConverter<DateTime>
         catch (System.Exception)
         {
             throw new JsonException(JsonSerializer.Serialize(new ApiStandardResponse<string?>(
-                400, "Invalid DateTime format", null
+                400, "Invalid DateTime format"
             )));
         }
 
         throw new JsonException(JsonSerializer.Serialize(new ApiStandardResponse<string?>(
-            400, "Invalid DateTime format", null
+            400, "Invalid DateTime format"
         )));
     }
 

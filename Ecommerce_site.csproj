@@ -33,7 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="filter\" />
         <Folder Include="logs\" />
         <Folder Include="Log\"/>
         <Folder Include="wwwroot\upload\product\" />

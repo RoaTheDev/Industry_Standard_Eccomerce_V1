@@ -50,7 +50,9 @@ public class ProductService : IProductService
 
             var tags = await _tagRepo.GetAllByConditionAsync(t => request.TagIds.Contains(t.TagId));
             product.Tags = tags;
-
+            if (tags.Count != request.TagIds.Count)
+                return new ApiStandardResponse<ProductCreateResponse>(StatusCodes.Status404NotFound,
+                    "One or more tag not found");
             await _productRepo.AddAsync(product);
 
             return new ApiStandardResponse<ProductCreateResponse>(StatusCodes.Status201Created,
@@ -77,42 +79,38 @@ public class ProductService : IProductService
     public async Task<ApiStandardResponse<ProductUpdateResponse?>> UpdateProductAsync(long id,
         ProductUpdateRequest request)
     {
-        try
-        {
-            var product = await _productRepo.GetByIdAsync(id);
-            if (!string.IsNullOrWhiteSpace(request.ProductName) && request.ProductName != product.ProductName)
-                product.ProductName = request.ProductName;
-            if (!string.IsNullOrWhiteSpace(request.Description) && request.Description != product.Description)
-                product.Description = request.Description;
-            if (product.DiscountPercentage != request.Discount)
-                product.DiscountPercentage = request.Discount;
-            if (product.Quantity != request.Quantity)
-                product.Quantity = request.Quantity;
-            if (product.UpdatedBy != request.UpdatedBy)
-                product.DiscountPercentage = request.Discount;
-            if (product.CategoryId != request.CategoryId)
-                product.CategoryId = request.CategoryId;
+        var product = await _productRepo.GetByIdAsync(id);
 
-            product.UpdatedAt = DateTime.UtcNow;
-            await _productRepo.UpdateAsync(product);
-
-            return new ApiStandardResponse<ProductUpdateResponse?>(StatusCodes.Status200OK, new ProductUpdateResponse
-            {
-                Description = product.Description,
-                Quantity = product.Quantity,
-                Price = product.Price,
-                Discount = product.DiscountPercentage,
-                ProductId = product.ProductId,
-                ProductName = product.ProductName,
-                UpdatedAt = product.UpdatedAt
-            });
-        }
-        catch (EntityNotFoundException e)
-        {
-            _logger.Error($"Error updating since the product does not exist by {e.Message}");
+        if (product is null)
             return new ApiStandardResponse<ProductUpdateResponse?>(StatusCodes.Status404NotFound,
-                "The product does not exist", null);
-        }
+                "The product does not exist");
+
+        if (!string.IsNullOrWhiteSpace(request.ProductName) && request.ProductName != product.ProductName)
+            product.ProductName = request.ProductName;
+        if (!string.IsNullOrWhiteSpace(request.Description) && request.Description != product.Description)
+            product.Description = request.Description;
+        if (product.DiscountPercentage != request.Discount)
+            product.DiscountPercentage = request.Discount;
+        if (product.Quantity != request.Quantity)
+            product.Quantity = request.Quantity;
+        if (product.UpdatedBy != request.UpdatedBy)
+            product.DiscountPercentage = request.Discount;
+        if (product.CategoryId != request.CategoryId)
+            product.CategoryId = request.CategoryId;
+
+        product.UpdatedAt = DateTime.UtcNow;
+        await _productRepo.UpdateAsync(product);
+
+        return new ApiStandardResponse<ProductUpdateResponse?>(StatusCodes.Status200OK, new ProductUpdateResponse
+        {
+            Description = product.Description,
+            Quantity = product.Quantity,
+            Price = product.Price,
+            Discount = product.DiscountPercentage,
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            UpdatedAt = product.UpdatedAt
+        });
     }
 
     public async Task<ApiStandardResponse<ProductByIdResponse>> GetProductByIdAsync(long id)
@@ -136,6 +134,10 @@ public class ProductService : IProductService
                 .Include(pc => pc.Category)
                 .Include(pi => pi.ProductImages)
         );
+
+        if (product is null)
+            return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status404NotFound,
+                "the product does not exist");
 
         return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status200OK, new ProductByIdResponse
         {
@@ -191,60 +193,48 @@ public class ProductService : IProductService
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteProductImage(long productId, long imageId)
     {
-        try
-        {
-            var image = await _imageRepo.GetByConditionAsync(i => i.ImageId == imageId && i.ProductId == productId);
+        var image = await _imageRepo.GetByConditionAsync(i => i.ImageId == imageId && i.ProductId == productId);
 
-            if (!string.IsNullOrWhiteSpace(image.ImageUrl))
-            {
-                await _storageProvider.DeleteFileAsync(image.ImageUrl);
-            }
-
-            await _imageRepo.DeleteAsync(image);
-            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK, new ConfirmationResponse
-            {
-                Message = "The image has been delete successfully"
-            });
-        }
-        catch (EntityNotFoundException)
-        {
+        if (image is null)
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
-                $"The product does not exist", null);
+                $"The product does not exist");
+        if (!string.IsNullOrWhiteSpace(image.ImageUrl))
+        {
+            await _storageProvider.DeleteFileAsync(image.ImageUrl);
         }
+
+        await _imageRepo.DeleteAsync(image);
+        return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK, new ConfirmationResponse
+        {
+            Message = "The image has been delete successfully"
+        });
     }
 
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(
         long productId, long imageId)
     {
-        try
-        {
-            var productImage = await _imageRepo.GetByConditionAsync(pi =>
-                pi.ProductId == productId && pi.ImageId == imageId);
+        var productImage = await _imageRepo.GetByConditionAsync(pi =>
+            pi.ProductId == productId && pi.ImageId == imageId);
 
-            if (productImage == null)
-                throw new EntityNotFoundException(typeof(ProductImage), $"{productId} and {imageId}");
-
-            string oldImagePath = productImage.ImageUrl;
-
-            if (!string.IsNullOrWhiteSpace(oldImagePath))
-            {
-                await _storageProvider.DeleteFileAsync(oldImagePath);
-            }
-
-            await _imageRepo.DeleteAsync(productImage);
-
-            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK,
-                new ConfirmationResponse()
-                {
-                    Message = "The image has been removed successfully"
-                });
-        }
-        catch (EntityNotFoundException)
-        {
+        if (productImage == null)
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
-                $"The product does not exist", null);
+                $"The product does not exist");
+
+        string oldImagePath = productImage.ImageUrl;
+
+        if (!string.IsNullOrWhiteSpace(oldImagePath))
+        {
+            await _storageProvider.DeleteFileAsync(oldImagePath);
         }
+
+        await _imageRepo.DeleteAsync(productImage);
+
+        return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK,
+            new ConfirmationResponse()
+            {
+                Message = "The image has been removed successfully"
+            });
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(ProductTagRemoveRequest request)
@@ -254,9 +244,14 @@ public class ProductService : IProductService
             p => p.Include(pt => pt.Tags) // Load tags
         );
 
+        if (product is null)
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                "The product does not exist ");
+
         var tagsToRemove = product.Tags.Where(t => request.TagIds.Contains(t.TagId)).ToList();
         if (!tagsToRemove.Any())
-            throw new EntityNotFoundException(typeof(Tag), string.Join(", ", request.TagIds));
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                "The tag does not exist");
         foreach (var tag in tagsToRemove)
         {
             product.Tags.Remove(tag);
@@ -270,14 +265,18 @@ public class ProductService : IProductService
     }
 
 
-    public async Task<ApiStandardResponse<ProductStatusResponse>> ChangeProductStatusAsync(long id)
+    public async Task<ApiStandardResponse<ProductStatusResponse?>> ChangeProductStatusAsync(long id)
     {
         try
         {
             var product = await _productRepo.GetByIdAsync(id);
 
+            if (product is null)
+                return new ApiStandardResponse<ProductStatusResponse?>(StatusCodes.Status404NotFound,
+                    $"The product does not exist");
+
             product.IsAvailable = !product.IsAvailable;
-            return new ApiStandardResponse<ProductStatusResponse>(StatusCodes.Status200OK, new ProductStatusResponse
+            return new ApiStandardResponse<ProductStatusResponse?>(StatusCodes.Status200OK, new ProductStatusResponse
             {
                 ProductId = product.ProductId,
                 IsAvailable = product.IsAvailable
@@ -292,42 +291,37 @@ public class ProductService : IProductService
     public async Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id,
         IList<IFormFile> files)
     {
-        try
-        {
-            var product = await _productRepo.GetByConditionAsync(p => p.ProductId == id);
-            IList<ProductImage> productImages = new List<ProductImage>();
-            bool isPrimary = true;
-            int counter = 1;
-
-            var imageUrls = await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), files.ToList());
-            foreach (var url in imageUrls)
-            {
-                productImages.Add(new ProductImage
-                {
-                    ImageUrl = url,
-                    ProductId = product.ProductId,
-                    IsPrimary = counter == 1 ? isPrimary : !isPrimary
-                });
-                counter++;
-            }
-
-            IList<ProductImage> uploadedImages = await _imageRepo.AddBulkAsync(productImages);
-            return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status201Created,
-                new ProductImageResponse
-                {
-                    ProductId = product.ProductId,
-                    Images = uploadedImages.Select(img => new ImageResponse
-                    {
-                        ImageId = img.ImageId,
-                        ImageUrl = img.ImageUrl
-                    })
-                });
-        }
-        catch (EntityNotFoundException)
-        {
+        var product = await _productRepo.GetByConditionAsync(p => p.ProductId == id);
+        if (product is null)
             return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status404NotFound,
-                $"The product does not exist", null);
+                $"The product does not exist");
+        IList<ProductImage> productImages = new List<ProductImage>();
+        bool isPrimary = true;
+        int counter = 1;
+
+        var imageUrls = await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), files.ToList());
+        foreach (var url in imageUrls)
+        {
+            productImages.Add(new ProductImage
+            {
+                ImageUrl = url,
+                ProductId = product.ProductId,
+                IsPrimary = counter == 1 ? isPrimary : !isPrimary
+            });
+            counter++;
         }
+
+        IList<ProductImage> uploadedImages = await _imageRepo.AddBulkAsync(productImages);
+        return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status201Created,
+            new ProductImageResponse
+            {
+                ProductId = product.ProductId,
+                Images = uploadedImages.Select(img => new ImageResponse
+                {
+                    ImageId = img.ImageId,
+                    ImageUrl = img.ImageUrl
+                })
+            });
     }
 
     Task<ApiStandardResponse<PaginatedProductResponse>> IProductService.SearchProductAsync(string name)

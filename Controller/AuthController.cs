@@ -1,8 +1,7 @@
-﻿using Ecommerce_site.Dto;
-using Ecommerce_site.Dto.Request.CustomerRequest;
+﻿using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
 using Ecommerce_site.Service.IService;
-using FluentValidation;
+using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,58 +12,64 @@ namespace Ecommerce_site.Controller;
 public class AuthController : ControllerBase
 {
     private readonly ICustomerService _customerService;
-    private readonly IValidator<CustomerRegisterRequestUap> _registerValidator;
-    private readonly IValidator<LoginRequestUap> _loginValidator;
 
-    public AuthController(ICustomerService customerService,
-        IValidator<CustomerRegisterRequestUap> registerValidator,
-        IValidator<LoginRequestUap> loginValidator)
+    public AuthController(ICustomerService customerService)
     {
         _customerService = customerService;
-        _registerValidator = registerValidator;
-        _loginValidator = loginValidator;
     }
 
     [Authorize]
     [HttpGet("{id:long}")]
-    public async Task<ActionResult<ApiStandardResponse<CustomerGetByIdResponse>>> GetCustomerById([FromRoute] long id)
+    public async Task<ActionResult<CustomerGetByIdResponse>> GetCustomerById([FromRoute] long id)
     {
         var response = await _customerService.GetCustomerByIdAsync(id);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 
 
     [HttpPost("register/")]
-    public async Task<ActionResult<ApiStandardResponse<CustomerRegisterRequestUap>>> Register(
+    public async Task<ActionResult<CustomerRegisterRequestUap>> Register(
         CustomerRegisterRequestUap request)
     {
-        var validationResult = await _registerValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var response = await _customerService.RegisterCustomerAsync(request);
+        if (!response.Success)
         {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<CustomerRegisterRequestUap?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
         }
 
-        var response = await _customerService.RegisterCustomerAsync(request);
-        if (response.StatusCode != StatusCodes.Status202Accepted) return StatusCode(response.StatusCode, response);
-
-        return Accepted(response);
+        return Accepted(response.Data);
     }
 
     [HttpPost("email-verification/")]
-    public async Task<ActionResult<ApiStandardResponse<CustomerCreationResponse>>> EmailVerification(
+    public async Task<ActionResult<CustomerCreationResponse>> EmailVerification(
         [FromHeader(Name = "Auth-Session-Token")]
         Guid session, [FromBody] EmailVerificationRequest request)
     {
         var response = await _customerService.EmailVerification(session, request);
-        if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(Response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
         HttpContext.Response.Cookies.Append("AuthToken", response.Data!.Token.Token, new CookieOptions
         {
@@ -73,26 +78,22 @@ public class AuthController : ControllerBase
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
-        return CreatedAtAction(nameof(GetCustomerById), new { Id = response.Data.UserId }, response);
+        return CreatedAtAction(nameof(GetCustomerById), new { Id = response.Data.UserId }, response.Data);
     }
 
     [HttpPost("login/")]
-    public async Task<ActionResult<ApiStandardResponse<LoginResponse>>> Login(LoginRequestUap request)
+    public async Task<ActionResult<LoginResponse>> Login(LoginRequestUap request)
     {
-        var validationResult = await _loginValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<LoginResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
-        }
-
         var response = await _customerService.LoginAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
         HttpContext.Response.Cookies.Append("AuthToken", response.Data!.Token.Token, new CookieOptions
         {
@@ -101,6 +102,6 @@ public class AuthController : ControllerBase
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
-        return Ok(response);
+        return Ok(response.Data);
     }
 }

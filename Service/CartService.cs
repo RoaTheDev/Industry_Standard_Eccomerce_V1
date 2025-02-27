@@ -1,0 +1,210 @@
+using Ecommerce_site.Data;
+using Ecommerce_site.Dto;
+using Ecommerce_site.Dto.Request.CartRequest;
+using Ecommerce_site.Dto.response.CartResponse;
+using Ecommerce_site.Exception;
+using Ecommerce_site.Model;
+using Ecommerce_site.Repo.IRepo;
+using Ecommerce_site.Service.IService;
+using Microsoft.EntityFrameworkCore;
+
+namespace Ecommerce_site.Service;
+
+public class CartService : ICartService
+{
+    private readonly IGenericRepo<Cart> _cartRepo;
+    private readonly IGenericRepo<CartItem> _cartItemsRepo;
+    private readonly IGenericRepo<Product> _productRepo;
+    private readonly EcommerceSiteContext _dbContext;
+
+    public CartService(IGenericRepo<Cart> cartRepo, IGenericRepo<CartItem> cartItemsRepo,
+        IGenericRepo<Product> productRepo, EcommerceSiteContext dbContext)
+    {
+        _cartRepo = cartRepo;
+        _cartItemsRepo = cartItemsRepo;
+        _productRepo = productRepo;
+        _dbContext = dbContext;
+    }
+
+    public async Task<ApiStandardResponse<CartResponse?>> GetCartByCustomerIdAsync(long id)
+    {
+        try
+        {
+            CartResponse? cartResponse = await _cartRepo.GetSelectedColumnsByConditionAsync(
+                c => c.CustomerId == id && !c.IsCheckout,
+                c => new CartResponse
+                {
+                    CartId = c.CartId,
+                    CustomerId = c.CustomerId,
+                    CreatedAt = c.CreatedAt,
+                    IsCheckedOut = c.IsCheckout,
+                    TotalBasePrice = c.CartItems.Sum(ci => ci.UnitPrice * ci.Quantity),
+                    TotalDiscount = c.CartItems.Sum(ci => ci.Discount * ci.Quantity),
+                    TotalAmount = c.CartItems.Sum(ci => ci.TotalPrice),
+                    CartItems = c.CartItems.Select(ci => new CartItemResponse
+                        {
+                            CartItemsId = ci.CartItemId,
+                            ProductId = ci.ProductId,
+                            ProductName = ci.Product.ProductName,
+                            Quantity = ci.Quantity,
+                            Discount = ci.Discount,
+                            TotalPrice = ci.TotalPrice,
+                            UnitPrice = ci.UnitPrice
+                        }
+                    ).ToList()
+                }, cIn => cIn.Include(ct => ct.CartItems)
+                    .ThenInclude(ctp => ctp.Product));
+           
+            if ( cartResponse.CartItems.Count == 0)
+                return new ApiStandardResponse<CartResponse?>(StatusCodes.Status204NoContent,
+                    "There are no items in the cart");
+            return new ApiStandardResponse<CartResponse?>(StatusCodes.Status200OK, cartResponse);
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<CartResponse?>(StatusCodes.Status404NotFound, "There are no cart ");
+        }
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> AddToCartAsync(long customerId,
+        AddToCartRequest request)
+    {
+        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var product =
+                    await _productRepo.GetSelectedColumnsByConditionAsync(p => p.ProductId == request.ProductId,
+                        p => new { p.Price, p.DiscountPercentage, p.Quantity });
+
+                if (request.Quantity > product.Quantity)
+                    return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
+                        $"Only {product.Quantity} left for the product");
+
+                decimal unitPrice = product.Price;
+                decimal discountAmount = (unitPrice * request.Quantity) * (product.DiscountPercentage / 100m);
+                decimal totalPrice = (unitPrice * request.Quantity) - discountAmount;
+
+                var fk = await _cartRepo.GetSelectedColumnsByConditionAsync(
+                    c => c.CustomerId == customerId && !c.IsCheckout,
+                    c => new
+                    {
+                        c.CartId
+                    });
+
+                var cart = _cartRepo.GetByConditionAsync(c => c.CustomerId == customerId && !c.IsCheckout);
+                CartItem cartItem = new CartItem();
+
+                if (fk == null)
+                {
+                    Cart newCart = await _cartRepo.AddAsync(new Cart
+                    {
+                        CustomerId = customerId,
+                        IsCheckout = false,
+                    });
+                    fk = new { newCart.CartId };
+                }
+
+                cartItem.CartId = fk.CartId;
+                cartItem.ProductId = request.ProductId;
+                cartItem.Quantity = request.Quantity;
+                cartItem.UnitPrice = unitPrice;
+                cartItem.Discount = discountAmount;
+                cartItem.TotalPrice = totalPrice;
+
+
+                await _cartItemsRepo.AddAsync(cartItem);
+                await transaction.CommitAsync();
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status201Created,
+                    new ConfirmationResponse
+                    {
+                        Message = "Item added successfully"
+                    });
+            }
+
+
+            catch (EntityNotFoundException)
+            {
+                await transaction.RollbackAsync();
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
+                    "Customer not found");
+            }
+            catch (System.Exception)
+            {
+                await transaction.RollbackAsync();
+                return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status503ServiceUnavailable,
+                    "system not responding");
+            }
+        }
+    }
+
+    public async Task<ApiStandardResponse<UpdateCartItemResponse?>> UpdateCartItemAsync(long customerId,
+        CartItemsUpdateRequest request)
+    {
+        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var cartItem =
+                    await _cartItemsRepo.GetByConditionAsync(ci =>
+                            ci.CartItemId == request.CartItemsId && ci.Cart.CustomerId == customerId &&
+                            !ci.Cart.IsCheckout,
+                        cic => cic.Include(c => c.Cart)
+                            .Include(c => c.Product));
+
+                if (request.Quantity > cartItem.Product.Quantity)
+                    return new ApiStandardResponse<UpdateCartItemResponse?>(StatusCodes.Status400BadRequest,
+                        "The amount cannot exceed the available product quantity");
+
+                if (cartItem.Quantity != request.Quantity)
+                {
+                    cartItem.Quantity = request.Quantity;
+                }
+
+                cartItem.TotalPrice = (cartItem.UnitPrice - cartItem.Discount) * cartItem.Quantity;
+                await _cartItemsRepo.UpdateAsync(cartItem);
+                await transaction.CommitAsync();
+
+                return new ApiStandardResponse<UpdateCartItemResponse?>(StatusCodes.Status200OK,
+                    new UpdateCartItemResponse()
+                    {
+                        CartItemId = cartItem.CartItemId,
+                        Quantity = cartItem.Quantity
+                    });
+            }
+            catch (EntityNotFoundException)
+            {
+                await transaction.RollbackAsync();
+                return new ApiStandardResponse<UpdateCartItemResponse?>(StatusCodes.Status404NotFound,
+                    "Customer not found");
+            }
+            catch (System.Exception)
+            {
+                await transaction.RollbackAsync();
+                return new ApiStandardResponse<UpdateCartItemResponse?>(StatusCodes.Status503ServiceUnavailable,
+                    "system not responding");
+            }
+        }
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> RemoveCartItemAsync(long customerId, long cartItemId)
+    {
+        try
+        {
+            var cartItem = await _cartItemsRepo.GetByConditionAsync(ci =>
+                    ci.CartItemId == cartItemId && ci.Cart.CustomerId == customerId &&
+                    !ci.Cart.IsCheckout,
+                cic => cic.Include(c => c.Cart));
+
+            await _cartItemsRepo.DeleteAsync(cartItem);
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK, new ConfirmationResponse
+            {
+                Message = "The item has been remove"
+            });
+        }
+        catch (EntityNotFoundException)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound, "Customer not found");
+        }
+    }
+}

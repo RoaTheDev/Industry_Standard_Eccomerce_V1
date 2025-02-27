@@ -14,7 +14,7 @@ public interface IProductService
         int pageSize = 10);
 
     Task<ApiStandardResponse<ConfirmationResponse?>> DeleteProductImage(long productId, long imageId);
-    Task<ApiStandardResponse<ProductStatusResponse>> ChangeProductStatusAsync(long id);
+    Task<ApiStandardResponse<ProductStatusResponse?>> ChangeProductStatusAsync(long id);
     Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id, IList<IFormFile> files);
 
     Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(long productId, long imageId);

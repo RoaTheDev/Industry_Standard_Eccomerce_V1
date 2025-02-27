@@ -52,7 +52,7 @@ namespace Ecommerce_site.Middleware
                             context.Response.StatusCode = StatusCodes.Status400BadRequest;
                             context.Response.ContentType = "application/json";
                             var errorResponse =
-                                new ApiStandardResponse<object?>(400, "Invalid JSON format.", null);
+                                new ApiStandardResponse<object?>(400, "Invalid JSON format.");
                             var json = JsonSerializer.Serialize(errorResponse);
                             await context.Response.WriteAsync(json);
                             return;

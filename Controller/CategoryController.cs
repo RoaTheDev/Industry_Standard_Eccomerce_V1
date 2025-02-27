@@ -2,6 +2,7 @@
 using Ecommerce_site.Dto.Request.CategoryRequest;
 using Ecommerce_site.Dto.response.CategoryResponse;
 using Ecommerce_site.Service.IService;
+using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_site.Controller;
@@ -18,60 +19,107 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet("{id:long}/")]
-    public async Task<ActionResult<ApiStandardResponse<CategoryResponse>>> GetCategoryById([FromRoute] long id)
+    public async Task<ActionResult<CategoryResponse>> GetCategoryById([FromRoute] long id)
     {
         var response = await _categoryService.GetCategoryByIdAsync(id);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpGet("search/")]
-    public async Task<ActionResult<ApiStandardResponse<CategoryResponse>>> GetCategoryByName([FromQuery] string name)
+    public async Task<ActionResult<CategoryResponse>> GetCategoryByName([FromQuery] string name)
     {
         var response = await _categoryService.GetCategoryLikeNameAsync(name);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiStandardResponse<List<CategoryListResponse>>>> GetAllCategory()
+    public async Task<ActionResult<List<CategoryListResponse>>> GetAllCategory()
     {
         var response = await _categoryService.GetCategoryListByIdAsync();
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiStandardResponse<CategoryCreateResponse>>> CreateCategory(
+    public async Task<ActionResult<CategoryCreateResponse>> CreateCategory(
         [FromBody] CategoryCreateRequest request)
     {
-        
         var response = await _categoryService.CreateCategoryAsync(request);
-        if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return CreatedAtAction(nameof(GetCategoryById), new { Id = response.Data!.CategoryId }, response);
+        return CreatedAtAction(nameof(GetCategoryById), new { Id = response.Data!.CategoryId }, response.Data);
     }
 
     [HttpPatch("{id:long}/")]
-    public async Task<ActionResult<ApiStandardResponse<CategoryResponse>>> UpdateCategory(
+    public async Task<ActionResult<CategoryResponse>> UpdateCategory(
         [FromBody] CategoryUpdateRequest request)
     {
         var response = await _categoryService.UpdateCategoryAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString(),
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode)
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpDelete]
-    public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> CategoryStatusChanger(
+    public async Task<ActionResult<ConfirmationResponse>> CategoryStatusChanger(
         [FromBody] CategoryStatusChangeRequest request)
     {
         var response = await _categoryService.CategoryStatusChangerAsync(request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return Ok(response);
+        return Ok(response.Data);
     }
 }

@@ -2,7 +2,7 @@
 using Ecommerce_site.Dto.Request.AddressRequest;
 using Ecommerce_site.Dto.response.AddressResponse;
 using Ecommerce_site.Service.IService;
-using FluentValidation;
+using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_site.Controller;
@@ -12,81 +12,88 @@ namespace Ecommerce_site.Controller;
 public class AddressController : ControllerBase
 {
     private readonly IAddressService _addressService;
-    private readonly IValidator<AddressCreationRequest> _addressCreateValidator;
-    private readonly IValidator<AddressUpdateRequest> _addressUpdateValidator;
 
-    public AddressController(IAddressService addressService, IValidator<AddressCreationRequest> addressCreateValidator,
-        IValidator<AddressUpdateRequest> addressUpdateValidator)
+    public AddressController(IAddressService addressService)
     {
         _addressService = addressService;
-        _addressCreateValidator = addressCreateValidator;
-        _addressUpdateValidator = addressUpdateValidator;
     }
 
     [HttpGet("{addressId:long}/")]
-    public async Task<ActionResult<ApiStandardResponse<AddressResponse>>> GetAddressById([FromRoute] long customerId,
+    public async Task<ActionResult<AddressResponse>> GetAddressById([FromRoute] long customerId,
         [FromRoute] long addressId)
     {
         var response = await _addressService.GetAddressByAddressIdAsync(customerId, addressId);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
-        return Ok(response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        return Ok(response.Data);
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiStandardResponse<AddressResponse>>> CreateAddress([FromRoute] long customerId,
+    public async Task<ActionResult<AddressResponse>> CreateAddress([FromRoute] long customerId,
         [FromBody] AddressCreationRequest request)
     {
-        var validationResult = await _addressCreateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var response = await _addressService.CreateAddressAsync(customerId, request);
+        if (!response.Success)
         {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<AddressResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
+            var problemDetails = new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            };
+            problemDetails.Extensions["errors"] = response.Errors;
+            return StatusCode(response.StatusCode, problemDetails);
         }
 
-        var response = await _addressService.CreateAddressAsync(customerId, request);
-        if (response.StatusCode != StatusCodes.Status201Created) return StatusCode(response.StatusCode, response);
-
         return CreatedAtAction(nameof(GetAddressById),
-            new { customerId, addressId = response.Data!.AddressId }, response);
+            new { customerId, addressId = response.Data!.AddressId }, response.Data);
     }
 
     [HttpPatch]
-    public async Task<ActionResult<ApiStandardResponse<AddressResponse>>> UpdateAddress([FromRoute] long customerId,
+    public async Task<ActionResult<AddressResponse>> UpdateAddress([FromRoute] long customerId,
         [FromBody] AddressUpdateRequest request)
     {
-        var validationResult = await _addressUpdateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var response = await _addressService.UpdateAddressAsync(customerId, request);
+        if (!response.Success)
         {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<AddressResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
+            var problemDetails = new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.FirstOrDefault()!.ToString()
+            };
+            return StatusCode(response.StatusCode, problemDetails);
         }
 
-        var response = await _addressService.UpdateAddressAsync(customerId, request);
-        if (response.StatusCode != StatusCodes.Status200OK)
-            return StatusCode(response.StatusCode, response);
-
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiStandardResponse<IEnumerable<AddressResponse>>>> GetAllAddressFromCustomerId(
+    public async Task<ActionResult<IEnumerable<AddressResponse>>> GetAllAddressFromCustomerId(
         [FromRoute(Name = "customerId")] long id)
     {
         var response = await _addressService.GetAddressListByCustomerIdAsync(id);
-        
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
 
-        return Ok(response);
+        if (!response.Success)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.FirstOrDefault()!.ToString()
+            };
+            return StatusCode(response.StatusCode, problemDetails);
+        }
+
+        return Ok(response.Data);
     }
 
     [HttpDelete("{addressId:long}/")]
@@ -94,7 +101,17 @@ public class AddressController : ControllerBase
         [FromRoute] long addressId)
     {
         var response = await _addressService.DeleteAddressAsync(customerId, addressId);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
-        return Ok(response);
+        if (!response.Success)
+        {
+            var problemDetails = new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.FirstOrDefault()!.ToString()
+            };
+            return StatusCode(response.StatusCode, problemDetails);
+        }
+
+        return Ok(response.Data);
     }
 }

@@ -2,7 +2,7 @@
 using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
 using Ecommerce_site.Service.IService;
-using FluentValidation;
+using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_site.Controller;
@@ -12,57 +12,45 @@ namespace Ecommerce_site.Controller;
 public class CustomerController : ControllerBase
 {
     private readonly ICustomerService _customerService;
-    private readonly IValidator<CustomerUpdateRequest> _updateValidator;
-    private readonly IValidator<PasswordChangeRequest> _passwordChangeValidator;
 
-    public CustomerController(IValidator<CustomerUpdateRequest> updateValidator, ICustomerService customerService,
-        IValidator<PasswordChangeRequest> passwordChangeValidator)
+    public CustomerController(ICustomerService customerService)
     {
-        _updateValidator = updateValidator;
         _customerService = customerService;
-        _passwordChangeValidator = passwordChangeValidator;
     }
 
     [HttpPatch("{id:long}/")]
-    public async Task<ActionResult<ApiStandardResponse<CustomerUpdateResponse>>> UpdateInfo([FromRoute] long id,
+    public async Task<ActionResult<CustomerUpdateResponse>> UpdateInfo([FromRoute] long id,
         [FromBody] CustomerUpdateRequest request)
     {
-        var validationResult = await _updateValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var response = await _customerService.UpdateCustomerInfoAsync(id, request);
+        if (!response.Success)
         {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<CustomerUpdateResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
         }
 
-        var response = await _customerService.UpdateCustomerInfoAsync(id, request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
-
-        return Ok(response);
+        return Ok(response.Data);
     }
 
     [HttpPatch("{id:long}/password-change/")]
     public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> PasswordChange([FromRoute] long id,
         [FromBody] PasswordChangeRequest request)
     {
-        var validationResult = await _passwordChangeValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var response = await _customerService.PasswordChangeAsync(id, request);
+        if (!response.Success)
         {
-            var errorList = validationResult.Errors
-                .Select(e => e.ErrorMessage)
-                .ToList();
-            return BadRequest(new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status400BadRequest,
-                errorList,
-                null));
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
         }
 
-        var response = await _customerService.PasswordChangeAsync(id, request);
-        if (response.StatusCode != StatusCodes.Status200OK) return StatusCode(response.StatusCode, response);
-        return Ok(response);
+        return Ok(response.Data);
     }
 }

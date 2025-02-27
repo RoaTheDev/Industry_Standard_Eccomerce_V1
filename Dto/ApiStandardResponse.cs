@@ -8,7 +8,6 @@ public class ApiStandardResponse<T>
     {
         Data = data;
         Success = true;
-        Errors = new List<string>();
     }
 
     public ApiStandardResponse(int statusCode, T data)
@@ -16,23 +15,20 @@ public class ApiStandardResponse<T>
         StatusCode = statusCode;
         Success = true;
         Data = data;
-        Errors = new List<string>();
     }
 
-    public ApiStandardResponse(int statusCode, List<string> errors, T data)
+    public ApiStandardResponse(int statusCode, List<object> errors)
     {
         StatusCode = statusCode;
         Success = false;
         Errors = errors;
-        Data = data;
     }
 
-    public ApiStandardResponse(int statusCode, string error, T data)
+    public ApiStandardResponse(int statusCode, object error)
     {
         StatusCode = statusCode;
-        Data = data;
         Success = false;
-        Errors = new List<string> { error };
+        Errors = new List<object> { error };
     }
 
     // HTTP status code of the response.
@@ -42,8 +38,8 @@ public class ApiStandardResponse<T>
     public bool Success { get; set; }
 
     // Response data in case successful and null when it is not
-    public T Data { get; set; }
+    public T? Data { get; set; }
 
     // List of error messages, if any.
-    public List<string> Errors { get; set; }
+    public List<object>? Errors { get; set; }
 }

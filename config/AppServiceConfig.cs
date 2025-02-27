@@ -39,7 +39,7 @@ public static class AppServiceConfig
     }
 
     public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services) =>
-        services.AddExceptionHandler<GlobalExceptionMiddleware>();
+        services.AddExceptionHandler<GlobalExceptionMiddleWare>();
 
     public static IServiceCollection LoggingConfig(this IServiceCollection services)
     {

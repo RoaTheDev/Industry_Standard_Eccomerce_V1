@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using Ecommerce_site.Data;
-using Ecommerce_site.Exception;
 using Ecommerce_site.Repo.IRepo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -85,14 +84,13 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         return await query.Select(selector).ToListAsync();
     }
 
-    public async Task<TResult> GetSelectedColumnsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
+    public async Task<TResult?> GetSelectedColumnsByConditionAsync<TResult>(Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector)
     {
-        return await _dbSet.AsNoTracking().Where(predicate).Select(selector).FirstOrDefaultAsync() ??
-               throw new EntityNotFoundException(typeof(T), selector);
+        return await _dbSet.AsNoTracking().Where(predicate).Select(selector).FirstOrDefaultAsync();
     }
 
-    public async Task<TResult> GetSelectedColumnsByConditionAsync<TResult>(
+    public async Task<TResult?> GetSelectedColumnsByConditionAsync<TResult>(
         Expression<Func<T, bool>> predicate,
         Expression<Func<T, TResult>> selector,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
@@ -106,18 +104,16 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
 
         if (asNoTracking) query = query.AsNoTracking();
 
-        return await query.Select(selector).FirstOrDefaultAsync()
-               ?? throw new EntityNotFoundException(typeof(T), predicate);
+        return await query.Select(selector).FirstOrDefaultAsync();
     }
 
-    public async Task<TResult> GetSelectedColumnsAsync<TResult>(
+    public async Task<TResult?> GetSelectedColumnsAsync<TResult>(
         Expression<Func<T, TResult>> selector)
     {
-        return await _dbSet.AsNoTracking().Select(selector).FirstOrDefaultAsync() ??
-               throw new EntityNotFoundException(typeof(T), selector);
+        return await _dbSet.AsNoTracking().Select(selector).FirstOrDefaultAsync();
     }
 
-    public async Task<TResult> GetSelectedColumnsAsync<TResult>(
+    public async Task<TResult?> GetSelectedColumnsAsync<TResult>(
         Expression<Func<T, TResult>> selector,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
         bool asNoTracking = true)
@@ -129,25 +125,24 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         if (asNoTracking)
             query = query.AsNoTracking();
 
-        return await query.Select(selector).FirstOrDefaultAsync()
-               ?? throw new EntityNotFoundException(typeof(T), selector);
+        return await query.Select(selector).FirstOrDefaultAsync();
     }
 
 
-    public async Task<T> GetByIdAsync(long id)
+    public async Task<T?> GetByIdAsync(long id)
     {
-        return await _dbSet.FindAsync(id) ?? throw new EntityNotFoundException(typeof(T), id);
+        return await _dbSet.FindAsync(id);
     }
 
-    public async Task<T> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true)
+    public async Task<T?> GetByConditionAsync(Expression<Func<T, bool>> predicate, bool asNoTracking = true)
     {
         var query = _dbSet.Where(predicate);
         if (asNoTracking) query = query.AsNoTracking();
 
-        return await query.FirstOrDefaultAsync() ?? throw new EntityNotFoundException(typeof(T), predicate);
+        return await query.FirstOrDefaultAsync() ;
     }
 
-    public async Task<T> GetByConditionAsync(
+    public async Task<T?> GetByConditionAsync(
         Expression<Func<T, bool>> predicate,
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
         bool asNoTracking = true)
@@ -160,12 +155,11 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
 
         if (asNoTracking) query = query.AsNoTracking();
 
-        return await query.FirstOrDefaultAsync()
-               ?? throw new EntityNotFoundException(typeof(T), predicate);
+        return await query.FirstOrDefaultAsync();
     }
 
 
-    public async Task<List<T>> GetAllAsync()
+    public async Task<List<T>?> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
     }

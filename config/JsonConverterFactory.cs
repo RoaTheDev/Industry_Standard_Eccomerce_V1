@@ -21,21 +21,21 @@ namespace Ecommerce_site.config
         public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
         {
             if (typeToConvert == typeof(int))
-                return new StringToNumberConverter<int>();
+                return new StrictJsonNumberValidator<int>();
             if (typeToConvert == typeof(long))
-                return new StringToNumberConverter<long>();
+                return new StrictJsonNumberValidator<long>();
             if (typeToConvert == typeof(float))
-                return new StringToNumberConverter<float>();
+                return new StrictJsonNumberValidator<float>();
             if (typeToConvert == typeof(double))
-                return new StringToNumberConverter<double>();
+                return new StrictJsonNumberValidator<double>();
             if (typeToConvert == typeof(decimal))
-                return new StringToNumberConverter<decimal>();
+                return new StrictJsonNumberValidator<decimal>();
             if (typeToConvert == typeof(bool))
-                return new StringToBoolConverter();
+                return new StrictJsonBooleanValidator();
             if (typeToConvert == typeof(DateTime))
                 return new StringToDateTimeConverter();
             if (typeToConvert == typeof(string))
-                return new IntToStringConverter();
+                return new StrictJsonStringValidator();
 
             throw new NotSupportedException($"Converter for {typeToConvert} is not supported.");
         }

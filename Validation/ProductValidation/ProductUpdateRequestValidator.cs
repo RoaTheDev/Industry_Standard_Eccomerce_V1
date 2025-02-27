@@ -1,5 +1,4 @@
 using Ecommerce_site.Dto.Request.ProductRequest;
-using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using FluentValidation;
@@ -24,6 +23,6 @@ public class ProductUpdateRequestValidator : AbstractValidator<ProductUpdateRequ
         ValidationContext<ProductUpdateRequest> validationContext, CancellationToken _)
     {
         if (!await _categoryRepo.EntityExistByConditionAsync(c => c.CategoryId == request.CategoryId))
-            throw new EntityNotFoundException(typeof(Category), request.CategoryId);
+            validationContext.AddFailure("categoryId", "The category does not exist");
     }
 }
