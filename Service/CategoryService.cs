@@ -1,4 +1,5 @@
-﻿using Ecommerce_site.Dto;
+﻿using AutoMapper;
+using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.CategoryRequest;
 using Ecommerce_site.Dto.response.CategoryResponse;
 using Ecommerce_site.Model;
@@ -13,27 +14,26 @@ public class CategoryService : ICategoryService
 {
     private readonly IGenericRepo<Category> _categoryRepo;
     private readonly IGenericRepo<User> _userRepo;
+    private readonly IMapper _mapper;
 
-    public CategoryService(IGenericRepo<Category> categoryRepo, IGenericRepo<User> userRepo)
+    public CategoryService(IGenericRepo<Category> categoryRepo, IGenericRepo<User> userRepo, IMapper mapper)
     {
         _categoryRepo = categoryRepo;
         _userRepo = userRepo;
+        _mapper = mapper;
     }
 
     public async Task<ApiStandardResponse<CategoryResponse?>> GetCategoryByIdAsync(long id)
     {
         var category =
             await _categoryRepo.GetSelectedColumnsByConditionAsync(
-                cate => cate.CategoryId == id && cate.IsActive == true,
-                c => new { c.CategoryName, c.Description });
+                cate => cate.CategoryId == id && cate.IsActive,
+                c => new CategoryResponse { CategoryName = c.CategoryName, Description = c.Description });
 
         if (category is null)
             return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
                 "The category does not exist");
-        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, new CategoryResponse
-        {
-            CategoryName = category.CategoryName, Description = category.Description
-        });
+        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, category);
     }
 
     public async Task<ApiStandardResponse<CategoryResponse?>> GetCategoryLikeNameAsync(string name)
@@ -41,41 +41,30 @@ public class CategoryService : ICategoryService
         var category =
             await _categoryRepo.GetSelectedColumnsByConditionAsync(
                 cate => EF.Functions.Like(cate.CategoryName, name) && cate.IsActive == true,
-                cate => new { cate.CategoryName, cate.Description });
+                cate => new CategoryResponse { CategoryName = cate.CategoryName, Description = cate.Description });
 
         if (category is null)
             return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
                 "The category does not exist");
-        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, new CategoryResponse
-        {
-            CategoryName = category.CategoryName,
-            Description = category.Description
-        });
+        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, category);
     }
 
     public async Task<ApiStandardResponse<List<CategoryListResponse>?>> GetCategoryListByIdAsync()
     {
         var categories = await _categoryRepo.GetSelectedColumnsListsAsync(
-            cate => new { cate.CategoryId, cate.CategoryName, cate.Description, cate.IsActive });
+            cate => new CategoryListResponse
+            {
+                CategoryId = cate.CategoryId,
+                CategoryName = cate.CategoryName,
+                Description = cate.Description,
+                IsActive = cate.IsActive
+            });
 
         if (!categories.Any())
             return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status404NotFound,
                 "There are no categories");
 
-        List<CategoryListResponse> categoryResponses = new List<CategoryListResponse>();
-
-        foreach (var category in categories)
-        {
-            categoryResponses.Add(new CategoryListResponse
-            {
-                CategoryId = category.CategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description,
-                IsActive = category.IsActive
-            });
-        }
-
-        return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status200OK, categoryResponses);
+        return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status200OK, categories);
     }
 
     public async Task<ApiStandardResponse<CategoryCreateResponse?>> CreateCategoryAsync(CategoryCreateRequest request)
@@ -98,50 +87,43 @@ public class CategoryService : ICategoryService
             CategoryName = request.CategoryName,
             Description = request.Description,
             CreatedBy = request.CreateBy,
+            IsActive = true
         });
 
-        return new ApiStandardResponse<CategoryCreateResponse?>(StatusCodes.Status201Created, new CategoryCreateResponse
-        {
-            CategoryId = createdCategory.CategoryId,
-            CategoryName = createdCategory.CategoryName,
-            Description = createdCategory.Description,
-            IsActive = createdCategory.IsActive,
-            CreatedBy = createdCategory.CreatedBy
-        });
+        CategoryCreateResponse response = _mapper.Map<CategoryCreateResponse>(createdCategory);
+        return new ApiStandardResponse<CategoryCreateResponse?>(StatusCodes.Status201Created, response);
     }
 
-    public async Task<ApiStandardResponse<CategoryResponse?>> UpdateCategoryAsync(CategoryUpdateRequest request)
+    public async Task<ApiStandardResponse<CategoryResponse?>> UpdateCategoryAsync(long id,
+        CategoryUpdateRequest request)
     {
-        var category = await _categoryRepo.GetByIdAsync(request.CategoryId);
+            var category = await _categoryRepo.GetByIdAsync(id);
 
-        if (category is null)
-            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
-                "The category does not exist");
+            if (category is null)
+                return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
+                    "The category does not exist");
 
-        bool isAdmin = await _userRepo.EntityExistByConditionAsync(
-            ua => ua.UserId == request.UpdatedBy &&
-                  ua.Role.RoleName.ToUpper() != RoleEnums.Admin.ToString().ToUpper(),
-            uIn => uIn.Include(ur => ur.Role));
+            bool isAdmin = await _userRepo.EntityExistByConditionAsync(
+                ua => ua.UserId == request.UpdatedBy &&
+                      ua.Role.RoleName.ToUpper() == RoleEnums.Admin.ToString().ToUpper(),
+                uIn => uIn.Include(ur => ur.Role));
 
-        if (!isAdmin)
-            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status403Forbidden,
-                "Only the admin can modify the category");
+            if (!isAdmin)
+                return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status403Forbidden,
+                    "Only the admin can modify the category");
 
-        if (!string.IsNullOrWhiteSpace(request.CategoryName) && category.CategoryName != request.CategoryName)
-            category.CategoryName = request.CategoryName;
+            if (!string.IsNullOrWhiteSpace(request.CategoryName) && category.CategoryName != request.CategoryName)
+                category.CategoryName = request.CategoryName;
 
-        if (!string.IsNullOrWhiteSpace(request.Description) && category.Description != request.Description)
-            category.Description = request.Description;
+            if (!string.IsNullOrWhiteSpace(request.Description) && category.Description != request.Description)
+                category.Description = request.Description;
 
-        category.UpdatedAt = DateTime.UtcNow;
+            category.UpdatedBy = request.UpdatedBy;
+            category.UpdatedAt = DateTime.UtcNow;
 
-        await _categoryRepo.UpdateAsync(category);
-
-        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, new CategoryResponse
-        {
-            CategoryName = request.CategoryName,
-            Description = request.Description
-        });
+            await _categoryRepo.UpdateAsync(category);
+            CategoryResponse response = _mapper.Map<CategoryResponse>(category);
+            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, response);
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> CategoryStatusChangerAsync(

@@ -10,6 +10,6 @@ public interface ICategoryService
     Task<ApiStandardResponse<CategoryResponse?>> GetCategoryLikeNameAsync(string name);
     Task<ApiStandardResponse<List<CategoryListResponse>?>> GetCategoryListByIdAsync();
     Task<ApiStandardResponse<CategoryCreateResponse?>> CreateCategoryAsync(CategoryCreateRequest request);
-    Task<ApiStandardResponse<CategoryResponse?>> UpdateCategoryAsync(CategoryUpdateRequest request);
+    Task<ApiStandardResponse<CategoryResponse?>> UpdateCategoryAsync(long id, CategoryUpdateRequest request);
     Task<ApiStandardResponse<ConfirmationResponse?>> CategoryStatusChangerAsync(CategoryStatusChangeRequest request);
 }

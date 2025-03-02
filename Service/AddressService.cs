@@ -1,4 +1,5 @@
-﻿using Ecommerce_site.Dto;
+﻿using AutoMapper;
+using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.AddressRequest;
 using Ecommerce_site.Dto.response.AddressResponse;
 using Ecommerce_site.Model;
@@ -11,46 +12,34 @@ public class AddressService : IAddressService
 {
     private readonly IGenericRepo<Address> _addressRepo;
     private readonly IGenericRepo<Customer> _customerRepo;
+    private readonly IMapper _mapper;
 
-    public AddressService(IGenericRepo<Address> addressRepo, IGenericRepo<Customer> customerRepo)
+    public AddressService(IGenericRepo<Address> addressRepo, IGenericRepo<Customer> customerRepo, IMapper mapper)
     {
         _addressRepo = addressRepo;
         _customerRepo = customerRepo;
+        _mapper = mapper;
     }
 
     public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long customerId, long addressId)
     {
         var address = await _addressRepo.GetSelectedColumnsByConditionAsync(
-            addr => addr.AddressId == addressId && addr.CustomerId == customerId,
-            addr => new
+            addr => addr.AddressId == addressId && addr.CustomerId == customerId && !addr.IsDeleted,
+            addr => new AddressResponse
             {
-                addr.AddressId,
-                addr.CustomerId,
-                addr.Country,
-                addr.City,
-                addr.State,
-                addr.PostalCode,
-                addr.FirstAddressLine,
-                addr.SecondAddressLine,
-                addr.IsDeleted
+                AddressId = addr.AddressId,
+                CustomerId = addr.CustomerId,
+                Country = addr.Country,
+                City = addr.City,
+                State = addr.State,
+                PostalCode = addr.PostalCode,
+                FirstAddressLine = addr.FirstAddressLine,
+                SecondAddressLine = addr.SecondAddressLine,
             });
         if (address is null)
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
                 "the address does not exist");
-        if (address.IsDeleted)
-            return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
-                "The address does not exist");
-        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, new AddressResponse
-        {
-            AddressId = address.AddressId,
-            CustomerId = address.CustomerId,
-            Country = address.Country,
-            State = address.State,
-            City = address.City,
-            PostalCode = address.PostalCode,
-            FirstAddressLine = address.FirstAddressLine,
-            SecondAddressLine = address.SecondAddressLine
-        });
+        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, address);
     }
 
     public async Task<ApiStandardResponse<IEnumerable<AddressResponse>?>> GetAddressListByCustomerIdAsync(
@@ -58,41 +47,23 @@ public class AddressService : IAddressService
     {
         var addressList = await _addressRepo.GetSelectedColumnsListsByConditionAsync(
             addr => addr.CustomerId == customerId,
-            addr => new
+            addr => new AddressResponse
             {
-                addr.AddressId,
-                addr.CustomerId,
-                addr.Country,
-                addr.City,
-                addr.State,
-                addr.PostalCode,
-                addr.FirstAddressLine,
-                addr.SecondAddressLine,
+                AddressId = addr.AddressId,
+                CustomerId = addr.CustomerId,
+                Country = addr.Country,
+                City = addr.City,
+                State = addr.State,
+                PostalCode = addr.PostalCode,
+                FirstAddressLine = addr.FirstAddressLine,
+                SecondAddressLine = addr.SecondAddressLine,
             });
-
 
         if (!addressList.Any())
             return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status404NotFound,
                 "the user does not have any address");
 
-        List<AddressResponse> response = new List<AddressResponse>();
-
-        foreach (var address in addressList)
-        {
-            response.Add(new AddressResponse
-            {
-                AddressId = address.AddressId,
-                CustomerId = address.CustomerId,
-                Country = address.Country,
-                City = address.City,
-                State = address.State,
-                PostalCode = address.PostalCode,
-                FirstAddressLine = address.FirstAddressLine,
-                SecondAddressLine = address.SecondAddressLine
-            });
-        }
-
-        return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status200OK, response);
+        return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status200OK, addressList);
     }
 
     public async Task<ApiStandardResponse<AddressResponse?>> CreateAddressAsync(long customerId,
@@ -118,26 +89,15 @@ public class AddressService : IAddressService
             FirstAddressLine = request.FirstAddressLine,
             IsDefault = !hasDefaultAddress
         });
-
-        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status201Created, new AddressResponse
-        {
-            AddressId = address.AddressId,
-            CustomerId = address.CustomerId,
-            Country = address.Country,
-            State = address.State,
-            City = address.City,
-            PostalCode = address.PostalCode,
-            FirstAddressLine = address.FirstAddressLine,
-            SecondAddressLine = address.SecondAddressLine
-        });
+        AddressResponse addressResponse = _mapper.Map<AddressResponse>(address);
+        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status201Created, addressResponse);
     }
 
     public async Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId,
         AddressUpdateRequest request)
     {
-        var address =
-            await _addressRepo.GetByConditionAsync(
-                addr => addr.AddressId == request.AddressId && addr.CustomerId == customerId, false);
+        Address? address = await _addressRepo.GetByConditionAsync(
+            addr => addr.AddressId == request.AddressId && addr.CustomerId == customerId, false);
 
         if (address is null)
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
@@ -158,18 +118,8 @@ public class AddressService : IAddressService
             address.Country = request.Country;
 
         await _addressRepo.UpdateAsync(address);
-
-        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, new AddressResponse
-        {
-            AddressId = address.AddressId,
-            CustomerId = address.CustomerId,
-            Country = address.Country,
-            State = address.State,
-            City = address.City,
-            PostalCode = address.PostalCode,
-            FirstAddressLine = address.FirstAddressLine,
-            SecondAddressLine = address.SecondAddressLine
-        });
+        AddressResponse addressResponse = _mapper.Map<AddressResponse>(address);
+        return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, addressResponse);
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(long customerId, long addressId)

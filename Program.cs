@@ -1,26 +1,13 @@
-using System.Diagnostics;
 using dotenv.net;
 using Ecommerce_site.config;
 using Ecommerce_site.filter;
 using Ecommerce_site.Middleware;
-using Microsoft.AspNetCore.Http.Features;
 using Serilog;
 
 DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
-// Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+builder.Services.AddProblemDetails();
 builder.Host.UseSerilog();
-builder.Services.AddProblemDetails(opt =>
-{
-    opt.CustomizeProblemDetails = context =>
-    {
-        context.ProblemDetails.Instance =
-            $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
-        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
-        Activity activity = context.HttpContext.Features.Get<IHttpActivityFeature>()!.Activity;
-        context.ProblemDetails.Extensions.TryAdd("traceId", activity.Id);
-    };
-});
 builder.Services.FluentValidationConfig();
 builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddAuthenticationConfig(builder.Configuration);
@@ -44,8 +31,8 @@ builder.Services.AddControllers(options => options.Filters.Add<FluentValidationF
     });
 
 var app = builder.Build();
+app.UseExceptionHandler();
 app.UseMiddleware<JsonValidationMiddleware>();
-app.UseExceptionHandler(_ => { });
 
 if (app.Environment.IsDevelopment())
 {
@@ -64,6 +51,4 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseStaticFiles();
 app.UseHttpsRedirection();
-app.UseStatusCodePages();
-
 app.Run();

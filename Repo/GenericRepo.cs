@@ -139,7 +139,7 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         var query = _dbSet.Where(predicate);
         if (asNoTracking) query = query.AsNoTracking();
 
-        return await query.FirstOrDefaultAsync() ;
+        return await query.FirstOrDefaultAsync();
     }
 
     public async Task<T?> GetByConditionAsync(

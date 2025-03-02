@@ -13,8 +13,6 @@ namespace Ecommerce_site.config;
 
 public static class AppServiceConfig
 {
-
-
     public static IServiceCollection AddDbConfig(this IServiceCollection service, IConfiguration configuration)
     {
         var dbConStr = configuration["DB_CONNECTION_STR"];
@@ -38,8 +36,13 @@ public static class AppServiceConfig
         });
     }
 
-    public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services) =>
+  
+
+    public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services)
+    {
         services.AddExceptionHandler<GlobalExceptionMiddleWare>();
+        return services;
+    }
 
     public static IServiceCollection LoggingConfig(this IServiceCollection services)
     {

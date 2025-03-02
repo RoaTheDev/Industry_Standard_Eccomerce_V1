@@ -24,12 +24,14 @@ public static class DependencyConfig
         service.AddTransient<OtpGenerator>();
         service.AddTransient<CustomPasswordHasher>();
 
+
         service.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
         service.AddScoped<ICustomerService, CustomerService>();
         service.AddScoped<IAddressService, AddressService>();
         service.AddScoped<ICategoryService, CategoryService>();
         service.AddScoped<IProductService, ProductService>();
         service.AddScoped<ICartService, CartService>();
+        service.AddScoped<IOrderService, OrderService>();
         service.AddKeyedTransient<IStorageProvider, LocalStorageProvider>("local");
         // service.AddKeyedTransient<IStorageProvider, AzureBlobStorageProvider>("azure");
         return service;
@@ -37,7 +39,7 @@ public static class DependencyConfig
 
     public static IServiceCollection MapperConfig(this IServiceCollection service)
     {
-        return service.AddAutoMapper(typeof(AppMapper));
+        return service.AddAutoMapper(typeof(Program).Assembly);
     }
 
     public static IServiceCollection FluentValidationConfig(this IServiceCollection service)

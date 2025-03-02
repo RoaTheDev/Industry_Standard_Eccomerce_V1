@@ -2,6 +2,7 @@ using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.CartRequest;
 using Ecommerce_site.Dto.response.CartResponse;
 using Ecommerce_site.Service.IService;
+using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce_site.Controller;
@@ -22,8 +23,16 @@ public class CartController : ControllerBase
     {
         var response = await _cartService.GetCartByCustomerIdAsync(customerId);
         if (response.StatusCode != StatusCodes.Status200OK)
-            return StatusCode(response.StatusCode, response);
-        return Ok(response);
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        return Ok(response.Data);
     }
 
     [HttpPost]
@@ -35,18 +44,27 @@ public class CartController : ControllerBase
             var errors = ModelState.Values.SelectMany(v => v.Errors)
                 .Select(e => e.ErrorMessage)
                 .ToList();
-
-            return BadRequest(new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status400BadRequest,
-                "Validation failed"
-            ));
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = GetStatusTitle.GetTitleForStatus(StatusCodes.Status400BadRequest),
+                Detail = "Validation errors",
+                Extensions = { ["errors"] = errors }
+            });
         }
 
         var response = await _cartService.AddToCartAsync(customerId, request);
-        if (response.StatusCode != StatusCodes.Status201Created)
-            return StatusCode(response.StatusCode, response);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
 
-        return CreatedAtAction(nameof(GetCartByCustomerId), new { customerId }, response);
+        return CreatedAtAction(nameof(GetCartByCustomerId), new { customerId }, response.Data);
     }
 
     [HttpDelete("{cartItemId:long}")]
@@ -54,9 +72,14 @@ public class CartController : ControllerBase
         [FromRoute] long cartItemId)
     {
         var response = await _cartService.RemoveCartItemAsync(customerId, cartItemId);
-        return response.StatusCode != StatusCodes.Status200OK
-            ? StatusCode(response.StatusCode, response)
-            : Ok(response);
+        return !response.Success
+            ? StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            })
+            : Ok(response.Data);
     }
 
     [HttpPatch]
@@ -71,13 +94,24 @@ public class CartController : ControllerBase
 
             return BadRequest(new ApiStandardResponse<ConfirmationResponse?>(
                 StatusCodes.Status400BadRequest,
-                "Validation failed"
+                new ProblemDetails
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = GetStatusTitle.GetTitleForStatus(StatusCodes.Status400BadRequest),
+                    Detail = "Validation errors",
+                    Extensions = { ["errors"] = errors }
+                }
             ));
         }
 
         var response = await _cartService.UpdateCartItemAsync(customerId, request);
-        return response.StatusCode != StatusCodes.Status200OK
-            ? StatusCode(response.StatusCode, response)
-            : Ok(response);
+        return !response.Success
+            ? StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            })
+            : Ok(response.Data);
     }
 }

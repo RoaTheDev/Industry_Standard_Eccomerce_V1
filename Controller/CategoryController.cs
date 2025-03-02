@@ -88,10 +88,10 @@ public class CategoryController : ControllerBase
     }
 
     [HttpPatch("{id:long}/")]
-    public async Task<ActionResult<CategoryResponse>> UpdateCategory(
+    public async Task<ActionResult<CategoryResponse>> UpdateCategory([FromRoute] long id,
         [FromBody] CategoryUpdateRequest request)
     {
-        var response = await _categoryService.UpdateCategoryAsync(request);
+        var response = await _categoryService.UpdateCategoryAsync(id, request);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
