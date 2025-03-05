@@ -1,7 +1,7 @@
 
 
 using System.ComponentModel.DataAnnotations;
-using Ecommerce_site.config.converter;
+using Ecommerce_site.config.Rule;
 using Newtonsoft.Json;
 
 namespace Ecommerce_site.Dto.Request.CustomerRequest;

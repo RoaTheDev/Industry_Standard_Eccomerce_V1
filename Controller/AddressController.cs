@@ -49,7 +49,6 @@ public class AddressController : ControllerBase
                 Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
                 Detail = response.Errors!.First().ToString()
             };
-            problemDetails.Extensions["errors"] = response.Errors;
             return StatusCode(response.StatusCode, problemDetails);
         }
 

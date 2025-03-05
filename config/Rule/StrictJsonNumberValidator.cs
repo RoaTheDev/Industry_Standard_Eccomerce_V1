@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ecommerce_site.Exception;
 
-namespace Ecommerce_site.config.converter
+namespace Ecommerce_site.config.Rule
 {
     public class StrictJsonNumberValidator<T> : JsonConverter<T> where T : struct
     {
@@ -11,7 +11,7 @@ namespace Ecommerce_site.config.converter
             try
             {
                 if (reader.TokenType != JsonTokenType.Number)
-                    throw new ApiValidationException("The value is either null or empty.");
+                    throw new ApiValidationException("Invalid numeric format.");
 
                 return ConvertNumber(reader);
             }
@@ -26,7 +26,7 @@ namespace Ecommerce_site.config.converter
         {
             writer.WriteNumberValue(Convert.ToDecimal(value));
         }
-        
+
         private T ConvertNumber(Utf8JsonReader reader)
         {
             Type targetType = typeof(T);

@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Ecommerce_site.config.converter;
+using Ecommerce_site.config.Rule;
 
 namespace Ecommerce_site.config
 {

@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ecommerce_site.Dto;
 
-namespace Ecommerce_site.config.converter;
+namespace Ecommerce_site.config.Rule;
 
 public class StringToDateTimeConverter : JsonConverter<DateTime>
 {

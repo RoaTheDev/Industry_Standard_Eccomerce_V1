@@ -160,7 +160,7 @@ public static class AppServiceConfig
     public static IServiceCollection AddAuthorizationConfig(this IServiceCollection service)
     {
         return service.AddAuthorization(opt =>
-        {
+        {   
             opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
             opt.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
         });

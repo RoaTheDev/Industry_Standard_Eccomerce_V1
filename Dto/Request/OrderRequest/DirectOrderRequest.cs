@@ -1,9 +1,8 @@
 namespace Ecommerce_site.Dto.Request.OrderRequest;
 
-public class OrderCreateRequest
+public class DirectOrderRequest
 {
     public required long BillingAddressId { get; set; }
     public required long ShippingAddressId { get; set; }
-    public required List<OrderItemCreateRequest> OrderItems { get; set; }
-    
+    public required OrderItemCreateRequest OrderItem { get; set; }
 }

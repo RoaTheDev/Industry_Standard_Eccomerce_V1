@@ -1,19 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Ecommerce_site.Dto;
+using Ecommerce_site.Exception;
 
-namespace Ecommerce_site.config.converter;
+namespace Ecommerce_site.config.Rule;
 
 public class StrictJsonStringValidator : JsonConverter<string>
 {
     public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.String)
-        {
-            throw new JsonException(JsonSerializer.Serialize(new ApiStandardResponse<string?>(
-                400, "Invalid string format"
-            )));
-        }
+            throw new ApiValidationException("Invalid numeric format.");
 
         return reader.GetString()!;
     }

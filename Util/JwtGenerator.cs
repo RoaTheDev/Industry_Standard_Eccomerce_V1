@@ -31,8 +31,6 @@ public class JwtGenerator
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = claimsIdentity,
-            // Issuer = "roa.io",
-            // Audience = "ecommerce-app",
             Expires = DateTime.UtcNow.AddHours(1),
             SigningCredentials = credential
         };

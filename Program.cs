@@ -31,8 +31,8 @@ builder.Services.AddControllers(options => options.Filters.Add<FluentValidationF
     });
 
 var app = builder.Build();
-app.UseExceptionHandler();
 app.UseMiddleware<JsonValidationMiddleware>();
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
