@@ -15,4 +15,5 @@ public interface ICustomerService
     Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequestUap requestUap);
     Task<ApiStandardResponse<CustomerUpdateResponse?>> UpdateCustomerInfoAsync(long id, CustomerUpdateRequest request);
     Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id, PasswordChangeRequest request);
+    Task<ApiStandardResponse<LoginResponse?>> LoginWithGoogle(GoogleLoginRequest request);
 }

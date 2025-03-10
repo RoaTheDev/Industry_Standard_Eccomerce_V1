@@ -12,6 +12,7 @@ using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
 using FluentEmail.Core;
+using Google.Apis.Auth;
 using Microsoft.EntityFrameworkCore;
 using ILogger = Serilog.ILogger;
 
@@ -25,6 +26,7 @@ public class CustomerService : ICustomerService
     private readonly RedisCaching _cache;
     private readonly IGenericRepo<Customer> _customerRepo;
     private readonly IFluentEmail _fluentEmail;
+    private readonly IConfiguration _config;
     private readonly JwtGenerator _jwtGenerator;
     private readonly ILogger _logger;
     private readonly OtpGenerator _otpGenerator;
@@ -37,7 +39,7 @@ public class CustomerService : ICustomerService
     public CustomerService(IGenericRepo<Customer> customerRepo, ILogger logger, CustomPasswordHasher passwordHasher,
         RedisCaching cache, IGenericRepo<User> userRepo, IGenericRepo<Role> roleRepo, OtpGenerator otpGenerator,
         IFluentEmail fluentEmail, RazorPageRenderer razorPageRenderer, JwtGenerator jwtGenerator,
-        EcommerceSiteContext dbContext)
+        EcommerceSiteContext dbContext, IConfiguration config)
     {
         _customerRepo = customerRepo;
         _logger = logger;
@@ -50,6 +52,106 @@ public class CustomerService : ICustomerService
         _razorPageRenderer = razorPageRenderer;
         _jwtGenerator = jwtGenerator;
         _dbContext = dbContext;
+        _config = config;
+    }
+
+    public async Task<ApiStandardResponse<LoginResponse?>> LoginWithGoogle(GoogleLoginRequest request)
+    {
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = [_config["CLIENT_ID"]]
+                });
+        }
+        catch (InvalidJwtException)
+        {
+            return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status401Unauthorized,
+                "Invalid Google token");
+        }
+
+        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var user = await _userRepo.GetByConditionAsync(u =>
+                    u.Email == payload.Email, uIn => uIn
+                    .Include(ur => ur.Role)
+                    .Include(ua => ua.AuthProviders));
+
+                if (user is not null)
+                {
+                    var userAuth = user.AuthProviders.FirstOrDefault(ua =>
+                        ua.AuthProviderId == payload.Subject &&
+                        EF.Functions.Like(ua.ProviderName, AuthProviderEnum.Google.ToString()));
+                    if (userAuth is null)
+                    {
+                        user.AuthProviders.Add(new AuthProvider
+                        {
+                            AuthProviderId = payload.Subject,
+                            ProviderName = AuthProviderEnum.Google.ToString(),
+                            IsDeleted = false,
+                            UserId = user.UserId
+                        });
+                        await _userRepo.UpdateAsync(user);
+                    }
+                }
+                else
+                {
+                    var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
+                        r => EF.Functions.Like(r.RoleName, RoleEnums.Customer.ToString()),
+                        r => new { r.RoleId });
+
+                    user = new User
+                    {
+                        RoleId = role!.RoleId,
+                        DisplayName = payload.Name,
+                        FirstName = payload.GivenName,
+                        LastName = payload.FamilyName,
+                        Email = payload.Email,
+                        IsDeleted = false,
+                        Gender = GenderEnums.Male.ToString(),
+                    };
+                    await _userRepo.AddAsync(user);
+
+                    var customer = new Customer
+                    {
+                        Dob = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-19)),
+                        IsDeleted = false,
+                        CustomerId = user.UserId
+                    };
+                    await _customerRepo.AddAsync(customer);
+                }
+
+                var accessToken = _jwtGenerator.GenerateAccessToken(
+                    user.UserId.ToString(),
+                    user.Email,
+                    user.Role.RoleName
+                );
+                var refreshToken = _jwtGenerator.GenerateRefreshToken();
+
+                await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
+
+                return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status200OK, new LoginResponse
+                {
+                    Token = new TokenResponse
+                    {
+                        Token = accessToken,
+                        ExpiresAt = DateTime.UtcNow.AddHours(1).ToString("O")
+                    },
+                    CustomerId = user.UserId,
+                    DisplayName = user.DisplayName,
+                    Message = "Google login successful"
+                });
+            }
+            catch (System.Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 
     public async Task<ApiStandardResponse<CustomerGetByIdResponse?>> GetCustomerByIdAsync(long id)

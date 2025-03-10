@@ -1,4 +1,5 @@
-﻿using Ecommerce_site.Dto.Request.CustomerRequest;
+﻿using Ecommerce_site.Dto;
+using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
@@ -85,6 +86,31 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<LoginResponse>> Login(LoginRequestUap request)
     {
         var response = await _customerService.LoginAsync(request);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        HttpContext.Response.Cookies.Append("AuthToken", response.Data!.Token.Token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddHours(1)
+        });
+        return Ok(response.Data);
+    }
+
+    [HttpPost("signin-google")]
+    public async Task<ActionResult<ApiStandardResponse<LoginResponse>>> GoogleLogin(
+        [FromBody] GoogleLoginRequest request)
+    {
+        var response = await _customerService.LoginWithGoogle(request);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails

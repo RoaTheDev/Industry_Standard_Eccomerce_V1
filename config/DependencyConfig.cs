@@ -24,7 +24,6 @@ public static class DependencyConfig
         service.AddTransient<OtpGenerator>();
         service.AddTransient<CustomPasswordHasher>();
 
-
         service.AddScoped(typeof(IGenericRepo<>), typeof(GenericRepo<>));
         service.AddScoped<ICustomerService, CustomerService>();
         service.AddScoped<IAddressService, AddressService>();

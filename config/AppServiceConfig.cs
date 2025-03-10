@@ -36,7 +36,6 @@ public static class AppServiceConfig
         });
     }
 
-  
 
     public static IServiceCollection AddGlobalExceptionHandler(this IServiceCollection services)
     {
@@ -154,13 +153,14 @@ public static class AppServiceConfig
                     }
                 };
             });
+        
         return service;
     }
 
     public static IServiceCollection AddAuthorizationConfig(this IServiceCollection service)
     {
         return service.AddAuthorization(opt =>
-        {   
+        {
             opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
             opt.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
         });

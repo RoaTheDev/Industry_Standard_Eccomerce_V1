@@ -95,83 +95,83 @@ public class OrderService : IOrderService
     public async Task<ApiStandardResponse<OrderResponse>> OrderCreateFromCartAsync(long customerId,
         OrderCreateRequest request)
     {
+        if (!await _customerRepo.EntityExistByConditionAsync(c =>
+                c.CustomerId == customerId && !c.IsDeleted))
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
+                "The customer does not exist");
+
+        bool addressesValid = await ValidateCustomerAddresses(customerId, request.BillingAddressId,
+            request.ShippingAddressId);
+
+        if (!addressesValid)
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
+                "The customer does not have the specified billing or shipping address");
+
+        if (!request.OrderItems.Any())
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                "Cannot create an order with no items");
+
+        var distinctProductIds = request.OrderItems.Select(i => i.ProductId).ToHashSet();
+
+        if (distinctProductIds.Count != request.OrderItems.Count)
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                "Duplicate products in order request");
+
+        var cart = await _cartRepo.GetByConditionAsync(
+            c => c.CustomerId == customerId && !c.IsCheckout,
+            cInc => cInc.Include(c => c.CartItems)
+                .ThenInclude(ci => ci.Product)
+        );
+
+        if (cart == null)
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
+                "No active cart found for this customer");
+
+        if (!cart.CartItems.Any())
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                "Cannot create an order with no items");
+
+        var cartItemDict = cart.CartItems.ToDictionary(ci => ci.ProductId);
+
+        foreach (var orderItem in request.OrderItems)
+        {
+            if (!cartItemDict.TryGetValue(orderItem.ProductId, out var cartItem))
+                return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                    $"Product ID {orderItem.ProductId} is not in your cart");
+
+            if (orderItem.Quantity != cartItem.Quantity)
+                return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                    $"Quantity mismatch for product ID {orderItem.ProductId}");
+        }
+
+        var availableProducts = cart.CartItems
+            .Where(ci => !ci.Product.IsDeleted && ci.Product.IsAvailable)
+            .Select(ci => ci.Product)
+            .ToList();
+
+        if (availableProducts.Count != cart.CartItems.Count)
+        {
+            var unavailableProductNames = cart.CartItems
+                .Where(ci => ci.Product.IsDeleted || !ci.Product.IsAvailable)
+                .Select(ci => ci.Product.ProductName)
+                .ToList();
+
+            return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                $"The following products are no longer available: {string.Join(", ", unavailableProductNames)}");
+        }
+
+        foreach (var cartItem in cart.CartItems)
+        {
+            var product = cartItem.Product;
+            if (cartItem.Quantity > product.Quantity)
+                return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
+                    $"Your order for {product.ProductName} exceeds available quantity. Only {product.Quantity} available.");
+        }
+
         using (var transaction = await _dbContext.Database.BeginTransactionAsync())
         {
             try
             {
-                if (!await _customerRepo.EntityExistByConditionAsync(c =>
-                        c.CustomerId == customerId && !c.IsDeleted))
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
-                        "The customer does not exist");
-
-                bool addressesValid = await ValidateCustomerAddresses(customerId, request.BillingAddressId,
-                    request.ShippingAddressId);
-
-                if (!addressesValid)
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
-                        "The customer does not have the specified billing or shipping address");
-
-                if (!request.OrderItems.Any())
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                        "Cannot create an order with no items");
-
-                var distinctProductIds = request.OrderItems.Select(i => i.ProductId).ToHashSet();
-
-                if (distinctProductIds.Count != request.OrderItems.Count)
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                        "Duplicate products in order request");
-
-                var cart = await _cartRepo.GetByConditionAsync(
-                    c => c.CustomerId == customerId && !c.IsCheckout,
-                    cInc => cInc.Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.Product)
-                );
-
-                if (cart == null)
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status404NotFound,
-                        "No active cart found for this customer");
-
-                if (!cart.CartItems.Any())
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                        "Cannot create an order with no items");
-
-                var cartItemDict = cart.CartItems.ToDictionary(ci => ci.ProductId);
-
-                foreach (var orderItem in request.OrderItems)
-                {
-                    if (!cartItemDict.TryGetValue(orderItem.ProductId, out var cartItem))
-                        return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                            $"Product ID {orderItem.ProductId} is not in your cart");
-
-                    if (orderItem.Quantity != cartItem.Quantity)
-                        return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                            $"Quantity mismatch for product ID {orderItem.ProductId}");
-                }
-
-                var availableProducts = cart.CartItems
-                    .Where(ci => !ci.Product.IsDeleted && ci.Product.IsAvailable)
-                    .Select(ci => ci.Product)
-                    .ToList();
-
-                if (availableProducts.Count != cart.CartItems.Count)
-                {
-                    var unavailableProductNames = cart.CartItems
-                        .Where(ci => ci.Product.IsDeleted || !ci.Product.IsAvailable)
-                        .Select(ci => ci.Product.ProductName)
-                        .ToList();
-
-                    return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                        $"The following products are no longer available: {string.Join(", ", unavailableProductNames)}");
-                }
-
-                foreach (var cartItem in cart.CartItems)
-                {
-                    var product = cartItem.Product;
-                    if (cartItem.Quantity > product.Quantity)
-                        return new ApiStandardResponse<OrderResponse>(StatusCodes.Status400BadRequest,
-                            $"Your order for {product.ProductName} exceeds available quantity. Only {product.Quantity} available.");
-                }
-
                 string orderNumber =
                     string.Concat(DateTime.UtcNow.ToString("yy-MM-dd"), Guid.NewGuid().ToString("N"));
                 decimal shippingCost = 3.5m;
@@ -274,33 +274,33 @@ public class OrderService : IOrderService
     public async Task<ApiStandardResponse<DirectOrderResponse>> DirectOrderCreateAsync(long customerId,
         DirectOrderRequest request)
     {
+        if (!await _customerRepo.EntityExistByConditionAsync(c =>
+                c.CustomerId == customerId && !c.IsDeleted))
+            return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
+                "The customer does not exist");
+
+        bool addressesValid = await ValidateCustomerAddresses(customerId, request.BillingAddressId,
+            request.ShippingAddressId);
+
+        if (!addressesValid)
+            return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
+                "The customer does not have the specified billing or shipping address");
+
+        var product = await _productRepo.GetByConditionAsync(p =>
+            p.ProductId == request.OrderItem.ProductId && p.IsAvailable && !p.IsDeleted);
+
+        if (product is null)
+            return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
+                "The product you're selecting is not available");
+
+        if (request.OrderItem.Quantity > product.Quantity)
+            return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
+                $"{product.ProductName} has only {product.Quantity} remaining");
+
         using (var transaction = await _dbContext.Database.BeginTransactionAsync())
         {
             try
             {
-                if (!await _customerRepo.EntityExistByConditionAsync(c =>
-                        c.CustomerId == customerId && !c.IsDeleted))
-                    return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
-                        "The customer does not exist");
-
-                bool addressesValid = await ValidateCustomerAddresses(customerId, request.BillingAddressId,
-                    request.ShippingAddressId);
-
-                if (!addressesValid)
-                    return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
-                        "The customer does not have the specified billing or shipping address");
-
-                var product = await _productRepo.GetByConditionAsync(p =>
-                    p.ProductId == request.OrderItem.ProductId && p.IsAvailable && !p.IsDeleted);
-
-                if (product is null)
-                    return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
-                        "The product you're selecting is not available");
-
-                if (request.OrderItem.Quantity > product.Quantity)
-                    return new ApiStandardResponse<DirectOrderResponse>(StatusCodes.Status404NotFound,
-                        $"{product.ProductName} has only {product.Quantity} remaining");
-
                 string orderNumber =
                     string.Concat(DateTime.UtcNow.ToString("yy-MM-dd"), Guid.NewGuid().ToString("N"));
 
@@ -321,8 +321,6 @@ public class OrderService : IOrderService
                     TotalAmount = itemTotalAmount,
                     TotalBasedAmount = itemBaseAmount,
                 });
-
-                await _orderRepo.AddAsync(order);
 
                 var orderItem = new OrderItem
                 {
@@ -414,7 +412,7 @@ public class OrderService : IOrderService
                 u.UserId == request.AdminId && !u.IsDeleted &&
                 EF.Functions.Like(u.Role.RoleName, RoleEnums.Admin.ToString()),
             uIn => uIn.Include(u => u.Role));
-        
+
         if (!isAdmin)
             return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
                 "Only admin can make changes");
