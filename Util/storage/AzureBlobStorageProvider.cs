@@ -15,7 +15,7 @@ public class AzureBlobStorageProvider : IStorageProvider
         _containerName = containerName;
     }
 
-    public async Task<IList<string>> UploadFilesAsync<T>(Guid guid, List<IFormFile> files)
+    public async Task<IList<string>> UploadFileAsync<T>(Guid guid, List<IFormFile> files)
     {
         var containerClient = _blobServiceClient.GetBlobContainerClient(_containerName);
         await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
@@ -44,6 +44,11 @@ public class AzureBlobStorageProvider : IStorageProvider
         }
 
         return uploadedUrls;
+    }
+
+    public Task<string> UploadFileAsync<T>(Guid guid, IFormFile file)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task DeleteFileAsync(string filePath)

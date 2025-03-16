@@ -12,7 +12,45 @@ public class LocalStorageProvider : IStorageProvider
         _environment = environment;
     }
 
-    public async Task<IList<string>> UploadFilesAsync<T>(Guid guid, List<IFormFile> files)
+    public async Task<string> UploadFileAsync<T>(Guid guid, IFormFile file)
+    {
+        string basePath = _environment.WebRootPath;
+
+        string relativePath = typeof(T) == typeof(ProductImage) ? "upload/product/" :
+            typeof(T) == typeof(User) ? "upload/profile/" : string.Empty;
+
+        if (string.IsNullOrEmpty(relativePath))
+        {
+            throw new InvalidOperationException("Unsupported entity type for image upload.");
+        }
+
+        string extension = Path.GetExtension(file.FileName).ToLower();
+        if (!AllowedExtensions.Contains(extension))
+        {
+            throw new InvalidOperationException($"Invalid file type: {extension}");
+        }
+
+        string randomFileName = Path.GetRandomFileName();
+        string randomPart = Path.GetFileNameWithoutExtension(randomFileName);
+        string uniqueFileName = $"{guid}_{randomPart}{extension}";
+
+        string fullPath = Path.Combine(basePath, relativePath);
+        if (!Directory.Exists(fullPath))
+        {
+            Directory.CreateDirectory(fullPath);
+        }
+
+        string fileFullPath = Path.Combine(fullPath, uniqueFileName);
+        await using (var stream = new FileStream(fileFullPath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+
+        string fileRelativePath = Path.Combine(relativePath, uniqueFileName);
+        return fileRelativePath;
+    }
+
+    public async Task<IList<string>> UploadFileAsync<T>(Guid guid, List<IFormFile> files)
     {
         string basePath = _environment.WebRootPath;
         IList<string> validFiles = new List<string>();

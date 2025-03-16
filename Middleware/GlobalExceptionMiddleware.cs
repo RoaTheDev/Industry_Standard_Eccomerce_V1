@@ -66,7 +66,6 @@ public class GlobalExceptionMiddleWare(ILogger logger) : IExceptionHandler
         {
             return (StatusCodes.Status400BadRequest, "The data you submitted conflicts with existing records.");
         }
-
         return (StatusCodes.Status500InternalServerError, "A database error occurred while processing your request.");
     }
 

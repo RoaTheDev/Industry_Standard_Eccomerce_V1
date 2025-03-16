@@ -153,9 +153,34 @@ public static class AppServiceConfig
                     }
                 };
             });
-        
+
         return service;
     }
+
+    public static IServiceCollection AddCorsConfig(this IServiceCollection service)
+    {
+        const string reactAppPolicy = "ReactAppPolicy";
+
+        return service.AddCors(options =>
+        {
+            options.AddPolicy(name: reactAppPolicy, policy =>
+            {
+                policy
+                    .WithOrigins(
+                        "http://localhost:5173", // Development React server
+                        "http://localhost:3000", // Another common React dev port
+                        "https://yourdomain.com", // Production domain
+                        "https://www.yourdomain.com" // www subdomain if needed
+                    )
+                    .AllowAnyMethod() 
+                    .AllowAnyHeader()
+                    .AllowCredentials() 
+                    .WithExposedHeaders("Content-Disposition", "X-Pagination") 
+                    .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+            });
+        });
+    }
+
 
     public static IServiceCollection AddAuthorizationConfig(this IServiceCollection service)
     {

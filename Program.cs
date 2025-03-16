@@ -1,3 +1,4 @@
+using System.Text.Json;
 using dotenv.net;
 using Ecommerce_site.config;
 using Ecommerce_site.filter;
@@ -6,8 +7,9 @@ using Serilog;
 
 DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddProblemDetails();
 builder.Host.UseSerilog();
+builder.Services.AddProblemDetails();
+builder.Services.AddCorsConfig();
 builder.Services.FluentValidationConfig();
 builder.Services.AddGlobalExceptionHandler();
 builder.Services.AddAuthenticationConfig(builder.Configuration);
@@ -25,12 +27,14 @@ builder.Services.AddControllers(options => options.Filters.Add<FluentValidationF
     .AddJsonOptions(options =>
     {
         {
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             options.AllowInputFormatterExceptionMessages = false;
             options.JsonSerializerOptions.Converters.Add(new CustomJsonConverterFactory());
         }
     });
 
 var app = builder.Build();
+app.UseCors("ReactAppPolicy");
 app.UseMiddleware<JsonValidationMiddleware>();
 app.UseExceptionHandler();
 

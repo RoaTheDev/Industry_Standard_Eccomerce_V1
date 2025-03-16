@@ -30,10 +30,10 @@ public class ProductController(IProductService productService)
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProductByIdResponse>> GetAllProduct(
-        [FromQuery] long cursorValue, [FromQuery] int pageSize)
+    public async Task<ActionResult<PaginatedProductResponse>> GetAllProduct(
+        [FromQuery] long cursor = 0, [FromQuery] int pageSize = 10)
     {
-        var response = await productService.GetAllProductAsync(cursorValue, pageSize);
+        var response = await productService.GetAllProductAsync(cursor, pageSize);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -84,7 +84,7 @@ public class ProductController(IProductService productService)
         return Ok(response.Data);
     }
 
-    [HttpDelete("{productId:long}/{imageId:long}/")]
+    [HttpDelete("{productId:long}/image/{imageId:long}/")]
     public async Task<ActionResult<ConfirmationResponse>> DeleteProductImage(
         [FromRoute] long productId, [FromRoute] long imageId)
     {
@@ -138,11 +138,11 @@ public class ProductController(IProductService productService)
         return CreatedAtAction(nameof(GetProductById), new { Id = response.Data!.ProductId }, response.Data);
     }
 
-    [HttpDelete("{id:long}/image/{imageId:long}")]
+    [HttpPatch("{id:long}/image/{imageId:long}")]
     public async Task<ActionResult<ProductImageChangeResponse>> ChangeProductImage(
-        [FromRoute] long id, [FromRoute] long imageId)
+        [FromRoute] long id, [FromRoute] long imageId, [FromForm] IFormFile file)
     {
-        var response = await productService.ChangeProductImageAsync(id, imageId);
+        var response = await productService.ChangeProductImageAsync(id, imageId, file);
         if (!response.Success)
             return StatusCode(response.StatusCode, new ProblemDetails
             {
@@ -153,11 +153,29 @@ public class ProductController(IProductService productService)
         return Ok(response.Data);
     }
 
+    [HttpPost("{id:long}/tag")]
+    public async Task<ActionResult<ConfirmationResponse>> AddTagsToProduct([FromRoute] long id,
+        AddTagToProductRequest request)
+    {
+        var response = await productService.AddTagsToProduct(id, request);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString(),
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode)
+            });
+        }
+
+        return Ok(response.Data);
+    }
+
     [HttpPatch("{id:long}/tag")]
-    public async Task<ActionResult<ConfirmationResponse>> RemoveProductTag(
+    public async Task<ActionResult<ConfirmationResponse>> RemoveProductTag([FromRoute] long id,
         [FromBody] ProductTagRemoveRequest request)
     {
-        var response = await productService.ProductTagRemoveAsync(request);
+        var response = await productService.ProductTagRemoveAsync(id, request);
 
         if (!response.Success)
         {

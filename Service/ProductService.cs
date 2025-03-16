@@ -161,17 +161,24 @@ public class ProductService : IProductService
 
         var products = await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
             p => true,
-            p => new ProductResponse
+            p => new ProductByIdResponse
             {
                 ProductId = p.ProductId,
                 ProductName = p.ProductName,
                 Description = p.Description,
                 Discount = p.DiscountPercentage,
                 Quantity = p.Quantity,
-                Price = p.Price
+                Price = p.Price,
+                Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
+                ImageUrls = p.ProductImages.Select(pi => pi.ImageUrl).ToImmutableList(),
+                CategoryName = p.Category.CategoryName
             },
             p => p.ProductId,
             cursorValue,
+            p => p
+                .Include(pt => pt.Tags)
+                .Include(pi => pi.ProductImages)
+                .Include(pc => pc.Category),
             pageSize
         );
 
@@ -190,6 +197,41 @@ public class ProductService : IProductService
         return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
     }
 
+    public async Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id,
+        IList<IFormFile> files)
+    {
+        var product = await _productRepo.GetByConditionAsync(p => p.ProductId == id);
+        if (product is null)
+            return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status404NotFound,
+                $"The product does not exist");
+        IList<ProductImage> productImages = new List<ProductImage>();
+        bool isPrimary = true;
+        int counter = 1;
+
+        var imageUrls = await _storageProvider.UploadFileAsync<ProductImage>(Guid.NewGuid(), files.ToList());
+        foreach (var url in imageUrls)
+        {
+            productImages.Add(new ProductImage
+            {
+                ImageUrl = url,
+                ProductId = product.ProductId,
+                IsPrimary = counter == 1 ? isPrimary : !isPrimary
+            });
+            counter++;
+        }
+
+        IList<ProductImage> uploadedImages = await _imageRepo.AddBulkAsync(productImages);
+        return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status201Created,
+            new ProductImageResponse
+            {
+                ProductId = product.ProductId,
+                Images = uploadedImages.Select(img => new ImageResponse
+                {
+                    ImageId = img.ImageId,
+                    ImageUrl = img.ImageUrl
+                })
+            });
+    }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteProductImage(long productId, long imageId)
     {
@@ -212,7 +254,7 @@ public class ProductService : IProductService
 
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(
-        long productId, long imageId)
+        long productId, long imageId, IFormFile file)
     {
         var productImage = await _imageRepo.GetByConditionAsync(pi =>
             pi.ProductId == productId && pi.ImageId == imageId);
@@ -228,19 +270,22 @@ public class ProductService : IProductService
             await _storageProvider.DeleteFileAsync(oldImagePath);
         }
 
-        await _imageRepo.DeleteAsync(productImage);
+        string newImageUrl = await _storageProvider.UploadFileAsync<ProductImage>(Guid.NewGuid(), file);
+        productImage.ImageUrl = newImageUrl;
+        await _imageRepo.UpdateAsync(productImage);
 
         return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status200OK,
             new ConfirmationResponse()
             {
-                Message = "The image has been removed successfully"
+                Message = "The image has been changed successfully"
             });
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(ProductTagRemoveRequest request)
+    public async Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(long id,
+        ProductTagRemoveRequest request)
     {
         var product = await _productRepo.GetByConditionAsync(
-            p => p.ProductId == request.ProductId && !p.IsDeleted,
+            p => p.ProductId == id && !p.IsDeleted,
             p => p.Include(pt => pt.Tags) // Load tags
         );
 
@@ -288,41 +333,60 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id,
-        IList<IFormFile> files)
+    public async Task<ApiStandardResponse<ConfirmationResponse>> AddTagsToProduct(long productId,
+        AddTagToProductRequest request)
     {
-        var product = await _productRepo.GetByConditionAsync(p => p.ProductId == id);
-        if (product is null)
-            return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status404NotFound,
-                $"The product does not exist");
-        IList<ProductImage> productImages = new List<ProductImage>();
-        bool isPrimary = true;
-        int counter = 1;
+        if (!request.TagIds.Any())
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status400BadRequest,
+                "No tag IDs provided");
 
-        var imageUrls = await _storageProvider.UploadFilesAsync<ProductImage>(Guid.NewGuid(), files.ToList());
-        foreach (var url in imageUrls)
+        var product = await _productRepo.GetByConditionAsync(
+            p => p.ProductId == productId && !p.IsDeleted,
+            p => p.Include(pt => pt.Tags)
+        );
+
+        if (product is null)
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                $"The product with ID {productId} does not exist");
+
+        var tagsToAdd = await _tagRepo.GetAllByConditionAsync(
+            t => request.TagIds.Contains(t.TagId) && !t.IsDeleted
+        );
+
+        if (tagsToAdd.Count != request.TagIds.Count)
         {
-            productImages.Add(new ProductImage
-            {
-                ImageUrl = url,
-                ProductId = product.ProductId,
-                IsPrimary = counter == 1 ? isPrimary : !isPrimary
-            });
-            counter++;
+            var missingTagIds = request.TagIds.Except(tagsToAdd.Select(t => t.TagId)).ToList();
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                $"The following tag IDs were not found: {string.Join(", ", missingTagIds)}");
         }
 
-        IList<ProductImage> uploadedImages = await _imageRepo.AddBulkAsync(productImages);
-        return new ApiStandardResponse<ProductImageResponse?>(StatusCodes.Status201Created,
-            new ProductImageResponse
-            {
-                ProductId = product.ProductId,
-                Images = uploadedImages.Select(img => new ImageResponse
+        var existingTagIds = product.Tags.Select(t => t.TagId).ToList();
+        var newTags = tagsToAdd.Where(t => !existingTagIds.Contains(t.TagId)).ToList();
+
+        if (newTags.Count == 0)
+        {
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status200OK,
+                new ConfirmationResponse
                 {
-                    ImageId = img.ImageId,
-                    ImageUrl = img.ImageUrl
-                })
+                    Message = "All specified tags are already associated with the product"
+                });
+        }
+
+        foreach (var tag in newTags)
+        {
+            product.Tags.Add(tag);
+        }
+
+        await _productRepo.UpdateAsync(product);
+
+        return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status200OK,
+            new ConfirmationResponse
+            {
+                Message =
+                    $"Successfully added {newTags.Count} tag(s) to the product: {string.Join(", ", newTags.Select(t => t.TagName))}"
             });
     }
+
 
     Task<ApiStandardResponse<PaginatedProductResponse>> IProductService.SearchProductAsync(string name)
     {

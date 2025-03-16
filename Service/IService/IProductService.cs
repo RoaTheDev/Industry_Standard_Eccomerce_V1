@@ -17,8 +17,9 @@ public interface IProductService
     Task<ApiStandardResponse<ProductStatusResponse?>> ChangeProductStatusAsync(long id);
     Task<ApiStandardResponse<ProductImageResponse?>> AddProductImageAsync(long id, IList<IFormFile> files);
 
-    Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(long productId, long imageId);
+    Task<ApiStandardResponse<ConfirmationResponse?>> ChangeProductImageAsync(long productId,long imageId, IFormFile file);
 
-    Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(ProductTagRemoveRequest request);
+    Task<ApiStandardResponse<ConfirmationResponse>> AddTagsToProduct(long productId,AddTagToProductRequest request);
+    Task<ApiStandardResponse<ConfirmationResponse>> ProductTagRemoveAsync(long id,ProductTagRemoveRequest request);
     Task<ApiStandardResponse<PaginatedProductResponse>> SearchProductAsync(string name);
 }
