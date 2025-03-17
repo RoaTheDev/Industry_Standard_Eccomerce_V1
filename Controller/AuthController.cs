@@ -209,6 +209,7 @@ public class AuthController : ControllerBase
                 Detail = "Invalid user ID"
             });
         }
+
         var response = await _customerService.LogoutAsync(userId);
         if (!response.Success)
         {
@@ -223,5 +224,34 @@ public class AuthController : ControllerBase
         HttpContext.Response.Cookies.Delete("AuthToken");
 
         return Ok(response.Data);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<ActionResult<CurrentUserResponse>> GetCurrentUser()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+        var response = await _customerService.GetCustomerByIdAsync(userId);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        var currentUser = new CurrentUserResponse
+        {
+            CustomerId = response.Data!.CustomerId,
+            DisplayName = $"{response.Data.FirstName} {response.Data.MiddleName} {response.Data.LastName}".Trim(),
+            Email = response.Data.Email
+        };
+        return Ok(currentUser);
     }
 }

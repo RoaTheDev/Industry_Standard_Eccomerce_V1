@@ -472,7 +472,7 @@ public class CustomerService : ICustomerService
                 TemplatePath = nameof(PasswordReset)
             };
 
-            var resetUrl = $"{_config["CLIENT_URL"]}/reset-password?token={resetSession}";
+            var resetUrl = $"{_config["CLIENT_URL"]}/auth/reset-password?token={resetSession}";
 
             var emailMsg = new PasswordResetMsg
             {
@@ -504,7 +504,7 @@ public class CustomerService : ICustomerService
         if (userId == 0)
             return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status400BadRequest,
                 "Invalid or expired reset token");
-        
+
         var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId);
         if (user is null)
             return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status404NotFound,
@@ -546,6 +546,7 @@ public class CustomerService : ICustomerService
             {
                 _logger.Error(error);
             }
+
             throw new ExternalException("External service not responding");
         }
     }
