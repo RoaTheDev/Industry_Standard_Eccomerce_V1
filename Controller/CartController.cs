@@ -22,7 +22,7 @@ public class CartController : ControllerBase
     public async Task<ActionResult<CartResponse>> GetCartByCustomerId([FromRoute] long customerId)
     {
         var response = await _cartService.GetCartByCustomerIdAsync(customerId);
-        if (response.StatusCode != StatusCodes.Status200OK)
+        if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
             {

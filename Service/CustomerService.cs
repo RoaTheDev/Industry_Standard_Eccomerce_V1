@@ -23,6 +23,7 @@ public class CustomerService : ICustomerService
     private const string RegisterAccountKey = "_customer.payload.";
     private const string RedisRefreshKey = "_customer.";
     private const string OtpVerificationKey = "_email.otp.";
+    private const string PasswordResetTokenKey = "_password.reset.";
     private readonly RedisCaching _cache;
     private readonly IGenericRepo<Customer> _customerRepo;
     private readonly IFluentEmail _fluentEmail;
@@ -250,7 +251,6 @@ public class CustomerService : ICustomerService
         }
     }
 
-
     public async Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerification(Guid session,
         EmailVerificationRequest request)
     {
@@ -450,6 +450,106 @@ public class CustomerService : ICustomerService
             new ConfirmationResponse { Message = "password changed successfully" });
     }
 
+    public async Task<ApiStandardResponse<ForgotPasswordResponse?>> ForgotPasswordAsync(ForgotPasswordRequest request)
+    {
+        try
+        {
+            var user = await _userRepo.GetByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower());
+
+            if (user is null)
+                return new ApiStandardResponse<ForgotPasswordResponse?>(StatusCodes.Status404NotFound,
+                    "No account with this email exists");
+
+            var resetSession = Guid.NewGuid().ToString();
+            var tokenExpiry = DateTime.UtcNow.AddMinutes(15);
+
+            await _cache.SetAsync($"{PasswordResetTokenKey}{resetSession}", user.UserId, TimeSpan.FromMinutes(15));
+
+            var emailMetadata = new EmailMetadata
+            {
+                Subject = "Password Reset Request",
+                ToAddress = user.Email,
+                TemplatePath = nameof(PasswordReset)
+            };
+
+            var resetUrl = $"{_config["CLIENT_URL"]}/reset-password?token={resetSession}";
+
+            var emailMsg = new PasswordResetMsg
+            {
+                ResetLink = resetUrl,
+                ExpirationMinutes = 15
+            };
+
+            await SendEmailAsync(emailMetadata, emailMsg);
+
+            return new ApiStandardResponse<ForgotPasswordResponse?>(StatusCodes.Status200OK,
+                new ForgotPasswordResponse
+                {
+                    Message = "Password reset instructions have been sent to your email",
+                    ExpiresAt = tokenExpiry.ToString("O")
+                });
+        }
+        catch (ExternalException e)
+        {
+            _logger.Error(e, "The email service not responding");
+            return new ApiStandardResponse<ForgotPasswordResponse?>(StatusCodes.Status503ServiceUnavailable,
+                "External service not responding");
+        }
+    }
+
+    public async Task<ApiStandardResponse<ResetPasswordResponse?>> ResetPasswordAsync(ResetPasswordRequest request,
+        string session)
+    {
+        var userId = await _cache.GetAsync<long>($"{PasswordResetTokenKey}{session}");
+        if (userId == 0)
+            return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status400BadRequest,
+                "Invalid or expired reset token");
+        
+        var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId);
+        if (user is null)
+            return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status404NotFound,
+                "User not found");
+
+        user.PasswordHashed = _passwordHasher.HashPassword(request.Password);
+        await _userRepo.UpdateAsync(user);
+
+        await _cache.RemoveAsync($"{PasswordResetTokenKey}{session}");
+
+        return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status200OK,
+            new ResetPasswordResponse { Message = "Password has been reset successfully" });
+    }
+
+    public async Task<ApiStandardResponse<LogoutResponse?>> LogoutAsync(long userId)
+    {
+        await _cache.RemoveAsync($"{RedisRefreshKey}{userId}");
+
+        return new ApiStandardResponse<LogoutResponse?>(StatusCodes.Status200OK,
+            new LogoutResponse { Message = "Logged out successfully" });
+    }
+
+    private async Task SendEmailAsync(EmailMetadata emailMetadata, PasswordResetMsg model)
+    {
+        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
+        var email = await _fluentEmail.To(emailMetadata.ToAddress)
+            .Subject(emailMetadata.Subject)
+            .Body(emailBody, true)
+            .SendAsync();
+
+        if (email.Successful)
+        {
+            _logger.Information("Email sent successfully!");
+        }
+        else
+        {
+            _logger.Error("Failed to send email.");
+            foreach (var error in email.ErrorMessages)
+            {
+                _logger.Error(error);
+            }
+            throw new ExternalException("External service not responding");
+        }
+    }
+
     private async Task SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model)
     {
         var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
@@ -468,8 +568,9 @@ public class CustomerService : ICustomerService
             foreach (var error in email.ErrorMessages)
             {
                 _logger.Error(error);
-                throw new ExternalException("External service not responding");
             }
+
+            throw new ExternalException("External service not responding");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Ecommerce_site.Dto;
+﻿using System.Security.Claims;
+using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
 using Ecommerce_site.Service.IService;
@@ -128,6 +129,99 @@ public class AuthController : ControllerBase
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddHours(1)
         });
+        return Ok(response.Data);
+    }
+
+    [HttpPost("forgot-password")]
+    public async Task<ActionResult<ForgotPasswordResponse>> ForgotPassword(ForgotPasswordRequest request)
+    {
+        var response = await _customerService.ForgotPasswordAsync(request);
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = GetStatusTitle.GetTitleForStatus(StatusCodes.Status400BadRequest),
+                Detail = "Validation errors",
+                Extensions = { ["errors"] = errors }
+            });
+        }
+
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        return Ok(response.Data);
+    }
+
+    [HttpPost("reset-password/{session}")]
+    public async Task<ActionResult<ResetPasswordResponse>> ResetPassword([FromRoute] string session,
+        [FromBody] ResetPasswordRequest request)
+    {
+        var response = await _customerService.ResetPasswordAsync(request, session);
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values.SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = GetStatusTitle.GetTitleForStatus(StatusCodes.Status400BadRequest),
+                Detail = "Validation errors",
+                Extensions = { ["errors"] = errors }
+            });
+        }
+
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        return Ok(response.Data);
+    }
+
+    [Authorize]
+    [HttpPost("logout")]
+    public async Task<ActionResult<LogoutResponse>> Logout()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !long.TryParse(userIdClaim, out var userId))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Invalid user ID"
+            });
+        }
+        var response = await _customerService.LogoutAsync(userId);
+        if (!response.Success)
+        {
+            return StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode),
+                Detail = response.Errors!.First().ToString()
+            });
+        }
+
+        HttpContext.Response.Cookies.Delete("AuthToken");
+
         return Ok(response.Data);
     }
 }

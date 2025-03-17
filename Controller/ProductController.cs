@@ -84,7 +84,7 @@ public class ProductController(IProductService productService)
         return Ok(response.Data);
     }
 
-    [HttpDelete("{productId:long}/image/{imageId:long}/")]
+    [HttpDelete("{productId:long}/image/{imageId:long}")]
     public async Task<ActionResult<ConfirmationResponse>> DeleteProductImage(
         [FromRoute] long productId, [FromRoute] long imageId)
     {
@@ -140,7 +140,7 @@ public class ProductController(IProductService productService)
 
     [HttpPatch("{id:long}/image/{imageId:long}")]
     public async Task<ActionResult<ProductImageChangeResponse>> ChangeProductImage(
-        [FromRoute] long id, [FromRoute] long imageId, [FromForm] IFormFile file)
+        [FromRoute] long id, [FromRoute] long imageId, [FromForm] FormFile file)
     {
         var response = await productService.ChangeProductImageAsync(id, imageId, file);
         if (!response.Success)
