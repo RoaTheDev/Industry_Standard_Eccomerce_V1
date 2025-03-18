@@ -1,6 +1,7 @@
 using System.Text;
 using Ecommerce_site.Data;
 using Ecommerce_site.Middleware;
+using Ecommerce_site.Model.Enum;
 using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -172,10 +173,10 @@ public static class AppServiceConfig
                         "https://yourdomain.com", // Production domain
                         "https://www.yourdomain.com" // www subdomain if needed
                     )
-                    .AllowAnyMethod() 
+                    .AllowAnyMethod()
                     .AllowAnyHeader()
-                    .AllowCredentials() 
-                    .WithExposedHeaders("Content-Disposition", "X-Pagination") 
+                    .AllowCredentials()
+                    .WithExposedHeaders("Content-Disposition", "X-Pagination")
                     .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
             });
         });
@@ -186,8 +187,9 @@ public static class AppServiceConfig
     {
         return service.AddAuthorization(opt =>
         {
-            opt.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-            opt.AddPolicy("Customer", policy => policy.RequireRole("Customer"));
+            opt.AddPolicy("Any", policy => policy.RequireRole(nameof(RoleEnums.Admin), nameof(RoleEnums.Customer)));
+            opt.AddPolicy("AdminOnly", policy => policy.RequireRole(nameof(RoleEnums.Admin)));
+            opt.AddPolicy("Customer", policy => policy.RequireRole(nameof(RoleEnums.Customer)));
         });
     }
 }

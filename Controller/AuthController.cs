@@ -2,6 +2,7 @@
 using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
+using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Authorization;
@@ -226,7 +227,7 @@ public class AuthController : ControllerBase
         return Ok(response.Data);
     }
 
-    [Authorize]
+    [Authorize(Policy = "Any")]
     [HttpGet("me")]
     public async Task<ActionResult<CurrentUserResponse>> GetCurrentUser()
     {
@@ -235,6 +236,7 @@ public class AuthController : ControllerBase
         {
             return Unauthorized();
         }
+
         var response = await _customerService.GetCustomerByIdAsync(userId);
         if (!response.Success)
         {
