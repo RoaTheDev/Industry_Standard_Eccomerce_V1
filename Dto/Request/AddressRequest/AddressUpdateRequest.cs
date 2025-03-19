@@ -2,17 +2,17 @@
 
 public class AddressUpdateRequest
 {
-    public required long AddressId { get; set; }
-    
-    public required string FirstAddressLine { get; set; }
+    public long AddressId { get; set; }
+
+    public string FirstAddressLine { get; set; } = string.Empty;
 
     public string? SecondAddressLine { get; set; }
 
-    public required string City { get; set; }
+    public string City { get; set; } = string.Empty;
 
-    public required string State { get; set; }
+    public string State { get; set; } = string.Empty;
 
-    public required string PostalCode { get; set; }
+    public string PostalCode { get; set; } = string.Empty;
 
-    public required string Country { get; set; }
+    public string Country { get; set; } = string.Empty;
 }

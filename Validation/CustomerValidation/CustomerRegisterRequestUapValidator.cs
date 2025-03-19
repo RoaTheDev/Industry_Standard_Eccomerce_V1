@@ -9,11 +9,13 @@ public class CustomerRegisterRequestUapValidator : AbstractValidator<CustomerReg
     {
         RuleFor(x => x.Email)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Email must not be null")
             .NotEmpty().WithMessage("Email must not be empty")
             .EmailAddress().WithMessage("Must be a valid email.");
 
         RuleFor(x => x.Password)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Password must not be null")
             .NotEmpty().WithMessage("Password must not be empty")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
             .WithMessage("Password must have at least one uppercase, one lowercase, and a number.")
@@ -23,16 +25,18 @@ public class CustomerRegisterRequestUapValidator : AbstractValidator<CustomerReg
 
         RuleFor(x => x.FirstName)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("firstname cannot be null")
             .NotEmpty().WithMessage("Your firstname cannot be empty")
-            .Must(firstName => !firstName.Contains(' ')).WithMessage("Firstname can't contain spaces")
+            .Must(firstName => firstName != null && !firstName.Contains(' ')).WithMessage("Firstname can't contain spaces")
             .Matches(@"^[a-zA-Z]{3,}$").WithMessage("Firstname can't contain any special character")
             .Length(3, 50).WithMessage("Firstname can only be between 4 to 50");
-        
+
 
         RuleFor(x => x.LastName)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty().WithMessage("Your  lastname cannot be empty")
-            .Must(lastName => !lastName.Contains(' ')).WithMessage("Lastname can't contain spaces")
+            .NotNull().WithMessage("Lastname must not be null")
+            .NotEmpty().WithMessage("Your lastname cannot be empty")
+            .Must(lastName => lastName != null && !lastName.Contains(' ')).WithMessage("Lastname can't contain spaces")
             .Matches(@"^[a-zA-Z]{3,}$").WithMessage("Lastname can't contain any special character")
             .Length(3, 50).WithMessage("Lastname can only be between 4 to 50");
 
@@ -42,10 +46,12 @@ public class CustomerRegisterRequestUapValidator : AbstractValidator<CustomerReg
             .Length(0, 50).WithMessage("Middle name can only be between 8 to 50");
 
         RuleFor(x => x.Dob)
+            .NotNull().WithMessage("Date of birth must not be null")
             .NotEmpty().WithMessage("Date of birth is required.")
             .Must(BeAtLeast15YearsOld).WithMessage("You must be at least 15 years old.");
 
         RuleFor(x => x.PhoneNumber)
+            .NotNull().WithMessage("Phone number must not be null")
             .NotEmpty().WithMessage("Phone number is required.")
             .Matches(@"^\+[1-9]\d{1,14}$")
             .WithMessage("Phone number must be in international format (e.g., +1234567890).");

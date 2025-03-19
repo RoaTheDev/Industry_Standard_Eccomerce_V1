@@ -10,7 +10,7 @@ public class StrictJsonStringValidator : JsonConverter<string>
     public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType != JsonTokenType.String)
-            throw new ApiValidationException("Invalid numeric format.");
+            throw new ApiValidationException("Invalid String format.");
 
         return reader.GetString()!;
     }

@@ -9,13 +9,15 @@ public class PasswordChangeRequestValidator : AbstractValidator<PasswordChangeRe
     {
         RuleFor(x => x.CurrentPassword)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Password must not be null")
             .NotEmpty().WithMessage("Password must not be empty")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
             .WithMessage("Password must have at least one uppercase, one lowercase, and a number.")
             .Length(8, 50).WithMessage("Password must be between 8 and 50 characters long.");
-        
+
         RuleFor(x => x.NewPassword)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Password must not be null")
             .NotEmpty().WithMessage("Password must not be empty")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
             .WithMessage("Password must have at least one uppercase, one lowercase, and a number.")

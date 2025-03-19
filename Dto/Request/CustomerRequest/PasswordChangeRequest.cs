@@ -2,7 +2,7 @@ namespace Ecommerce_site.Dto.Request.CustomerRequest;
 
 public class PasswordChangeRequest
 {
-    public required string CurrentPassword { get; set; }
-    public required string NewPassword { get; set; }
-    public required string ConfirmNewPassword { get; set; }
+    public  string? CurrentPassword { get; set; }
+    public  string? NewPassword { get; set; }
+    public  string? ConfirmNewPassword { get; set; }
 }

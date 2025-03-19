@@ -9,11 +9,13 @@ public class LoginRequestValidator : AbstractValidator<LoginRequestUap>
     {
         RuleFor(x => x.Email)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Email must not be null")
             .NotEmpty().WithMessage("Email must not be empty")
             .EmailAddress().WithMessage("Must be a valid email.");
 
         RuleFor(x => x.Password)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Password must not be null")
             .NotEmpty().WithMessage("Password must not be empty")
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$")
             .WithMessage("Password must have at least one uppercase, one lowercase, and a number.")

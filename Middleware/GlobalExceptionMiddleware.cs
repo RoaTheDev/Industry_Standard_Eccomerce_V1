@@ -17,6 +17,7 @@ public class GlobalExceptionMiddleWare(ILogger logger) : IExceptionHandler
     {
         var problemDetails = new ProblemDetails();
         logger.Error(exception, "An error occurred: {Message}", exception.Message);
+        
         var (statusCode, specificMessage) = exception switch
         {
             // Database Exceptions
@@ -43,7 +44,6 @@ public class GlobalExceptionMiddleWare(ILogger logger) : IExceptionHandler
         problemDetails.Extensions.TryAdd("requestId", httpContext.TraceIdentifier);
         var activityFeature = httpContext.Features.Get<IHttpActivityFeature>()!;
         problemDetails.Extensions.TryAdd("traceId", activityFeature.Activity.Id);
-
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/problem+json";
         await httpContext.Response.WriteAsync(JsonSerializer.Serialize(problemDetails),

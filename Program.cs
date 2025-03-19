@@ -3,6 +3,7 @@ using dotenv.net;
 using Ecommerce_site.config;
 using Ecommerce_site.filter;
 using Ecommerce_site.Middleware;
+using Microsoft.AspNetCore.Mvc;
 using Serilog;
 
 DotEnv.Load();
@@ -23,7 +24,8 @@ builder.Services.AddSwaggerConfig();
 builder.Services.MapperConfig();
 builder.Services.CustomDependencyConfig();
 
-builder.Services.AddControllers(options => options.Filters.Add<FluentValidationFilter>())
+builder.Services.Configure<ApiBehaviorOptions>(options => { options.SuppressModelStateInvalidFilter = true; });
+builder.Services.AddControllers(options => { options.Filters.Add<FluentValidationFilter>(); })
     .AddJsonOptions(options =>
     {
         {

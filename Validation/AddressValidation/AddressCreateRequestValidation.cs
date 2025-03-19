@@ -17,12 +17,14 @@ public class AddressCreateRequestValidation : AbstractValidator<AddressCreationR
 
         RuleFor(x => x.State)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("The state cannot be null")
             .NotEmpty().WithMessage("State cannot be empty")
             .Matches(@"^[a-zA-Z\d]{2,}$").WithMessage("State can't contain any special character")
             .Length(2, 100).WithMessage("State can only be between 2 to 100");
 
         RuleFor(x => x.FirstAddressLine)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("The first address line cannot be null")
             .NotEmpty().WithMessage("First address line cannot be empty")
             .Matches(@"^[a-zA-Z\d\s]{5,}$").WithMessage("First Address can't contain any special character")
             .Length(5, 100).WithMessage("First address can only be between 5 to 100");

@@ -2,11 +2,11 @@
 
 public class AddressCreationRequest
 {
-    public required string FirstAddressLine { get; set; }
+    public  string FirstAddressLine { get; set; } = string.Empty;
     public string? SecondAddressLine { get; set; }
-    public required string City { get; set; }
-    public required string State { get; set; }
-    public required string PostalCode { get; set; }
-    public required string Country { get; set; }
+    public string City { get; set; } = string.Empty;
+    public  string State { get; set; } = string.Empty;
+    public  string PostalCode { get; set; } = string.Empty;
+    public  string Country { get; set; } = string.Empty;
     
 }

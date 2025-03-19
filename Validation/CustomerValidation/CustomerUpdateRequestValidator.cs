@@ -9,6 +9,7 @@ public class CustomerUpdateRequestValidator : AbstractValidator<CustomerUpdateRe
     {
         RuleFor(x => x.Email)
             .Cascade(CascadeMode.Stop)
+            .NotNull().WithMessage("Email must not be null")
             .NotEmpty().WithMessage("Email must not be empty")
             .EmailAddress().WithMessage("Must be a valid email.");
 

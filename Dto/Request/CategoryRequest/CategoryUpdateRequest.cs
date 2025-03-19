@@ -2,7 +2,7 @@
 
 public class CategoryUpdateRequest
 {
-    public required string CategoryName { get; set; }
-    public required string Description { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public required long UpdatedBy { get; set; }
 }

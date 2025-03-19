@@ -14,6 +14,7 @@ public class ProductRequestValidator<T> : AbstractValidator<T> where T : Product
             .PrecisionScale(10, 2, true).WithMessage("Price must have at most 8 digits in total and 2 decimals.");
 
         RuleFor(x => x.Description)
+            .NotNull().WithMessage("The description cannot be null")
             .NotEmpty().WithMessage("The description cannot be empty")
             .MaximumLength(255).WithMessage("Description cannot exceed 500 characters.")
             .When(p => !string.IsNullOrEmpty(p.Description));

@@ -18,7 +18,6 @@ public class ProductUpdateRequestValidator : AbstractValidator<ProductUpdateRequ
         RuleFor(x => x).CustomAsync(ValidUpdateAsync);
     }
 
-
     private async Task ValidUpdateAsync(ProductUpdateRequest request,
         ValidationContext<ProductUpdateRequest> validationContext, CancellationToken _)
     {

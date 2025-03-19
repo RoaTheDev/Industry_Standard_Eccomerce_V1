@@ -194,7 +194,7 @@ public class CustomerService : ICustomerService
     {
         try
         {
-            if (await _userRepo.EntityExistByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower()))
+            if (await _userRepo.EntityExistByConditionAsync(u => u.Email.ToLower() == request.Email!.ToLower()))
             {
                 return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status409Conflict,
                     "The user Already exist");
@@ -214,18 +214,18 @@ public class CustomerService : ICustomerService
             {
                 Gender = request.Gender ?? GenderEnums.Male.ToString().ToLower(),
                 Dob = request.Dob,
-                Email = request.Email,
-                Password = request.Password,
-                FirstName = request.FirstName,
+                Email = request.Email!,
+                Password = request.Password!,
+                FirstName = request.FirstName!,
                 MiddleName = request.MiddleName ?? "",
-                LastName = request.LastName,
+                LastName = request.LastName!,
                 PhoneNumber = request.PhoneNumber
             }, TimeSpan.FromMinutes(15));
 
             var emailMetadata = new EmailMetadata
             {
                 Subject = "Email Verification",
-                ToAddress = request.Email,
+                ToAddress = request.Email!,
                 TemplatePath = nameof(EmailVerification)
             };
 
@@ -440,10 +440,10 @@ public class CustomerService : ICustomerService
         if (user.IsDeleted)
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
                 "The account is locked");
-        if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHashed!))
+        if (!_passwordHasher.VerifyPassword(request.CurrentPassword!, user.PasswordHashed!))
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
                 "The current password does not match");
-        user.PasswordHashed = _passwordHasher.HashPassword(request.NewPassword);
+        user.PasswordHashed = _passwordHasher.HashPassword(request.NewPassword!);
         await _userRepo.UpdateAsync(user);
         return new ApiStandardResponse<ConfirmationResponse?>(
             StatusCodes.Status200OK,
@@ -454,7 +454,7 @@ public class CustomerService : ICustomerService
     {
         try
         {
-            var user = await _userRepo.GetByConditionAsync(u => u.Email.ToLower() == request.Email.ToLower());
+            var user = await _userRepo.GetByConditionAsync(u => u.Email.ToLower() == request.Email!.ToLower());
 
             if (user is null)
                 return new ApiStandardResponse<ForgotPasswordResponse?>(StatusCodes.Status404NotFound,
@@ -510,7 +510,7 @@ public class CustomerService : ICustomerService
             return new ApiStandardResponse<ResetPasswordResponse?>(StatusCodes.Status404NotFound,
                 "User not found");
 
-        user.PasswordHashed = _passwordHasher.HashPassword(request.Password);
+        user.PasswordHashed = _passwordHasher.HashPassword(request.Password!);
         await _userRepo.UpdateAsync(user);
 
         await _cache.RemoveAsync($"{PasswordResetTokenKey}{session}");

@@ -3,9 +3,9 @@ namespace Ecommerce_site.Dto.Request.CategoryRequest;
 
 public class CategoryCreateRequest
 {
-    public required string CategoryName { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
 
-    public required string Description { get; set; }
+    public  string Description { get; set; }= string.Empty;
 
     public required long CreateBy { get; set; }
 }

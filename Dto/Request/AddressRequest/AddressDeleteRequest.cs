@@ -2,6 +2,6 @@
 
 public class AddressDeleteRequest
 {
-    public required long AddressId { get; set; }
-    public required long CustomerId { get; set; }
+    public  long AddressId { get; set; }
+    public  long CustomerId { get; set; }
 }
