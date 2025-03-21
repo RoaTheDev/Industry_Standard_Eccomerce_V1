@@ -6,7 +6,6 @@ using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using StackExchange.Redis;
 
@@ -19,7 +18,7 @@ public static class AppServiceConfig
         var dbConStr = configuration["DB_CONNECTION_STR"];
         return service.AddDbContext<EcommerceSiteContext>(opt => opt.UseSqlServer(dbConStr));
     }
-
+  
     public static IServiceCollection AddRedisConfig(this IServiceCollection service, IConfiguration configuration)
     {
         var redisConStr = configuration["REDIS_CONNECTION"];
@@ -52,46 +51,6 @@ public static class AppServiceConfig
             .WriteTo.File("logs/loggingInfo", rollingInterval: RollingInterval.Day)
             .CreateLogger();
         services.AddSingleton(Log.Logger);
-        return services;
-    }
-
-    public static IServiceCollection AddSwaggerConfig(this IServiceCollection services)
-    {
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Ecommerce API",
-                Version = "v1",
-                Description = "API documentation for Ecommerce APP"
-            });
-
-            var securityScheme = new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Description = "Enter 'Bearer {your token}'",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            };
-
-            options.AddSecurityDefinition("Bearer", securityScheme);
-
-            var securityRequirement = new OpenApiSecurityRequirement
-            {
-                { securityScheme, new List<string>() }
-            };
-
-            options.AddSecurityRequirement(securityRequirement);
-        });
-
         return services;
     }
 
@@ -166,8 +125,7 @@ public static class AppServiceConfig
         {
             options.AddPolicy(name: reactAppPolicy, policy =>
             {
-                policy
-                    .WithOrigins(
+                policy.WithOrigins(
                         "http://localhost:5173", // Development React server
                         "http://localhost:3000", // Another common React dev port
                         "https://yourdomain.com", // Production domain

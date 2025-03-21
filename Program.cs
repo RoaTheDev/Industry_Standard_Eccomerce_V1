@@ -4,6 +4,7 @@ using Ecommerce_site.config;
 using Ecommerce_site.filter;
 using Ecommerce_site.Middleware;
 using Microsoft.AspNetCore.Mvc;
+using Scalar.AspNetCore;
 using Serilog;
 
 DotEnv.Load();
@@ -20,7 +21,6 @@ builder.Services.LoggingConfig();
 builder.Services.AddDbConfig(builder.Configuration);
 builder.Services.AddRedisConfig(builder.Configuration);
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerConfig();
 builder.Services.MapperConfig();
 builder.Services.CustomDependencyConfig();
 
@@ -36,20 +36,20 @@ builder.Services.AddControllers(options => { options.Filters.Add<FluentValidatio
     });
 
 var app = builder.Build();
+
 app.UseCors("ReactAppPolicy");
 app.UseMiddleware<JsonValidationMiddleware>();
 app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.MapGet("/", context =>
 {
-    context.Response.Redirect("/swagger");
+    context.Response.Redirect("/scalar");
     return Task.CompletedTask;
 });
 app.UseAuthentication();
