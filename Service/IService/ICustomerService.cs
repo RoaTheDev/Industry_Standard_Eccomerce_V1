@@ -20,4 +20,9 @@ public interface ICustomerService
     Task<ApiStandardResponse<ForgotPasswordResponse?>> ForgotPasswordAsync(ForgotPasswordRequest request);
     Task<ApiStandardResponse<ResetPasswordResponse?>> ResetPasswordAsync(ResetPasswordRequest request, string session);
     Task<ApiStandardResponse<LogoutResponse?>> LogoutAsync(long userId);
+
+    Task<ApiStandardResponse<ConfirmationResponse>> ChangeProfileImage(long id, IFormFile file);
+    Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken);
+    Task<ApiStandardResponse<ConfirmationResponse?>> UnlinkProvider(long userId, string providerId, string providerName);
+    Task<ApiStandardResponse<List<AuthProviderResponse>?>> GetLinkedProvidersAsync(long userId);
 }

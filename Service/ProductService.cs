@@ -117,40 +117,25 @@ public class ProductService : IProductService
     {
         var product = await _productRepo.GetSelectedColumnsByConditionAsync(
             p => p.ProductId == id && !p.IsDeleted,
-            p => new
+            p => new ProductByIdResponse
             {
-                p.ProductId,
-                p.ProductName,
-                p.Price,
-                p.Description,
-                p.Category.CategoryName,
-                p.Quantity,
-                p.DiscountPercentage,
-                p.IsAvailable,
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                Price = p.Price,
+                Description = p.Description,
+                CategoryName = p.Category.CategoryName,
+                Quantity = p.Quantity,
+                Discount = p.DiscountPercentage,
                 Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
-                ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToImmutableList()
-            },
-            p => p.Include(pt => pt.Tags)
-                .Include(pc => pc.Category)
-                .Include(pi => pi.ProductImages)
+                ImageUrls = p.ProductImages.Select(i => i.ImageUrl).ToImmutableList(),
+            }
         );
 
         if (product is null)
             return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status404NotFound,
                 "the product does not exist");
 
-        return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status200OK, new ProductByIdResponse
-        {
-            ProductId = product.ProductId,
-            ProductName = product.ProductName,
-            Description = product.Description,
-            Discount = product.DiscountPercentage,
-            Price = product.Price,
-            Quantity = product.Quantity,
-            CategoryName = product.CategoryName,
-            Tags = product.Tags,
-            ImageUrls = product.ImageUrls
-        });
+        return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status200OK, product);
     }
 
     public async Task<ApiStandardResponse<PaginatedProductResponse>> GetAllProductAsync(long cursorValue = 0,
@@ -161,7 +146,7 @@ public class ProductService : IProductService
 
         var products = await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
             p => true,
-            p => new ProductByIdResponse
+            p => new PaginatedProduct
             {
                 ProductId = p.ProductId,
                 ProductName = p.ProductName,
@@ -170,15 +155,11 @@ public class ProductService : IProductService
                 Quantity = p.Quantity,
                 Price = p.Price,
                 Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
-                ImageUrls = p.ProductImages.Select(pi => pi.ImageUrl).ToImmutableList(),
+                ImageUrls = p.ProductImages.Where(pi => pi.IsPrimary).Select(pi => pi.ImageUrl).First(),
                 CategoryName = p.Category.CategoryName
             },
             p => p.ProductId,
             cursorValue,
-            p => p
-                .Include(pt => pt.Tags)
-                .Include(pi => pi.ProductImages)
-                .Include(pc => pc.Category),
             pageSize
         );
 

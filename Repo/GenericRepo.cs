@@ -274,7 +274,7 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
 
         query = query.Take(pageSize);
 
-        return await query.Select(selector).ToListAsync();
+        return await query.AsSplitQuery().Select(selector).ToListAsync();
     }
 
     public async Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
@@ -308,7 +308,6 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
             : query.OrderByDescending(cursorSelector);
 
         query = query.Take(pageSize);
-
-        return await query.Select(selector).ToListAsync();
+        return await query.AsSplitQuery().Select(selector).ToListAsync();
     }
 }

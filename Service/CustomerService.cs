@@ -27,6 +27,8 @@ public class CustomerService : ICustomerService
     private readonly RedisCaching _cache;
     private readonly IGenericRepo<Customer> _customerRepo;
     private readonly IFluentEmail _fluentEmail;
+
+
     private readonly IConfiguration _config;
     private readonly JwtGenerator _jwtGenerator;
     private readonly ILogger _logger;
@@ -35,12 +37,13 @@ public class CustomerService : ICustomerService
     private readonly RazorPageRenderer _razorPageRenderer;
     private readonly IGenericRepo<Role> _roleRepo;
     private readonly IGenericRepo<User> _userRepo;
+    private readonly IGenericRepo<AuthProvider> _provider;
     private readonly EcommerceSiteContext _dbContext;
 
     public CustomerService(IGenericRepo<Customer> customerRepo, ILogger logger, CustomPasswordHasher passwordHasher,
         RedisCaching cache, IGenericRepo<User> userRepo, IGenericRepo<Role> roleRepo, OtpGenerator otpGenerator,
         IFluentEmail fluentEmail, RazorPageRenderer razorPageRenderer, JwtGenerator jwtGenerator,
-        EcommerceSiteContext dbContext, IConfiguration config)
+        EcommerceSiteContext dbContext, IConfiguration config, IGenericRepo<AuthProvider> provider)
     {
         _customerRepo = customerRepo;
         _logger = logger;
@@ -54,6 +57,7 @@ public class CustomerService : ICustomerService
         _jwtGenerator = jwtGenerator;
         _dbContext = dbContext;
         _config = config;
+        _provider = provider;
     }
 
     public async Task<ApiStandardResponse<LoginResponse?>> LoginWithGoogle(GoogleLoginRequest request)
@@ -89,14 +93,13 @@ public class CustomerService : ICustomerService
                         EF.Functions.Like(ua.ProviderName, AuthProviderEnum.Google.ToString()));
                     if (userAuth is null)
                     {
-                        user.AuthProviders.Add(new AuthProvider
+                        await _provider.AddAsync(new AuthProvider
                         {
                             AuthProviderId = payload.Subject,
                             ProviderName = AuthProviderEnum.Google.ToString(),
                             IsDeleted = false,
                             UserId = user.UserId
                         });
-                        await _userRepo.UpdateAsync(user);
                     }
                 }
                 else
@@ -110,31 +113,40 @@ public class CustomerService : ICustomerService
                         RoleId = role!.RoleId,
                         DisplayName = payload.Name,
                         FirstName = payload.GivenName,
+                        MiddleName = "",
                         LastName = payload.FamilyName,
                         Email = payload.Email,
                         IsDeleted = false,
                         Gender = GenderEnums.Male.ToString(),
                     };
-                    await _userRepo.AddAsync(user);
 
-                    var customer = new Customer
+                    user = await _userRepo.AddAsync(user);
+
+                    await _provider.AddAsync(new AuthProvider
+                    {
+                        AuthProviderId = payload.Subject,
+                        ProviderName = AuthProviderEnum.Google.ToString(),
+                        IsDeleted = false,
+                        UserId = user.UserId
+                    });
+
+                    await _customerRepo.AddAsync(new Customer
                     {
                         Dob = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-19)),
                         IsDeleted = false,
                         CustomerId = user.UserId
-                    };
-                    await _customerRepo.AddAsync(customer);
+                    });
                 }
 
                 var accessToken = _jwtGenerator.GenerateAccessToken(
                     user.UserId.ToString(),
                     user.Email,
-                    user.Role.RoleName
+                    RoleEnums.Customer.ToString()
                 );
                 var refreshToken = _jwtGenerator.GenerateRefreshToken();
 
                 await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
-
+                await transaction.CommitAsync();
                 return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status200OK, new LoginResponse
                 {
                     Token = new TokenResponse
@@ -573,5 +585,191 @@ public class CustomerService : ICustomerService
 
             throw new ExternalException("External service not responding");
         }
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse>> ChangeProfileImage(long id, IFormFile file)
+    {
+        if (!await _customerRepo.EntityExistByConditionAsync(c => c.CustomerId == id && !c.IsDeleted))
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                "The user does not exist");
+
+
+        throw new NotImplementedException();
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken)
+    {
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = [_config["CLIENT_ID"]]
+                });
+        }
+        catch (InvalidJwtException)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status401Unauthorized,
+                "Invalid Google token");
+        }
+
+        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId,
+                    include => include.Include(u => u.AuthProviders));
+
+                if (user == null)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status404NotFound,
+                        "User not found");
+                }
+
+                var existingAuth = await _dbContext.AuthProviders
+                    .FirstOrDefaultAsync(ap =>
+                        ap.AuthProviderId == payload.Subject &&
+                        ap.ProviderName == AuthProviderEnum.Google.ToString() &&
+                        !ap.IsDeleted);
+
+                if (existingAuth != null && existingAuth.UserId != userId)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status409Conflict,
+                        "This Google account is already linked to another user");
+                }
+
+                var existingUserAuth = user.AuthProviders.FirstOrDefault(a =>
+                    a.AuthProviderId == payload.Subject &&
+                    a.ProviderName == AuthProviderEnum.Google.ToString());
+
+                if (existingUserAuth != null)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status409Conflict,
+                        "This Google account is already linked to your account");
+                }
+
+                var newProvider = new AuthProvider
+                {
+                    UserId = userId,
+                    ProviderName = AuthProviderEnum.Google.ToString(),
+                    AuthProviderId = payload.Subject,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                };
+
+                await _dbContext.AuthProviders.AddAsync(newProvider);
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status200OK,
+                    new ConfirmationResponse { Message = "Google account successfully linked" });
+            }
+            catch (System.Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.Error(ex, "Error linking Google account");
+                throw;
+            }
+        }
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> UnlinkProvider(long userId, string providerId,
+        string providerName)
+    {
+        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                var authProviders = await _dbContext.AuthProviders
+                    .Where(ap => ap.UserId == userId && !ap.IsDeleted)
+                    .ToListAsync();
+
+                if (authProviders.Count == 0)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status404NotFound,
+                        "No authentication providers found for this user");
+                }
+
+                var authProvider = authProviders.FirstOrDefault(ap =>
+                    ap.AuthProviderId == providerId &&
+                    ap.ProviderName == providerName);
+
+                if (authProvider == null)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status404NotFound,
+                        "Authentication provider not found");
+                }
+
+                var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId);
+                bool hasPassword = user != null && !string.IsNullOrEmpty(user.PasswordHashed);
+
+                if (authProviders.Count <= 1 && !hasPassword)
+                {
+                    return new ApiStandardResponse<ConfirmationResponse?>(
+                        StatusCodes.Status400BadRequest,
+                        "Cannot remove the only authentication method. Add another method first.");
+                }
+
+                authProvider.IsDeleted = true;
+                authProvider.UpdatedAt = DateTime.UtcNow;
+
+                await _dbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status200OK,
+                    new ConfirmationResponse { Message = $"{providerName} account successfully unlinked" });
+            }
+            catch (System.Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.Error(ex, "Error unlinking provider");
+                throw;
+            }
+        }
+    }
+
+    public async Task<ApiStandardResponse<List<AuthProviderResponse>?>> GetLinkedProvidersAsync(long userId)
+    {
+        var authProviders = await _dbContext.AuthProviders
+            .Where(ap => ap.UserId == userId && !ap.IsDeleted)
+            .Select(ap => new AuthProviderResponse
+            {
+                ProviderId = ap.AuthProviderId,
+                ProviderName = ap.ProviderName,
+                LinkedAt = ap.CreatedAt
+            })
+            .ToListAsync();
+
+        var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId);
+        if (user == null)
+        {
+            return new ApiStandardResponse<List<AuthProviderResponse>?>(
+                StatusCodes.Status404NotFound,
+                "User not found");
+        }
+
+        if (!string.IsNullOrEmpty(user.PasswordHashed))
+        {
+            authProviders.Add(new AuthProviderResponse
+            {
+                ProviderId = "password",
+                ProviderName = "Password",
+                LinkedAt = user.CreatedAt
+            });
+        }
+
+        return new ApiStandardResponse<List<AuthProviderResponse>?>(
+            StatusCodes.Status200OK,
+            authProviders);
     }
 }
