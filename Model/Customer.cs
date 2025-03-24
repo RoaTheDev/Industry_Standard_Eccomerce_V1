@@ -4,15 +4,15 @@ public  class Customer
 {
     public long CustomerId { get; set; }
 
-    public DateOnly Dob { get; set; }
+    public DateOnly? Dob { get; set; }
 
-    public string PhoneNumber { get; set; } = null!;
+    public string? PhoneNumber { get; set; }
 
     public bool IsDeleted { get; set; }
 
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
-    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+    public virtual Cart? Cart { get; set; }
 
     public virtual User CustomerNavigation { get; set; } = null!;
 

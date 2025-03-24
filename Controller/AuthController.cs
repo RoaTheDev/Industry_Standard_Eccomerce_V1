@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
         [FromHeader(Name = "Auth-Session-Token")]
         Guid session, [FromBody] EmailVerificationRequest request)
     {
-        var response = await _customerService.EmailVerification(session, request);
+        var response = await _customerService.EmailVerificationAsync(session, request);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails

@@ -9,7 +9,7 @@ public interface ICustomerService
     Task<ApiStandardResponse<CustomerRegisterResponse?>> RegisterCustomerAsync(CustomerRegisterRequestUap request);
     Task<ApiStandardResponse<CustomerGetByIdResponse?>> GetCustomerByIdAsync(long id);
 
-    Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerification(Guid session,
+    Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerificationAsync(Guid session,
         EmailVerificationRequest request);
 
     Task<ApiStandardResponse<LoginResponse?>> LoginAsync(LoginRequestUap requestUap);

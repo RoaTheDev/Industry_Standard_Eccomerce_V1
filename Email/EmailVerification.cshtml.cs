@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Personal_finance_tracker.service.templates;
+namespace Ecommerce_site.Email;
 
 public class EmailVerification : PageModel
 {

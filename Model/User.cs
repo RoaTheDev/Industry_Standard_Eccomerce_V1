@@ -26,6 +26,8 @@ public  class User
 
     public bool IsDeleted { get; set; }
 
+    public string? Profile { get; set; }
+
     public virtual ICollection<AuthProvider> AuthProviders { get; set; } = new List<AuthProvider>();
 
     public virtual ICollection<Cancellation> Cancellations { get; set; } = new List<Cancellation>();

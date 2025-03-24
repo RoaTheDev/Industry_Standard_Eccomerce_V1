@@ -1,6 +1,6 @@
 ﻿namespace Ecommerce_site.Model;
 
-public class Product
+public  class Product
 {
     public long ProductId { get; set; }
 
@@ -20,7 +20,7 @@ public class Product
 
     public long CreatedBy { get; set; }
 
-    public long UpdatedBy { get; set; }
+    public long? UpdatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -40,7 +40,7 @@ public class Product
 
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
 
-    public virtual User UpdatedByNavigation { get; set; } = null!;
+    public virtual User? UpdatedByNavigation { get; set; }
 
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }

@@ -47,7 +47,8 @@ public  class EcommerceSiteContext : DbContext
     public virtual DbSet<Tag> Tags { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-    
+
+ 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Address>(entity =>
@@ -153,6 +154,10 @@ public  class EcommerceSiteContext : DbContext
         {
             entity.ToTable("Carts", "orders");
 
+            entity.HasIndex(e => e.CustomerId, "IX_Cart_CustomerId_IsCheckout")
+                .IsUnique()
+                .HasFilter("([is_checkout]=(0))");
+
             entity.Property(e => e.CartId).HasColumnName("cart_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -161,8 +166,8 @@ public  class EcommerceSiteContext : DbContext
             entity.Property(e => e.CustomerId).HasColumnName("customer_id");
             entity.Property(e => e.IsCheckout).HasColumnName("is_checkout");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.Carts)
-                .HasForeignKey(d => d.CustomerId)
+            entity.HasOne(d => d.Customer).WithOne(p => p.Cart)
+                .HasForeignKey<Cart>(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Carts_Customers");
         });
@@ -446,7 +451,6 @@ public  class EcommerceSiteContext : DbContext
 
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.ProductUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_UpdatedBy");
 
             entity.HasMany(d => d.Tags).WithMany(p => p.Products)
@@ -604,6 +608,10 @@ public  class EcommerceSiteContext : DbContext
             entity.Property(e => e.PasswordHashed)
                 .HasMaxLength(255)
                 .HasColumnName("password_hashed");
+            entity.Property(e => e.Profile)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("profile");
             entity.Property(e => e.RoleId).HasColumnName("role_id");
             entity.Property(e => e.UpdatedAt)
                 .HasColumnType("datetime")
