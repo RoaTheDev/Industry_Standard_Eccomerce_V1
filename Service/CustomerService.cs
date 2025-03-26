@@ -44,7 +44,7 @@ public class CustomerService : ICustomerService
         RedisCaching cache, IGenericRepo<User> userRepo, IGenericRepo<Role> roleRepo, OtpGenerator otpGenerator,
         IFluentEmail fluentEmail, RazorPageRenderer razorPageRenderer, JwtGenerator jwtGenerator,
         EcommerceSiteContext dbContext, IConfiguration config, IGenericRepo<AuthProvider> provider,
-        [FromKeyedServices("local")]  IStorageProvider storageProvider)
+        [FromKeyedServices("local")] IStorageProvider storageProvider)
     {
         _customerRepo = customerRepo;
         _logger = logger;
@@ -91,7 +91,7 @@ public class CustomerService : ICustomerService
                 {
                     var userAuth = user.AuthProviders.FirstOrDefault(ua =>
                         ua.AuthProviderId == payload.Subject &&
-                        EF.Functions.Like(ua.ProviderName, AuthProviderEnum.Google.ToString()));
+                        ua.ProviderName.Contains(AuthProviderEnum.Google.ToString()));
                     if (userAuth is null)
                     {
                         await _provider.AddAsync(new AuthProvider
@@ -106,7 +106,7 @@ public class CustomerService : ICustomerService
                 else
                 {
                     var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
-                        r => EF.Functions.Like(r.RoleName, RoleEnums.Customer.ToString()),
+                        r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
                         r => new { r.RoleId });
 
                     user = new User
@@ -291,7 +291,7 @@ public class CustomerService : ICustomerService
                         "the registration session has ended");
 
                 var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
-                    r => EF.Functions.Like(r.RoleName, RoleEnums.Customer.ToString()),
+                    r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
                     r => new { r.RoleName, r.RoleId });
 
                 if (role is null)
@@ -442,26 +442,6 @@ public class CustomerService : ICustomerService
             });
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id,
-        PasswordChangeRequest request)
-    {
-        var user = await _userRepo.GetByConditionAsync(u => u.UserId == id);
-
-        if (user is null)
-            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
-                "The account does not exist");
-        if (user.IsDeleted)
-            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
-                "The account is locked");
-        if (!_passwordHasher.VerifyPassword(request.CurrentPassword!, user.PasswordHashed!))
-            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
-                "The current password does not match");
-        user.PasswordHashed = _passwordHasher.HashPassword(request.NewPassword!);
-        await _userRepo.UpdateAsync(user);
-        return new ApiStandardResponse<ConfirmationResponse?>(
-            StatusCodes.Status200OK,
-            new ConfirmationResponse { Message = "password changed successfully" });
-    }
 
     public async Task<ApiStandardResponse<ForgotPasswordResponse?>> ForgotPasswordAsync(ForgotPasswordRequest request)
     {
@@ -540,53 +520,28 @@ public class CustomerService : ICustomerService
             new LogoutResponse { Message = "Logged out successfully" });
     }
 
-    private async Task SendEmailAsync(EmailMetadata emailMetadata, PasswordResetMsg model)
+
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> PasswordChangeAsync(long id,
+        PasswordChangeRequest request)
     {
-        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
-        var email = await _fluentEmail.To(emailMetadata.ToAddress)
-            .Subject(emailMetadata.Subject)
-            .Body(emailBody, true)
-            .SendAsync();
+        var user = await _userRepo.GetByConditionAsync(u => u.UserId == id);
 
-        if (email.Successful)
-        {
-            _logger.Information("Email sent successfully!");
-        }
-        else
-        {
-            _logger.Error("Failed to send email.");
-            foreach (var error in email.ErrorMessages)
-            {
-                _logger.Error(error);
-            }
-
-            throw new ExternalException("External service not responding");
-        }
+        if (user is null)
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
+                "The account does not exist");
+        if (user.IsDeleted)
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
+                "The account is locked");
+        if (!_passwordHasher.VerifyPassword(request.CurrentPassword!, user.PasswordHashed!))
+            return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status400BadRequest,
+                "The current password does not match");
+        user.PasswordHashed = _passwordHasher.HashPassword(request.NewPassword!);
+        await _userRepo.UpdateAsync(user);
+        return new ApiStandardResponse<ConfirmationResponse?>(
+            StatusCodes.Status200OK,
+            new ConfirmationResponse { Message = "password changed successfully" });
     }
 
-    private async Task SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model)
-    {
-        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
-        var email = await _fluentEmail.To(emailMetadata.ToAddress)
-            .Subject(emailMetadata.Subject)
-            .Body(emailBody, true)
-            .SendAsync();
-
-        if (email.Successful)
-        {
-            _logger.Information("Email sent successfully!");
-        }
-        else
-        {
-            _logger.Error("Failed to send email.");
-            foreach (var error in email.ErrorMessages)
-            {
-                _logger.Error(error);
-            }
-
-            throw new ExternalException("External service not responding");
-        }
-    }
 
     public async Task<ApiStandardResponse<ConfirmationResponse>> ChangeProfileImage(long id, IFormFile file)
     {
@@ -754,5 +709,53 @@ public class CustomerService : ICustomerService
         return new ApiStandardResponse<List<AuthProviderResponse>?>(
             StatusCodes.Status200OK,
             authProviders);
+    }
+
+    private async Task SendEmailAsync(EmailMetadata emailMetadata, PasswordResetMsg model)
+    {
+        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
+        var email = await _fluentEmail.To(emailMetadata.ToAddress)
+            .Subject(emailMetadata.Subject)
+            .Body(emailBody, true)
+            .SendAsync();
+
+        if (email.Successful)
+        {
+            _logger.Information("Email sent successfully!");
+        }
+        else
+        {
+            _logger.Error("Failed to send email.");
+            foreach (var error in email.ErrorMessages)
+            {
+                _logger.Error(error);
+            }
+
+            throw new ExternalException("External service not responding");
+        }
+    }
+
+    private async Task SendEmailAsync(EmailMetadata emailMetadata, EmailVerificationMsg model)
+    {
+        var emailBody = await _razorPageRenderer.RenderTemplateAsync(emailMetadata.TemplatePath, model);
+        var email = await _fluentEmail.To(emailMetadata.ToAddress)
+            .Subject(emailMetadata.Subject)
+            .Body(emailBody, true)
+            .SendAsync();
+
+        if (email.Successful)
+        {
+            _logger.Information("Email sent successfully!");
+        }
+        else
+        {
+            _logger.Error("Failed to send email.");
+            foreach (var error in email.ErrorMessages)
+            {
+                _logger.Error(error);
+            }
+
+            throw new ExternalException("External service not responding");
+        }
     }
 }

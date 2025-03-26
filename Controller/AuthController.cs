@@ -2,7 +2,6 @@
 using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.CustomerRequest;
 using Ecommerce_site.Dto.response.CustomerResponse;
-using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Service.IService;
 using Ecommerce_site.Util;
 using Microsoft.AspNetCore.Authorization;
