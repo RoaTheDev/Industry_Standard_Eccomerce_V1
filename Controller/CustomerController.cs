@@ -56,8 +56,9 @@ public class CustomerController : ControllerBase
     }
 
     [HttpPatch("{id:long}/profile/")]
-    public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> ProfileChange([FromRoute] long id,
-        [FromForm] FormFile file)
+    public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse>>> ProfileChange(
+        [FromRoute] long id,
+        [FromForm] IFormFile file)
     {
         var response = await _customerService.ChangeProfileImage(id, file);
         if (!response.Success)
@@ -86,11 +87,12 @@ public class CustomerController : ControllerBase
             : Ok(response.Data);
     }
 
-    [HttpDelete("unlink/{providerName:alpha}/{providerId:alpha}")]
+    [HttpDelete("unlink/{providerName}/{providerId}")]
     public async Task<ActionResult<ApiStandardResponse<ConfirmationResponse?>>> UnlinkProvider(
-        [FromRoute] string providerName, [FromRoute] string providerId)
+         [FromRoute] string providerName,[FromRoute] string providerId)
     {
         var userId = long.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        Console.WriteLine($"this is the user Id  {userId}");
         var response = await _customerService.UnlinkProvider(userId, providerId, providerName);
         return !response.Success
             ? StatusCode(response.StatusCode, new ProblemDetails

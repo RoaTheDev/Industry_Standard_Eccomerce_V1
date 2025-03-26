@@ -79,50 +79,20 @@ public class CustomerService : ICustomerService
                 "Invalid Google token");
         }
 
-        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            try
+            var user = await _userRepo.GetByConditionAsync(u =>
+                u.Email == payload.Email, uIn => uIn
+                .Include(ur => ur.Role)
+                .Include(ua => ua.AuthProviders));
+            if (user is not null)
             {
-                var user = await _userRepo.GetByConditionAsync(u =>
-                    u.Email == payload.Email, uIn => uIn
-                    .Include(ur => ur.Role)
-                    .Include(ua => ua.AuthProviders));
-                if (user is not null)
+                var userAuth = user.AuthProviders.FirstOrDefault(ua =>
+                    ua.AuthProviderId == payload.Subject &&
+                    ua.ProviderName.Contains(AuthProviderEnum.Google.ToString()));
+                if (userAuth is null)
                 {
-                    var userAuth = user.AuthProviders.FirstOrDefault(ua =>
-                        ua.AuthProviderId == payload.Subject &&
-                        ua.ProviderName.Contains(AuthProviderEnum.Google.ToString()));
-                    if (userAuth is null)
-                    {
-                        await _provider.AddAsync(new AuthProvider
-                        {
-                            AuthProviderId = payload.Subject,
-                            ProviderName = AuthProviderEnum.Google.ToString(),
-                            IsDeleted = false,
-                            UserId = user.UserId
-                        });
-                    }
-                }
-                else
-                {
-                    var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
-                        r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
-                        r => new { r.RoleId });
-
-                    user = new User
-                    {
-                        RoleId = role!.RoleId,
-                        DisplayName = payload.Name,
-                        FirstName = payload.GivenName,
-                        MiddleName = "",
-                        LastName = payload.FamilyName,
-                        Email = payload.Email,
-                        IsDeleted = false,
-                        Gender = GenderEnums.Male.ToString(),
-                    };
-
-                    user = await _userRepo.AddAsync(user);
-
                     await _provider.AddAsync(new AuthProvider
                     {
                         AuthProviderId = payload.Subject,
@@ -130,41 +100,69 @@ public class CustomerService : ICustomerService
                         IsDeleted = false,
                         UserId = user.UserId
                     });
-
-                    await _customerRepo.AddAsync(new Customer
-                    {
-                        Dob = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-19)),
-                        IsDeleted = false,
-                        CustomerId = user.UserId
-                    });
                 }
+            }
+            else
+            {
+                var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
+                    r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
+                    r => new { r.RoleId });
 
-                var accessToken = _jwtGenerator.GenerateAccessToken(
-                    user.UserId.ToString(),
-                    user.Email,
-                    RoleEnums.Customer.ToString()
-                );
-                var refreshToken = _jwtGenerator.GenerateRefreshToken();
-
-                await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
-                await transaction.CommitAsync();
-                return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status200OK, new LoginResponse
+                user = new User
                 {
-                    Token = new TokenResponse
-                    {
-                        Token = accessToken,
-                        ExpiresAt = DateTime.UtcNow.AddHours(1).ToString("O")
-                    },
-                    CustomerId = user.UserId,
-                    DisplayName = user.DisplayName,
-                    Message = "Google login successful"
+                    RoleId = role!.RoleId,
+                    DisplayName = payload.Name,
+                    FirstName = payload.GivenName,
+                    MiddleName = "",
+                    LastName = payload.FamilyName,
+                    Email = payload.Email,
+                    IsDeleted = false,
+                    Gender = GenderEnums.Male.ToString(),
+                };
+
+                user = await _userRepo.AddAsync(user);
+
+                await _provider.AddAsync(new AuthProvider
+                {
+                    AuthProviderId = payload.Subject,
+                    ProviderName = AuthProviderEnum.Google.ToString(),
+                    IsDeleted = false,
+                    UserId = user.UserId
+                });
+
+                await _customerRepo.AddAsync(new Customer
+                {
+                    Dob = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-19)),
+                    IsDeleted = false,
+                    CustomerId = user.UserId
                 });
             }
-            catch (System.Exception)
+
+            var accessToken = _jwtGenerator.GenerateAccessToken(
+                user.UserId.ToString(),
+                user.Email,
+                RoleEnums.Customer.ToString()
+            );
+            var refreshToken = _jwtGenerator.GenerateRefreshToken();
+
+            await _cache.SetAsync($"{RedisRefreshKey}{user.UserId}", refreshToken);
+            await transaction.CommitAsync();
+            return new ApiStandardResponse<LoginResponse?>(StatusCodes.Status200OK, new LoginResponse
             {
-                await transaction.RollbackAsync();
-                throw;
-            }
+                Token = new TokenResponse
+                {
+                    Token = accessToken,
+                    ExpiresAt = DateTime.UtcNow.AddHours(1).ToString("O")
+                },
+                CustomerId = user.UserId,
+                DisplayName = user.DisplayName,
+                Message = "Google login successful"
+            });
+        }
+        catch (System.Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 
@@ -180,7 +178,8 @@ public class CustomerService : ICustomerService
                 u.FirstName,
                 u.LastName,
                 u.MiddleName,
-                u.Gender
+                u.Gender,
+                u.Profile
             }, include => include.Include(u => u.Customer)!
         );
 
@@ -195,7 +194,8 @@ public class CustomerService : ICustomerService
             LastName = customer.LastName,
             MiddleName = customer.MiddleName,
             Gender = customer.Gender,
-            PhoneNumber = customer.PhoneNumber!, CustomerId = customer.UserId
+            PhoneNumber = customer.PhoneNumber!, CustomerId = customer.UserId,
+            Profile = customer.Profile
         };
 
         return new ApiStandardResponse<CustomerGetByIdResponse?>(StatusCodes.Status200OK, response);
@@ -267,91 +267,89 @@ public class CustomerService : ICustomerService
     public async Task<ApiStandardResponse<CustomerCreationResponse?>> EmailVerificationAsync(Guid session,
         EmailVerificationRequest request)
     {
-        using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+        try
         {
-            try
+            var otp = await _cache.GetAsync<uint>($"{OtpVerificationKey}{session}");
+            var customerRegisterObj = await _cache.GetAsync<UserCreationCache>($"{RegisterAccountKey}{session}");
+
+            if (otp == 0)
             {
-                var otp = await _cache.GetAsync<uint>($"{OtpVerificationKey}{session}");
-                var customerRegisterObj = await _cache.GetAsync<UserCreationCache>($"{RegisterAccountKey}{session}");
+                return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
+                    "The otp has expired");
+            }
 
-                if (otp == 0)
+            if (otp != request.Otp)
+            {
+                return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status400BadRequest,
+                    "The code does not match");
+            }
+
+            if (customerRegisterObj == null)
+                return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
+                    "the registration session has ended");
+
+            var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
+                r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
+                r => new { r.RoleName, r.RoleId });
+
+            if (role is null)
+                return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
+                    "The customer role does not exist yet");
+
+            var createdUser = await _userRepo.AddAsync(
+                new User
                 {
-                    return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
-                        "The otp has expired");
-                }
-
-                if (otp != request.Otp)
-                {
-                    return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status400BadRequest,
-                        "The code does not match");
-                }
-
-                if (customerRegisterObj == null)
-                    return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
-                        "the registration session has ended");
-
-                var role = await _roleRepo.GetSelectedColumnsByConditionAsync(
-                    r => r.RoleName.Contains(RoleEnums.Customer.ToString()),
-                    r => new { r.RoleName, r.RoleId });
-
-                if (role is null)
-                    return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status404NotFound,
-                        "The customer role does not exist yet");
-
-                var createdUser = await _userRepo.AddAsync(
-                    new User
-                    {
-                        Gender = customerRegisterObj.Gender,
-                        FirstName = customerRegisterObj.FirstName,
-                        MiddleName = customerRegisterObj.MiddleName,
-                        LastName = customerRegisterObj.LastName,
-                        Email = customerRegisterObj.Email,
-                        DisplayName =
-                            $"{customerRegisterObj.FirstName} {customerRegisterObj.MiddleName} {customerRegisterObj.LastName}",
-                        PasswordHashed = _passwordHasher.HashPassword(customerRegisterObj.Password),
-                        RoleId = role.RoleId
-                    });
-
-                await _customerRepo.AddAsync(new Customer
-                {
-                    CustomerId = createdUser.UserId,
-                    PhoneNumber = customerRegisterObj.PhoneNumber,
-                    Dob = customerRegisterObj.Dob
+                    Gender = customerRegisterObj.Gender,
+                    FirstName = customerRegisterObj.FirstName,
+                    MiddleName = customerRegisterObj.MiddleName,
+                    LastName = customerRegisterObj.LastName,
+                    Email = customerRegisterObj.Email,
+                    DisplayName =
+                        $"{customerRegisterObj.FirstName} {customerRegisterObj.MiddleName} {customerRegisterObj.LastName}",
+                    PasswordHashed = _passwordHasher.HashPassword(customerRegisterObj.Password),
+                    RoleId = role.RoleId
                 });
 
-                await transaction.CommitAsync();
-
-                var accessToken =
-                    _jwtGenerator.GenerateAccessToken(createdUser.UserId.ToString(), createdUser.Email, role.RoleName);
-                var refreshToken = _jwtGenerator.GenerateRefreshToken();
-
-                await _cache.RemoveAsync($"{OtpVerificationKey}{session}");
-                await _cache.RemoveAsync($"{RegisterAccountKey}{session}");
-                await _cache.SetAsync($"{RedisRefreshKey}{createdUser.UserId}", refreshToken);
-
-                return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status201Created,
-                    new CustomerCreationResponse
-                    {
-                        UserId = createdUser.UserId,
-                        Gender = createdUser.Gender,
-                        Dob = customerRegisterObj.Dob,
-                        Email = createdUser.Email,
-                        FirstName = createdUser.FirstName,
-                        MiddleName = createdUser.MiddleName,
-                        LastName = createdUser.LastName,
-                        PhoneNumber = customerRegisterObj.PhoneNumber,
-                        Token = new TokenResponse
-                        {
-                            Token = accessToken,
-                            ExpiresAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
-                        }
-                    });
-            }
-            catch (System.Exception)
+            await _customerRepo.AddAsync(new Customer
             {
-                await transaction.RollbackAsync();
-                throw;
-            }
+                CustomerId = createdUser.UserId,
+                PhoneNumber = customerRegisterObj.PhoneNumber,
+                Dob = customerRegisterObj.Dob
+            });
+
+            await transaction.CommitAsync();
+
+            var accessToken =
+                _jwtGenerator.GenerateAccessToken(createdUser.UserId.ToString(), createdUser.Email, role.RoleName);
+            var refreshToken = _jwtGenerator.GenerateRefreshToken();
+
+            await _cache.RemoveAsync($"{OtpVerificationKey}{session}");
+            await _cache.RemoveAsync($"{RegisterAccountKey}{session}");
+            await _cache.SetAsync($"{RedisRefreshKey}{createdUser.UserId}", refreshToken);
+
+            return new ApiStandardResponse<CustomerCreationResponse?>(StatusCodes.Status201Created,
+                new CustomerCreationResponse
+                {
+                    UserId = createdUser.UserId,
+                    Gender = createdUser.Gender,
+                    Dob = customerRegisterObj.Dob,
+                    Email = createdUser.Email,
+                    FirstName = createdUser.FirstName,
+                    MiddleName = createdUser.MiddleName,
+                    LastName = createdUser.LastName,
+                    PhoneNumber = customerRegisterObj.PhoneNumber,
+                    Token = new TokenResponse
+                    {
+                        Token = accessToken,
+                        ExpiresAt = DateTime.UtcNow.AddMinutes(15).ToString("O")
+                    }
+                });
+        }
+        catch (System.Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
     }
 
@@ -565,81 +563,100 @@ public class CustomerService : ICustomerService
             });
     }
 
-    public async Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken)
-    {
-        GoogleJsonWebSignature.Payload payload;
-        try
+        public async Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken)
         {
-            payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
-                new GoogleJsonWebSignature.ValidationSettings
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
+                    new GoogleJsonWebSignature.ValidationSettings
+                    {
+                        Audience = [_config["CLIENT_ID"]]
+                    });
+            }
+            catch (InvalidJwtException)
+            {
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status401Unauthorized,
+                    "Invalid Google token");
+            }
+
+            var existingAuth = await _provider.GetByConditionAsync(ap =>
+                ap.AuthProviderId == payload.Subject &&
+                ap.ProviderName == AuthProviderEnum.Google.ToString());
+
+            if (existingAuth is { IsDeleted: false } && existingAuth.UserId != userId)
+            {
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status409Conflict,
+                    "This Google account is already linked to another user");
+            }
+
+            var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId,
+                include => include.Include(u => u.AuthProviders));
+
+            if (user == null)
+            {
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status404NotFound,
+                    "User not found");
+            }
+
+            var existingUserAuth = user.AuthProviders.FirstOrDefault(a =>
+                a.AuthProviderId == payload.Subject &&
+                a.ProviderName == AuthProviderEnum.Google.ToString());
+
+            if (existingUserAuth is { IsDeleted: false })
+            {
+                return new ApiStandardResponse<ConfirmationResponse?>(
+                    StatusCodes.Status409Conflict,
+                    "This Google account is already linked to your account");
+            }
+
+            if (existingUserAuth is { IsDeleted: true })
+            {
+                existingUserAuth.IsDeleted = false;
+                existingUserAuth.UpdatedAt = DateTime.UtcNow;
+                await _provider.UpdateAsync(existingUserAuth);
+            }
+            else if (existingAuth is { IsDeleted: true })
+            {
+                // Case where this Google account was previously linked to someone else but deleted
+                // We'll create a new record rather than reviving the old one
+                await _provider.AddAsync(new AuthProvider
                 {
-                    Audience = [_config["CLIENT_ID"]]
+                    UserId = userId,
+                    ProviderName = AuthProviderEnum.Google.ToString(),
+                    AuthProviderId = payload.Subject,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
                 });
-        }
-        catch (InvalidJwtException)
-        {
+            }
+            else
+            {
+                await _provider.AddAsync(new AuthProvider
+                {
+                    UserId = userId,
+                    ProviderName = AuthProviderEnum.Google.ToString(),
+                    AuthProviderId = payload.Subject,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsDeleted = false
+                });
+            }
+
             return new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status401Unauthorized,
-                "Invalid Google token");
+                StatusCodes.Status200OK,
+                new ConfirmationResponse { Message = "Google account successfully linked" });
         }
-
-        var existingAuth = await _provider.GetByConditionAsync(ap =>
-            ap.AuthProviderId == payload.Subject &&
-            ap.ProviderName == AuthProviderEnum.Google.ToString() &&
-            !ap.IsDeleted);
-
-        if (existingAuth != null && existingAuth.UserId != userId)
-        {
-            return new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status409Conflict,
-                "This Google account is already linked to another user");
-        }
-
-        var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId,
-            include => include.Include(u => u.AuthProviders));
-
-        if (user == null)
-        {
-            return new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status404NotFound,
-                "User not found");
-        }
-
-        var existingUserAuth = user.AuthProviders.FirstOrDefault(a =>
-            a.AuthProviderId == payload.Subject &&
-            a.ProviderName == AuthProviderEnum.Google.ToString() &&
-            !a.IsDeleted);
-
-        if (existingUserAuth != null)
-        {
-            return new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status409Conflict,
-                "This Google account is already linked to your account");
-        }
-
-        var newProvider = new AuthProvider
-        {
-            UserId = userId,
-            ProviderName = AuthProviderEnum.Google.ToString(),
-            AuthProviderId = payload.Subject,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            IsDeleted = false
-        };
-
-        await _provider.AddAsync(newProvider);
-
-        return new ApiStandardResponse<ConfirmationResponse?>(
-            StatusCodes.Status200OK,
-            new ConfirmationResponse { Message = "Google account successfully linked" });
-    }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> UnlinkProvider(long userId, string providerId,
         string providerName)
     {
         var authProviders = await _provider.GetAllByConditionAsync(ap => ap.UserId == userId && !ap.IsDeleted);
 
-        if (authProviders.Count == 0)
+        if (authProviders.Count < 1)
         {
             return new ApiStandardResponse<ConfirmationResponse?>(
                 StatusCodes.Status404NotFound,

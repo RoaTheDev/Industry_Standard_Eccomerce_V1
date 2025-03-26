@@ -12,4 +12,6 @@ public class CustomerGetByIdResponse
     public required string Email { get; set; }
     public required DateOnly Dob { get; set; }
     public required string PhoneNumber { get; set; }
+    
+    public required string? Profile { get; set; }
 }
