@@ -2,7 +2,6 @@
 
 public class AddressUpdateRequest
 {
-    public long AddressId { get; set; }
 
     public string FirstAddressLine { get; set; } = string.Empty;
 

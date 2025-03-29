@@ -9,6 +9,11 @@ public interface IAddressService
     Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long customerId, long addressId);
     Task<ApiStandardResponse<IEnumerable<AddressResponse>?>> GetAddressListByCustomerIdAsync(long customerId);
     Task<ApiStandardResponse<AddressResponse?>> CreateAddressAsync(long customerId, AddressCreationRequest request);
-    Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId,AddressUpdateRequest request);
-    Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(long customerId,long  addressId);
+
+    Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId, long addressId,
+        AddressUpdateRequest request);
+
+    Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(long customerId, long addressId);
+
+    Task<ApiStandardResponse<ConfirmationResponse>> ChangeDefaultAddress(long customerId,long addressId);
 }

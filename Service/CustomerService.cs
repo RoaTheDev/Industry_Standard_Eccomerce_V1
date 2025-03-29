@@ -563,93 +563,92 @@ public class CustomerService : ICustomerService
             });
     }
 
-        public async Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken)
+    public async Task<ApiStandardResponse<ConfirmationResponse?>> LinkGoogleAccount(long userId, string idToken)
+    {
+        GoogleJsonWebSignature.Payload payload;
+        try
         {
-            GoogleJsonWebSignature.Payload payload;
-            try
-            {
-                payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
-                    new GoogleJsonWebSignature.ValidationSettings
-                    {
-                        Audience = [_config["CLIENT_ID"]]
-                    });
-            }
-            catch (InvalidJwtException)
-            {
-                return new ApiStandardResponse<ConfirmationResponse?>(
-                    StatusCodes.Status401Unauthorized,
-                    "Invalid Google token");
-            }
-
-            var existingAuth = await _provider.GetByConditionAsync(ap =>
-                ap.AuthProviderId == payload.Subject &&
-                ap.ProviderName == AuthProviderEnum.Google.ToString());
-
-            if (existingAuth is { IsDeleted: false } && existingAuth.UserId != userId)
-            {
-                return new ApiStandardResponse<ConfirmationResponse?>(
-                    StatusCodes.Status409Conflict,
-                    "This Google account is already linked to another user");
-            }
-
-            var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId,
-                include => include.Include(u => u.AuthProviders));
-
-            if (user == null)
-            {
-                return new ApiStandardResponse<ConfirmationResponse?>(
-                    StatusCodes.Status404NotFound,
-                    "User not found");
-            }
-
-            var existingUserAuth = user.AuthProviders.FirstOrDefault(a =>
-                a.AuthProviderId == payload.Subject &&
-                a.ProviderName == AuthProviderEnum.Google.ToString());
-
-            if (existingUserAuth is { IsDeleted: false })
-            {
-                return new ApiStandardResponse<ConfirmationResponse?>(
-                    StatusCodes.Status409Conflict,
-                    "This Google account is already linked to your account");
-            }
-
-            if (existingUserAuth is { IsDeleted: true })
-            {
-                existingUserAuth.IsDeleted = false;
-                existingUserAuth.UpdatedAt = DateTime.UtcNow;
-                await _provider.UpdateAsync(existingUserAuth);
-            }
-            else if (existingAuth is { IsDeleted: true })
-            {
-                // Case where this Google account was previously linked to someone else but deleted
-                // We'll create a new record rather than reviving the old one
-                await _provider.AddAsync(new AuthProvider
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken,
+                new GoogleJsonWebSignature.ValidationSettings
                 {
-                    UserId = userId,
-                    ProviderName = AuthProviderEnum.Google.ToString(),
-                    AuthProviderId = payload.Subject,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false
+                    Audience = [_config["CLIENT_ID"]]
                 });
-            }
-            else
-            {
-                await _provider.AddAsync(new AuthProvider
-                {
-                    UserId = userId,
-                    ProviderName = AuthProviderEnum.Google.ToString(),
-                    AuthProviderId = payload.Subject,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    IsDeleted = false
-                });
-            }
-
-            return new ApiStandardResponse<ConfirmationResponse?>(
-                StatusCodes.Status200OK,
-                new ConfirmationResponse { Message = "Google account successfully linked" });
         }
+        catch (InvalidJwtException)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status401Unauthorized,
+                "Invalid Google token");
+        }
+
+        var existingAuth = await _provider.GetByConditionAsync(ap =>
+            ap.AuthProviderId == payload.Subject &&
+            ap.ProviderName == AuthProviderEnum.Google.ToString());
+
+        if (existingAuth is { IsDeleted: false } && existingAuth.UserId != userId)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status409Conflict,
+                "This Google account is already linked to another user");
+        }
+
+        var user = await _userRepo.GetByConditionAsync(u => u.UserId == userId,
+            include => include.Include(u => u.AuthProviders));
+
+        if (user == null)
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status404NotFound,
+                "User not found");
+        }
+
+        var existingUserAuth = user.AuthProviders.FirstOrDefault(a =>
+            a.AuthProviderId == payload.Subject &&
+            a.ProviderName == AuthProviderEnum.Google.ToString());
+        if (existingUserAuth is { IsDeleted: false })
+        {
+            return new ApiStandardResponse<ConfirmationResponse?>(
+                StatusCodes.Status409Conflict,
+                "This Google account is already linked to your account");
+        }
+
+        if (existingUserAuth is { IsDeleted: true })
+        {
+            existingUserAuth.IsDeleted = false;
+            existingUserAuth.UpdatedAt = DateTime.UtcNow;
+            await _provider.UpdateAsync(existingUserAuth);
+        }
+        else if (existingAuth is { IsDeleted: true })
+        {
+            // Case where this Google account was previously linked to someone else but deleted
+            // We'll create a new record rather than reviving the old one
+            await _provider.AddAsync(new AuthProvider
+            {
+                UserId = userId,
+                ProviderName = AuthProviderEnum.Google.ToString(),
+                AuthProviderId = payload.Subject,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            });
+        }
+        else
+        {
+            await _provider.AddAsync(new AuthProvider
+            {
+                UserId = userId,
+                ProviderName = AuthProviderEnum.Google.ToString(),
+                AuthProviderId = payload.Subject,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            });
+        }
+
+        return new ApiStandardResponse<ConfirmationResponse?>(
+            StatusCodes.Status200OK,
+            new ConfirmationResponse { Message = "Google account successfully linked" });
+    }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> UnlinkProvider(long userId, string providerId,
         string providerName)

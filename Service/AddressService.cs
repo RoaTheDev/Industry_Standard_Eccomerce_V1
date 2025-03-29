@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Ecommerce_site.Data;
 using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.AddressRequest;
 using Ecommerce_site.Dto.response.AddressResponse;
@@ -12,13 +13,16 @@ public class AddressService : IAddressService
 {
     private readonly IGenericRepo<Address> _addressRepo;
     private readonly IGenericRepo<Customer> _customerRepo;
+    private readonly EcommerceSiteContext _dbContext;
     private readonly IMapper _mapper;
 
-    public AddressService(IGenericRepo<Address> addressRepo, IGenericRepo<Customer> customerRepo, IMapper mapper)
+    public AddressService(IGenericRepo<Address> addressRepo, IGenericRepo<Customer> customerRepo, IMapper mapper,
+        EcommerceSiteContext dbContext)
     {
         _addressRepo = addressRepo;
         _customerRepo = customerRepo;
         _mapper = mapper;
+        _dbContext = dbContext;
     }
 
     public async Task<ApiStandardResponse<AddressResponse?>> GetAddressByAddressIdAsync(long customerId, long addressId)
@@ -93,11 +97,11 @@ public class AddressService : IAddressService
         return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status201Created, addressResponse);
     }
 
-    public async Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId,
+    public async Task<ApiStandardResponse<AddressResponse?>> UpdateAddressAsync(long customerId, long addressId,
         AddressUpdateRequest request)
     {
         Address? address = await _addressRepo.GetByConditionAsync(
-            addr => addr.AddressId == request.AddressId && addr.CustomerId == customerId, false);
+            addr => addr.AddressId == addressId && addr.CustomerId == customerId, false);
 
         if (address is null)
             return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status404NotFound,
@@ -120,6 +124,51 @@ public class AddressService : IAddressService
         await _addressRepo.UpdateAsync(address);
         AddressResponse addressResponse = _mapper.Map<AddressResponse>(address);
         return new ApiStandardResponse<AddressResponse?>(StatusCodes.Status200OK, addressResponse);
+    }
+
+    public async Task<ApiStandardResponse<ConfirmationResponse>> ChangeDefaultAddress(long customerId, long addressId)
+    {
+        var currentDefaultAddr =
+            await _addressRepo.GetByConditionAsync(addr => addr.CustomerId == customerId && addr.IsDefault);
+        if (currentDefaultAddr is null)
+        {
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                "There is no default address");
+        }
+
+        var newDefaultAddr = await _addressRepo.GetByIdAsync(addressId);
+
+        if (newDefaultAddr is null)
+        {
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status404NotFound,
+                "The address you selected does not exist");
+        }
+
+        if (currentDefaultAddr.AddressId == addressId)
+        {
+            return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status400BadRequest,
+                "This address is already set as the default.");
+        }
+
+        await using (var transaction = await _dbContext.Database.BeginTransactionAsync())
+        {
+            try
+            {
+                currentDefaultAddr.IsDefault = false;
+                newDefaultAddr.IsDefault = true;
+                await _addressRepo.UpdateBulk(new List<Address> { currentDefaultAddr, newDefaultAddr });
+                await transaction.CommitAsync();
+                return new ApiStandardResponse<ConfirmationResponse>(StatusCodes.Status200OK, new ConfirmationResponse
+                {
+                    Message = "The default address has been changed"
+                });
+            }
+            catch (System.Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> DeleteAddressAsync(long customerId, long addressId)
