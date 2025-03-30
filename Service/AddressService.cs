@@ -50,7 +50,7 @@ public class AddressService : IAddressService
         long customerId)
     {
         var addressList = await _addressRepo.GetSelectedColumnsListsByConditionAsync(
-            addr => addr.CustomerId == customerId,
+            addr => addr.CustomerId == customerId && !addr.IsDeleted,
             addr => new AddressResponse
             {
                 AddressId = addr.AddressId,
@@ -62,10 +62,6 @@ public class AddressService : IAddressService
                 FirstAddressLine = addr.FirstAddressLine,
                 SecondAddressLine = addr.SecondAddressLine,
             });
-
-        if (!addressList.Any())
-            return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status404NotFound,
-                "the user does not have any address");
 
         return new ApiStandardResponse<IEnumerable<AddressResponse>?>(StatusCodes.Status200OK, addressList);
     }
