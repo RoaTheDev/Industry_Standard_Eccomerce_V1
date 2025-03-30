@@ -105,7 +105,7 @@ public class ProductController(IProductService productService)
     [HttpPatch("{id:long}/")]
     public async Task<ActionResult<ProductStatusResponse>> ChangeProductStatus([FromRoute] long id)
     {
-        var response = await productService.ChangeProductStatusAsync(id);
+        var response = await productService.UpdateProductStatusAsync(id);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -142,7 +142,7 @@ public class ProductController(IProductService productService)
     public async Task<ActionResult<ProductImageChangeResponse>> ChangeProductImage(
         [FromRoute] long id, [FromRoute] long imageId, [FromForm] FormFile file)
     {
-        var response = await productService.ChangeProductImageAsync(id, imageId, file);
+        var response = await productService.UpdateProductImageAsync(id, imageId, file);
         if (!response.Success)
             return StatusCode(response.StatusCode, new ProblemDetails
             {
