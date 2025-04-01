@@ -1,3 +1,5 @@
+using Ecommerce_site.Model.Enum;
+
 namespace Ecommerce_site.Dto.Request.ProductRequest;
 
 public class ProductFilterRequest
@@ -8,5 +10,7 @@ public class ProductFilterRequest
     public decimal? MaxPrice { get; set; }
     public bool? InStockOnly { get; set; }
     public bool IsLatest { get; set; }
-    public string? SortBy { get; set; }
+    public SortByEnum? SortBy { get; set; }
+
+    public string? SearchQuery { get; set; }
 }

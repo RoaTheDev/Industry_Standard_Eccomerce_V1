@@ -13,11 +13,11 @@ public class CartService : ICartService
 {
     private readonly IGenericRepo<Cart> _cartRepo;
     private readonly IGenericRepo<CartItem> _cartItemsRepo;
-    private readonly IGenericRepo<Product> _productRepo;
+    private readonly IGenericRepo<Model.Product> _productRepo;
     private readonly EcommerceSiteContext _dbContext;
 
     public CartService(IGenericRepo<Cart> cartRepo, IGenericRepo<CartItem> cartItemsRepo,
-        IGenericRepo<Product> productRepo, EcommerceSiteContext dbContext)
+        IGenericRepo<Model.Product> productRepo, EcommerceSiteContext dbContext)
     {
         _cartRepo = cartRepo;
         _cartItemsRepo = cartItemsRepo;

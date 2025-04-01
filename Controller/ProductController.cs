@@ -9,7 +9,7 @@ namespace Ecommerce_site.Controller;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class ProductController(IProductService productService)
+public class ProductController(IProductService productService,IProductImageService productImageService,IProductTagService productTagService)
     : ControllerBase
 {
     [HttpGet("{id:long}/")]
@@ -88,7 +88,7 @@ public class ProductController(IProductService productService)
     public async Task<ActionResult<ConfirmationResponse>> DeleteProductImage(
         [FromRoute] long productId, [FromRoute] long imageId)
     {
-        var response = await productService.DeleteProductImage(productId, imageId);
+        var response = await productImageService.DeleteProductImage(productId, imageId);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -124,7 +124,7 @@ public class ProductController(IProductService productService)
         [FromRoute] long id,
         [FromForm] IList<IFormFile> files)
     {
-        var response = await productService.AddProductImageAsync(id, files);
+        var response = await productImageService.AddProductImageAsync(id, files);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -142,7 +142,7 @@ public class ProductController(IProductService productService)
     public async Task<ActionResult<ProductImageChangeResponse>> ChangeProductImage(
         [FromRoute] long id, [FromRoute] long imageId, [FromForm] FormFile file)
     {
-        var response = await productService.UpdateProductImageAsync(id, imageId, file);
+        var response = await productImageService.UpdateProductImageAsync(id, imageId, file);
         if (!response.Success)
             return StatusCode(response.StatusCode, new ProblemDetails
             {
@@ -157,7 +157,7 @@ public class ProductController(IProductService productService)
     public async Task<ActionResult<ConfirmationResponse>> AddTagsToProduct([FromRoute] long id,
         AddTagToProductRequest request)
     {
-        var response = await productService.AddTagsToProduct(id, request);
+        var response = await productTagService.AddTagsToProduct(id, request);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -175,7 +175,7 @@ public class ProductController(IProductService productService)
     public async Task<ActionResult<ConfirmationResponse>> RemoveProductTag([FromRoute] long id,
         [FromBody] ProductTagRemoveRequest request)
     {
-        var response = await productService.ProductTagRemoveAsync(id, request);
+        var response = await productTagService.ProductTagRemoveAsync(id, request);
 
         if (!response.Success)
         {

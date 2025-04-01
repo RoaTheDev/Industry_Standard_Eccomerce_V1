@@ -29,6 +29,9 @@ public static class DependencyConfig
         service.AddScoped<IAddressService, AddressService>();
         service.AddScoped<ICategoryService, CategoryService>();
         service.AddScoped<IProductService, ProductService>();
+        service.AddScoped<IProductImageService, ProductImageService>();
+        service.AddScoped<IProductTagService, ProductTagService>();
+        service.AddScoped<IProductFilterService,ProductFilterService>();
         service.AddScoped<ICartService, CartService>();
         service.AddScoped<IOrderService, OrderService>();
         service.AddKeyedTransient<IStorageProvider, LocalStorageProvider>("local");

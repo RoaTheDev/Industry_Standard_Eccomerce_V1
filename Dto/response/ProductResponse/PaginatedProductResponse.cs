@@ -25,4 +25,6 @@ public class AppliedProductFilters
     public bool? InStockOnly { get; set; }
     public string? SortBy { get; set; } // "price", "date", "name"
     public string? SortOrder { get; set; } // "asc", "desc"
+    public string? SearchQuery { get; set; }
+
 }
