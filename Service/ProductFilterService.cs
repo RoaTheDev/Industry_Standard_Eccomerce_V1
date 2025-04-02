@@ -8,7 +8,7 @@ using Ecommerce_site.Dto.response.ProductResponse;
 using Ecommerce_site.Model;
 using Ecommerce_site.Model.Enum;
 using Ecommerce_site.Repo.IRepo;
-using Ecommerce_site.Service.IService;
+using Ecommerce_site.Service.IService.IProduct;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;

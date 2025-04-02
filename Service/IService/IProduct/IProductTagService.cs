@@ -1,7 +1,7 @@
 using Ecommerce_site.Dto;
 using Ecommerce_site.Dto.Request.ProductRequest;
 
-namespace Ecommerce_site.Service.IService;
+namespace Ecommerce_site.Service.IService.IProduct;
 
 public interface IProductTagService
 {

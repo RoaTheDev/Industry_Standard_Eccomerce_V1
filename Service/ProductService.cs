@@ -6,6 +6,7 @@ using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service.IService;
+using Ecommerce_site.Service.IService.IProduct;
 using ILogger = Serilog.ILogger;
 
 namespace Ecommerce_site.Service;

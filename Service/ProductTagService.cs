@@ -3,6 +3,7 @@ using Ecommerce_site.Dto.Request.ProductRequest;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service.IService;
+using Ecommerce_site.Service.IService.IProduct;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ecommerce_site.Service;
