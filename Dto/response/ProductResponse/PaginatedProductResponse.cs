@@ -8,6 +8,12 @@ public class PaginatedProductResponse
     public AppliedProductFilters? AppliedFilters { get; set; } 
 }
 
+public class ProductListingResponse
+{
+    public required List<PaginatedProduct> Products { get; set; }
+    public long? NextCursor { get; set; }
+    public required int PageSize { get; set; }
+}
 public  class PaginatedProduct : ProductResponse
 {
     public required DateTime CreateAt { get; set; }
@@ -22,9 +28,9 @@ public class AppliedProductFilters
     public List<long>? TagIds { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
-    public bool? InStockOnly { get; set; }
-    public string? SortBy { get; set; } // "price", "date", "name"
-    public string? SortOrder { get; set; } // "asc", "desc"
+    public bool? InStock { get; set; }
+    public string? SortBy { get; set; } 
+    public string? SortOrder { get; set; } 
     public string? SearchQuery { get; set; }
 
 }

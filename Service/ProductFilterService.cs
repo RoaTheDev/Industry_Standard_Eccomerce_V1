@@ -142,7 +142,7 @@ public class ProductFilterService : IProductFilterService
                 TagIds = filter.TagIds,
                 MinPrice = filter.MinPrice,
                 MaxPrice = filter.MaxPrice,
-                InStockOnly = filter.InStockOnly,
+                InStock = filter.InStock,
                 SortBy = filter.SortBy?.ToString(),
                 SortOrder = ascending ? SortOrder.Ascending.ToString() : SortOrder.Descending.ToString(),
                 SearchQuery = filter.SearchQuery
@@ -202,7 +202,7 @@ public class ProductFilterService : IProductFilterService
                             TagIds = filter.TagIds,
                             MinPrice = filter.MinPrice,
                             MaxPrice = filter.MaxPrice,
-                            InStockOnly = filter.InStockOnly,
+                            InStock = filter.InStock,
                             SortBy = nameof(SortByEnum.BestSelling)
                         }
                     });
@@ -246,7 +246,7 @@ public class ProductFilterService : IProductFilterService
                     TagIds = filter.TagIds,
                     MinPrice = filter.MinPrice,
                     MaxPrice = filter.MaxPrice,
-                    InStockOnly = filter.InStockOnly,
+                    InStock = filter.InStock,
                     SortBy = nameof(SortByEnum.BestSelling)
                 }
             };
@@ -279,7 +279,7 @@ public class ProductFilterService : IProductFilterService
             var categoryId = filter.CategoryId ?? (object)DBNull.Value;
             var minPrice = filter.MinPrice ?? (object)DBNull.Value;
             var maxPrice = filter.MaxPrice ?? (object)DBNull.Value;
-            var inStockOnly = filter.InStockOnly ?? (object)DBNull.Value;
+            var inStockOnly = filter.InStock ?? (object)DBNull.Value;
             var tagIds = filter.TagIds != null ? string.Join(",", filter.TagIds) : (object)DBNull.Value;
             var sortBy = filter.SortBy.HasValue ? filter.SortBy.ToString()?.ToLower() : (object)DBNull.Value;
 
@@ -305,7 +305,7 @@ public class ProductFilterService : IProductFilterService
                     TagIds = filter.TagIds,
                     MinPrice = filter.MinPrice,
                     MaxPrice = filter.MaxPrice,
-                    InStockOnly = filter.InStockOnly,
+                    InStock = filter.InStock,
                     SortBy = filter.SortBy?.ToString(),
                     SearchQuery = filter.SearchQuery
                 }
@@ -368,7 +368,7 @@ public class ProductFilterService : IProductFilterService
                     TagIds = filter.TagIds,
                     MinPrice = filter.MinPrice,
                     MaxPrice = filter.MaxPrice,
-                    InStockOnly = filter.InStockOnly,
+                    InStock = filter.InStock,
                     SortBy = filter.SortBy?.ToString(),
                     SortOrder = ascending ? SortOrder.Ascending.ToString() : SortOrder.Descending.ToString(),
                     SearchQuery = filter.SearchQuery
@@ -402,8 +402,8 @@ public class ProductFilterService : IProductFilterService
             predicate = predicate.And(p => p.Price >= filter.MinPrice.Value);
         if (filter.MaxPrice.HasValue && filter.MaxPrice.Value >= 0)
             predicate = predicate.And(p => p.Price <= filter.MaxPrice.Value);
-        if (filter.InStockOnly.HasValue)
-            predicate = predicate.And(p => p.IsAvailable == filter.InStockOnly.Value);
+        if (filter.InStock.HasValue)
+            predicate = predicate.And(p => p.IsAvailable == filter.InStock.Value);
         if (filter.TagIds?.Count > 0)
             predicate = predicate.And(p => p.Tags.Any(t => filter.TagIds.Contains(t.TagId)));
 

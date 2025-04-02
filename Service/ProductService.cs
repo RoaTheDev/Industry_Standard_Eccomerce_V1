@@ -5,7 +5,6 @@ using Ecommerce_site.Dto.response.ProductResponse;
 using Ecommerce_site.Exception;
 using Ecommerce_site.Model;
 using Ecommerce_site.Repo.IRepo;
-using Ecommerce_site.Service.IService;
 using Ecommerce_site.Service.IService.IProduct;
 using ILogger = Serilog.ILogger;
 
@@ -134,7 +133,7 @@ public class ProductService : IProductService
         return new ApiStandardResponse<ProductByIdResponse>(StatusCodes.Status200OK, product);
     }
 
-    public async Task<ApiStandardResponse<PaginatedProductResponse>> GetAllProductAsync(long cursorValue = 0,
+    public async Task<ApiStandardResponse<ProductListingResponse>> GetAllProductAsync(long cursorValue = 0,
         int pageSize = 10)
     {
         if (cursorValue < 0) cursorValue = 0;
@@ -170,13 +169,13 @@ public class ProductService : IProductService
             nextCursor = products.Last().ProductId;
         }
 
-        var response = new PaginatedProductResponse
+        var response = new ProductListingResponse
         {
             Products = products,
             NextCursor = nextCursor,
             PageSize = pageSize
         };
-        return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
+        return new ApiStandardResponse<ProductListingResponse>(StatusCodes.Status200OK, response);
     }
 
 
@@ -262,7 +261,7 @@ public class ProductService : IProductService
         });
     }
 
-    public async Task<ApiStandardResponse<PaginatedProductResponse>> GetProductsByCategoryAsync(long categoryId,
+    public async Task<ApiStandardResponse<ProductListingResponse>> GetProductsByCategoryAsync(long categoryId,
         long cursorValue = 0, int pageSize = 10)
     {
         if (cursorValue < 0) cursorValue = 0;
@@ -298,14 +297,13 @@ public class ProductService : IProductService
             nextCursor = products.Last().ProductId;
         }
 
-        var response = new PaginatedProductResponse
+        var response = new ProductListingResponse
         {
             Products = products,
             NextCursor = nextCursor,
             PageSize = pageSize,
-            AppliedFilters = new AppliedProductFilters { CategoryId = categoryId }
         };
 
-        return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
+        return new ApiStandardResponse<ProductListingResponse>(StatusCodes.Status200OK, response);
     }
 }

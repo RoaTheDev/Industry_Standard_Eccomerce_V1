@@ -8,8 +8,7 @@ public class ProductFilterRequest
     public List<long>? TagIds { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
-    public bool? InStockOnly { get; set; }
-    public bool IsLatest { get; set; }
+    public bool? InStock { get; set; }
     public SortByEnum? SortBy { get; set; }
 
     public string? SearchQuery { get; set; }
