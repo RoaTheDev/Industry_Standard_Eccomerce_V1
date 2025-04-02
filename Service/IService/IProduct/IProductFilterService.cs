@@ -19,7 +19,6 @@ public interface IProductFilterService
     Task<ApiStandardResponse<PaginatedProductResponse>> GetFilteredProductsAsync(
         ProductFilterRequest filter,
         long cursorValue = 0,
-        int pageSize = 10,
-        bool useFullTextSearch = true
+        int pageSize = 10
     );
 }

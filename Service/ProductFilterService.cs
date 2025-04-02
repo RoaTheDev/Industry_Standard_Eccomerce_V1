@@ -11,6 +11,7 @@ using Ecommerce_site.Repo.IRepo;
 using Ecommerce_site.Service.IService;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using ILogger = Serilog.ILogger;
 
 namespace Ecommerce_site.Service;
@@ -32,13 +33,23 @@ public class ProductFilterService : IProductFilterService
         long cursorValue = 0,
         int pageSize = 10)
     {
-        var filter = new ProductFilterRequest
+        try
         {
-            SortBy = SortByEnum.BestSelling
-        };
+            var filter = new ProductFilterRequest
+            {
+                SortBy = SortByEnum.BestSelling
+            };
 
-        return await GetFilteredProductsAsync(filter, cursorValue, pageSize, useFullTextSearch: true);
+            return await GetFilteredProductsAsync(filter, cursorValue, pageSize);
+        }
+        catch (System.Exception ex)
+        {
+            _logger.Error(ex, "Error in GetBestSellingProductsAsync");
+            return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status500InternalServerError,
+                "An error occurred while retrieving best selling products");
+        }
     }
+
 
     public async Task<ApiStandardResponse<PaginatedProductResponse>> GetNewArrivalsAsync(
         long cursorValue = 0,
@@ -49,15 +60,13 @@ public class ProductFilterService : IProductFilterService
             SortBy = SortByEnum.Latest
         };
 
-        return await GetFilteredProductsAsync(filter, cursorValue, pageSize, useFullTextSearch: true);
+        return await GetFilteredProductsAsync(filter, cursorValue, pageSize);
     }
-
 
     public async Task<ApiStandardResponse<PaginatedProductResponse>> GetFilteredProductsAsync(
         ProductFilterRequest filter,
         long cursorValue = 0,
-        int pageSize = 10,
-        bool useFullTextSearch = false)
+        int pageSize = 10)
     {
         try
         {
@@ -75,47 +84,22 @@ public class ProductFilterService : IProductFilterService
                 filter.SearchQuery = filter.SearchQuery.Trim();
             }
 
-            if (useFullTextSearch && !string.IsNullOrWhiteSpace(filter.SearchQuery))
-            {
-                var fullTextResult = await PerformFullTextSearchAsync(filter, cursorValue, pageSize);
-                if (fullTextResult.StatusCode == StatusCodes.Status200OK)
-                {
-                    return fullTextResult;
-                }
-
-                _logger.Warning("Full-text search failed, falling back to regular search");
-            }
-
             if (filter.SortBy == SortByEnum.BestSelling)
             {
-                return await GetBestSellingProductsAsync(filter, cursorValue, pageSize);
+                return await ProcessBestSellingProductsAsync(filter, cursorValue, pageSize);
             }
 
-            var predicate = BuildFilterPredicate(filter);
-            var (sortSelector, ascending) = GetSortSelector(filter.SortBy ?? SortByEnum.None);
-            var products =
-                await GetPaginatedProductsAsync(filter, cursorValue, pageSize, predicate, sortSelector, ascending);
-            var nextCursor = GetNextCursor(products, filter.IsLatest, pageSize);
-
-            var response = new PaginatedProductResponse
+            ApiStandardResponse<PaginatedProductResponse> result;
+            if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
             {
-                Products = products.ToList(),
-                NextCursor = nextCursor,
-                PageSize = pageSize,
-                AppliedFilters = new AppliedProductFilters
-                {
-                    CategoryId = filter.CategoryId,
-                    TagIds = filter.TagIds,
-                    MinPrice = filter.MinPrice,
-                    MaxPrice = filter.MaxPrice,
-                    InStockOnly = filter.InStockOnly,
-                    SortBy = filter.SortBy?.ToString(),
-                    SortOrder = ascending ? SortOrder.Ascending.ToString() : SortOrder.Descending.ToString(),
-                    SearchQuery = filter.SearchQuery
-                }
-            };
+                result = await HandleSearchAsync(filter, cursorValue, pageSize);
+            }
+            else
+            {
+                result = await HandleFilteringAsync(filter, cursorValue, pageSize);
+            }
 
-            return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
+            return result;
         }
         catch (System.Exception ex)
         {
@@ -125,7 +109,65 @@ public class ProductFilterService : IProductFilterService
         }
     }
 
-    private async Task<ApiStandardResponse<PaginatedProductResponse>> GetBestSellingProductsAsync(
+    private async Task<ApiStandardResponse<PaginatedProductResponse>> HandleSearchAsync(
+        ProductFilterRequest filter, long cursorValue, int pageSize)
+    {
+        var fullTextResult = await PerformFullTextSearchAsync(filter, cursorValue, pageSize);
+        if (fullTextResult.StatusCode == StatusCodes.Status200OK)
+        {
+            return fullTextResult;
+        }
+
+        _logger.Warning("Full-text search failed, falling back to regular search");
+        return await GetRegularSearchProductsAsync(filter, cursorValue, pageSize);
+    }
+
+    private async Task<ApiStandardResponse<PaginatedProductResponse>> HandleFilteringAsync(
+        ProductFilterRequest filter, long cursorValue, int pageSize)
+    {
+        var predicate = BuildFilterPredicate(filter);
+        var ascending = GetSortOrder(filter.SortBy ?? SortByEnum.None);
+
+        var products = await GetPaginatedProductsAsync(filter, cursorValue, pageSize, predicate, ascending);
+        var nextCursor = GetNextCursor(products, filter.SortBy == SortByEnum.Latest, pageSize);
+
+        var response = new PaginatedProductResponse
+        {
+            Products = products.ToList(),
+            NextCursor = nextCursor,
+            PageSize = pageSize,
+            AppliedFilters = new AppliedProductFilters
+            {
+                CategoryId = filter.CategoryId,
+                TagIds = filter.TagIds,
+                MinPrice = filter.MinPrice,
+                MaxPrice = filter.MaxPrice,
+                InStockOnly = filter.InStockOnly,
+                SortBy = filter.SortBy?.ToString(),
+                SortOrder = ascending ? SortOrder.Ascending.ToString() : SortOrder.Descending.ToString(),
+                SearchQuery = filter.SearchQuery
+            }
+        };
+
+        return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK, response);
+    }
+
+// Helper method to get sort order
+    private bool GetSortOrder(SortByEnum sortBy)
+    {
+        return sortBy switch
+        {
+            SortByEnum.MinPrice => true,
+            SortByEnum.MaxPrice => false,
+            SortByEnum.Name => true,
+            SortByEnum.Date => false,
+            SortByEnum.Latest => false,
+            SortByEnum.BestSelling => false,
+            _ => true
+        };
+    }
+
+    private async Task<ApiStandardResponse<PaginatedProductResponse>> ProcessBestSellingProductsAsync(
         ProductFilterRequest filter,
         long cursorValue = 0,
         int pageSize = 10)
@@ -141,12 +183,12 @@ public class ProductFilterService : IProductFilterService
 
             var orderedProducts = filteredProducts
                 .OrderByDescending(p => p.TotalOrdered)
-                .SkipWhile(p => cursorValue > 0 && p.ProductId <= cursorValue)
+                .SkipWhile(p => cursorValue >= 0 && p.ProductId <= cursorValue)
                 .Take(pageSize)
                 .Select(p => p.ProductId)
                 .ToList();
 
-            if (!orderedProducts.Any())
+            if (orderedProducts.Count == 0)
             {
                 return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status200OK,
                     new PaginatedProductResponse
@@ -213,7 +255,7 @@ public class ProductFilterService : IProductFilterService
         }
         catch (System.Exception ex)
         {
-            _logger.Error(ex, "Error in GetBestSellingProductsAsync");
+            _logger.Error(ex, "Error in ProcessBestSellingProductsAsync");
             return new ApiStandardResponse<PaginatedProductResponse>(StatusCodes.Status500InternalServerError,
                 "An error occurred while retrieving best selling products");
         }
@@ -243,7 +285,12 @@ public class ProductFilterService : IProductFilterService
 
             var products = await _dbContext.Set<PaginatedProduct>()
                 .FromSqlInterpolated(
-                    $"EXEC inventory.SearchProducts @SearchQuery={searchQuery}, @CategoryId={categoryId}, @MinPrice={minPrice}, @MaxPrice={maxPrice}, @InStockOnly={inStockOnly}, @TagIds={tagIds}, @CursorValue={cursorValue}, @PageSize={pageSize}, @SortBy={sortBy}")
+                    $"""
+                     EXEC inventory.SearchProducts @SearchQuery={searchQuery},
+                      @CategoryId={categoryId}, @MinPrice={minPrice},
+                       @MaxPrice={maxPrice}, @InStockOnly={inStockOnly},
+                        @TagIds={tagIds}, @CursorValue={cursorValue}, @PageSize={pageSize}, @SortBy={sortBy}
+                     """)
                 .ToListAsync();
 
             long? nextCursor = products.Count == pageSize ? products.Last().ProductId : null;
@@ -305,10 +352,10 @@ public class ProductFilterService : IProductFilterService
                     p.Description.ToLower().Contains(searchTerm));
             }
 
-            var (sortSelector, ascending) = GetSortSelector(filter.SortBy ?? SortByEnum.None);
+            var ascending = GetSortOrder(filter.SortBy ?? SortByEnum.None);
             var products =
-                await GetPaginatedProductsAsync(filter, cursorValue, pageSize, predicate, sortSelector, ascending);
-            var nextCursor = GetNextCursor(products, filter.IsLatest, pageSize);
+                await GetPaginatedProductsAsync(filter, cursorValue, pageSize, predicate, ascending);
+            var nextCursor = GetNextCursor(products, filter.SortBy == SortByEnum.Latest, pageSize);
 
             var response = new PaginatedProductResponse
             {
@@ -363,80 +410,110 @@ public class ProductFilterService : IProductFilterService
         return predicate;
     }
 
-    private (Expression<Func<Product, object>> sortSelector, bool ascending) GetSortSelector(SortByEnum sortBy)
-    {
-        return sortBy switch
-        {
-            SortByEnum.MinPrice => (p => p.Price, true),
-            SortByEnum.MaxPrice => (p => p.Price, false),
-            SortByEnum.Name => (p => p.ProductName, true),
-            SortByEnum.Date => (p => p.CreatedAt, false),
-            SortByEnum.Latest => (p => p.CreatedAt, false),
-            SortByEnum.BestSelling => (p => p.ProductId, true), // Handled separately in GetBestSellingProductsAsync
-            _ => (p => p.ProductId, true)
-        };
-    }
-
     private async Task<IReadOnlyList<PaginatedProduct>> GetPaginatedProductsAsync(
         ProductFilterRequest filter,
         long cursorValue,
         int pageSize,
         Expression<Func<Product, bool>> predicate,
-        Expression<Func<Product, object>> sortSelector,
         bool ascending)
     {
-        if (filter.SortBy is SortByEnum.Latest or SortByEnum.Date)
+        Expression<Func<Product, PaginatedProduct>> productSelector = p => new PaginatedProduct
         {
-            return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
-                predicate,
-                p => new PaginatedProduct
-                {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    Description = p.Description,
-                    Discount = p.DiscountPercentage,
-                    Quantity = p.Quantity,
-                    Price = p.Price,
-                    Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
-                    ImageUrls = p.ProductImages.Where(pi => pi.IsPrimary).Select(pi => pi.ImageUrl).FirstOrDefault() ??
-                                "",
-                    CategoryName = p.Category.CategoryName,
-                    CreateAt = p.CreatedAt
-                },
-                p => p.CreatedAt,
-                cursorValue > 0 ? new DateTime(cursorValue) : DateTime.MinValue,
-                query => query.Include(p => p.Tags).Include(p => p.Category).Include(p => p.ProductImages),
-                pageSize,
-                false
-            );
-        }
+            ProductId = p.ProductId,
+            ProductName = p.ProductName,
+            Description = p.Description,
+            Discount = p.DiscountPercentage,
+            Quantity = p.Quantity,
+            Price = p.Price,
+            Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
+            ImageUrls = p.ProductImages.Where(pi => pi.IsPrimary).Select(pi => pi.ImageUrl).FirstOrDefault() ?? "",
+            CategoryName = p.Category.CategoryName,
+            CreateAt = p.CreatedAt
+        };
 
-        return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
-            predicate,
-            p => new PaginatedProduct
-            {
-                ProductId = p.ProductId,
-                ProductName = p.ProductName,
-                Description = p.Description,
-                Discount = p.DiscountPercentage,
-                Quantity = p.Quantity,
-                Price = p.Price,
-                Tags = p.Tags.Select(t => t.TagName).ToImmutableList(),
-                ImageUrls = p.ProductImages.Where(pi => pi.IsPrimary).Select(pi => pi.ImageUrl).FirstOrDefault() ?? "",
-                CategoryName = p.Category.CategoryName,
-                CreateAt = p.CreatedAt
-            },
-            sortSelector,
-            cursorValue,
-            query => query.Include(p => p.Tags).Include(p => p.Category).Include(p => p.ProductImages),
-            pageSize,
-            ascending
-        );
+        Func<IQueryable<Product>, IIncludableQueryable<Product, object>> includeFunc = query => query
+            .Include(p => p.Tags)
+            .Include(p => p.Category)
+            .Include(p => p.ProductImages);
+
+        switch (filter.SortBy)
+        {
+            case SortByEnum.Latest:
+            case SortByEnum.Date:
+                DateTime cursorDateTime = cursorValue > 0 && cursorValue <= DateTime.MaxValue.Ticks
+                    ? new DateTime(cursorValue)
+                    : DateTime.UtcNow;
+                return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
+                    predicate,
+                    productSelector,
+                    p => p.CreatedAt, 
+                    cursorDateTime,
+                    includeFunc,
+                    pageSize,
+                    false
+                );
+
+            case SortByEnum.MinPrice:
+            case SortByEnum.MaxPrice:
+                decimal cursorPrice = 0M;
+                if (cursorValue > 0)
+                {
+                    var product = await _productRepo.GetByIdAsync(cursorValue);
+                    if (product != null)
+                    {
+                        cursorPrice = product.Price;
+                    }
+                }
+
+                return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
+                    predicate,
+                    productSelector,
+                    p => p.Price, 
+                    cursorPrice,
+                    includeFunc,
+                    pageSize,
+                    filter.SortBy == SortByEnum.MinPrice
+                );
+
+            case SortByEnum.Name:
+                string cursorName = string.Empty;
+                if (cursorValue > 0)
+                {
+                    var product = await _productRepo.GetByIdAsync(cursorValue);
+                    if (product != null)
+                    {
+                        cursorName = product.ProductName;
+                    }
+                }
+
+                return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
+                    predicate,
+                    productSelector,
+                    p => p.ProductName,
+                    cursorName,
+                    includeFunc,
+                    pageSize
+                );
+            default:
+                return await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
+                    predicate,
+                    productSelector,
+                    p => p.ProductId,
+                    cursorValue,
+                    includeFunc,
+                    pageSize,
+                    ascending
+                );
+        }
     }
 
     private long? GetNextCursor(IReadOnlyList<PaginatedProduct> products, bool isLatest, int pageSize)
     {
-        if (products.Count < pageSize) return null;
-        return isLatest ? products.Last().CreateAt.Ticks : products.Last().ProductId;
+        if (products.Count < pageSize)
+            return null;
+
+        return isLatest
+            ? products.Last().CreateAt.Ticks
+            : products.Last().ProductId;
     }
 }

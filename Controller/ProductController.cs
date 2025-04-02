@@ -9,7 +9,11 @@ namespace Ecommerce_site.Controller;
 
 [ApiController]
 [Route("/api/[controller]")]
-public class ProductController(IProductService productService,IProductImageService productImageService,IProductTagService productTagService)
+public class ProductController(
+    IProductService productService,
+    IProductImageService productImageService,
+    IProductTagService productTagService,
+    IProductFilterService productFilterService)
     : ControllerBase
 {
     [HttpGet("{id:long}/")]
@@ -188,5 +192,52 @@ public class ProductController(IProductService productService,IProductImageServi
         }
 
         return Ok(response.Data);
+    }
+
+    [HttpGet("best-selling")]
+    public async Task<ActionResult<PaginatedProductResponse>> GetBestSellingProduct([FromQuery] long cursor = 0,
+        [FromQuery] int pageSize = 10)
+    {
+        var response = await productFilterService.GetBestSellingProductsAsync(cursor, pageSize);
+        return response.Success
+            ? Ok(response.Data)
+            : StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString(),
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode)
+            });
+    }
+
+    [HttpGet("new-arrival")]
+    public async Task<ActionResult<PaginatedProductResponse>> GetNewArrival([FromQuery] long cursor = 0,
+        [FromQuery] int pageSize = 10)
+    {
+        var response = await productFilterService.GetNewArrivalsAsync(cursor, pageSize);
+        return response.Success
+            ? Ok(response.Data)
+            : StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString(),
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode)
+            });
+    }
+
+    [HttpGet("filter")]
+    public async Task<ActionResult<PaginatedProductResponse>> FilterProduct(
+        [FromQuery] ProductFilterRequest request,
+        [FromQuery] long cursor = 0,
+        [FromQuery] int pageSize = 10)
+    {
+        var response = await productFilterService.GetFilteredProductsAsync(request, cursor, pageSize);
+        return response.Success
+            ? Ok(response.Data)
+            : StatusCode(response.StatusCode, new ProblemDetails
+            {
+                Status = response.StatusCode,
+                Detail = response.Errors!.First().ToString(),
+                Title = GetStatusTitle.GetTitleForStatus(response.StatusCode)
+            });
     }
 }
