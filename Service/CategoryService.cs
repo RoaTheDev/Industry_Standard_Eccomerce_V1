@@ -59,11 +59,7 @@ public class CategoryService : ICategoryService
                 Description = cate.Description,
                 IsActive = cate.IsActive
             });
-
-        if (!categories.Any())
-            return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status404NotFound,
-                "There are no categories");
-
+        
         return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status200OK, categories);
     }
 
