@@ -54,7 +54,8 @@ public class FluentValidationFilter : ActionFilterAttribute
 
     private bool IsReadOperation(string httpMethod)
     {
-        return httpMethod == HttpMethods.Get || httpMethod == HttpMethods.Head || httpMethod == HttpMethods.Options;
+        return httpMethod == HttpMethods.Get || httpMethod == HttpMethods.Head || httpMethod == HttpMethods.Options ||
+               httpMethod == HttpMethods.Delete ;
     }
 
     private async Task<bool> ValidateArgumentAsync(object actionArgument, ActionExecutingContext context)

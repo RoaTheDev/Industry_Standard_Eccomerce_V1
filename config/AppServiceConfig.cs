@@ -67,7 +67,7 @@ public static class AppServiceConfig
             Port = Convert.ToInt32(config["SMTP_PORT"]),
             User = config["SMTP_EMAIL"],
             Password = config["SMTP_PASSWORD"],
-            //UseSsl = true,
+            UseSsl = true,
             RequiresAuthentication = true
         };
 

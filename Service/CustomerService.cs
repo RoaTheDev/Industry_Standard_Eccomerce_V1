@@ -216,7 +216,7 @@ public class CustomerService : ICustomerService
             if (request.Password != request.ConfirmPassword)
             {
                 return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status400BadRequest,
-                    "The  password does not match");
+                    "The password does not match");
             }
 
             var otp = _otpGenerator.GenerateSecureOtp();
@@ -247,8 +247,8 @@ public class CustomerService : ICustomerService
                 VerificationCode = otp,
                 VerificationExpTime = 15
             };
+            _ = SendEmailAsync(emailMetadata, emailMsg);
 
-            await SendEmailAsync(emailMetadata, emailMsg);
             return new ApiStandardResponse<CustomerRegisterResponse?>(StatusCodes.Status202Accepted,
                 new CustomerRegisterResponse
                 {
@@ -332,13 +332,8 @@ public class CustomerService : ICustomerService
                 new CustomerCreationResponse
                 {
                     UserId = createdUser.UserId,
-                    Gender = createdUser.Gender,
-                    Dob = customerRegisterObj.Dob,
                     Email = createdUser.Email,
-                    FirstName = createdUser.FirstName,
-                    MiddleName = createdUser.MiddleName,
-                    LastName = createdUser.LastName,
-                    PhoneNumber = customerRegisterObj.PhoneNumber,
+                    DisplayName = createdUser.DisplayName,
                     Token = new TokenResponse
                     {
                         Token = accessToken,
@@ -470,9 +465,13 @@ public class CustomerService : ICustomerService
                 ResetLink = resetUrl,
                 ExpirationMinutes = 15
             };
-
-            await SendEmailAsync(emailMetadata, emailMsg);
-
+            await Task.Run(() => SendEmailAsync(emailMetadata, emailMsg).ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    _logger.Error(t.Exception, "Failed to send email in background task.");
+                }
+            }));
             return new ApiStandardResponse<ForgotPasswordResponse?>(StatusCodes.Status200OK,
                 new ForgotPasswordResponse
                 {

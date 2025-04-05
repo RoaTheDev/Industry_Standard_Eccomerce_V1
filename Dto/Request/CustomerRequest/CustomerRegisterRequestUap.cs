@@ -14,6 +14,5 @@ public class CustomerRegisterRequestUap
     public string? ConfirmPassword { get; set; }
     public DateOnly Dob { get; set; } = default;
 
-    [JsonConverter(typeof(StrictJsonStringValidator))]
     public required string PhoneNumber { get; set; }
 }
