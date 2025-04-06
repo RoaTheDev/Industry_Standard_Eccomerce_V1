@@ -20,16 +20,32 @@ public class TagService : ITagService
         _userRepo = userRepo;
     }
 
-    public async Task<ApiStandardResponse<List<AllTagResponse>>> GetAllTagsAsync()
+    public async Task<ApiStandardResponse<PaginatedTagResponse>> GetAllTagsAsync(int cursor, int pageSize)
     {
-        List<AllTagResponse> tags = await _tagRepo.GetSelectedColumnsListsByConditionAsync(t => !t.IsDeleted, t =>
-            new AllTagResponse
+        if (cursor < 0) cursor = 0;
+        if (pageSize < 1) pageSize = 10;
+        var tags = await _tagRepo.GetCursorPaginatedSelectedColumnsAsync(t => new AllTagResponse
             {
                 TagId = t.TagId,
                 TagName = t.TagName
-            });
+            },
+            t => t.TagId,
+            cursor,
+            pageSize);
 
-        return new ApiStandardResponse<List<AllTagResponse>>(StatusCodes.Status200OK, tags);
+        long? nextCursor = null;
+
+        if (tags.Count == pageSize)
+        {
+            nextCursor = tags.Last().TagId;
+        }
+
+        return new ApiStandardResponse<PaginatedTagResponse>(StatusCodes.Status200OK, new PaginatedTagResponse
+        {
+            Tags = tags,
+            PageSize = pageSize,
+            NextCursor = nextCursor
+        });
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse>> CreateTagAsync(long adminId, CreateTagRequest request)
@@ -129,5 +145,4 @@ public class TagService : ITagService
 
         return new ApiStandardResponse<GetTagByIdResponse>(StatusCodes.Status200OK, tag);
     }
-    
 }

@@ -6,7 +6,7 @@ namespace Ecommerce_site.Service.IService;
 
 public interface ITagService
 {
-    Task<ApiStandardResponse<List<AllTagResponse>>> GetAllTagsAsync();
+    Task<ApiStandardResponse<PaginatedTagResponse>> GetAllTagsAsync(int cursor, int pageSize);
     Task<ApiStandardResponse<ConfirmationResponse>> CreateTagAsync(long adminId, CreateTagRequest request);
     Task<ApiStandardResponse<ConfirmationResponse>> UpdateTagAsync(long id, long adminId, UpdateTagRequest request);
     Task<ApiStandardResponse<ConfirmationResponse>> DeleteTagAsync(long id, long adminId);

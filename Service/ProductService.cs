@@ -138,9 +138,8 @@ public class ProductService : IProductService
     {
         if (cursorValue < 0) cursorValue = 0;
         if (pageSize < 1) pageSize = 10;
-
+    
         var products = await _productRepo.GetCursorPaginatedSelectedColumnsAsync(
-            p => true,
             p => new PaginatedProduct
             {
                 ProductId = p.ProductId,

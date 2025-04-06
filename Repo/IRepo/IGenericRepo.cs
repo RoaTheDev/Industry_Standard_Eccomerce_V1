@@ -76,4 +76,10 @@ public interface IGenericRepo<T> where T : class
         Func<IQueryable<T>, IIncludableQueryable<T, object>> include,
         int pageSize = 10,
         bool ascending = true);
+    Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, TResult>> selector,
+        Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue,
+        int pageSize = 10,
+        bool ascending = true);
 }

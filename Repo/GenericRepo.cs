@@ -310,4 +310,58 @@ public class GenericRepo<T> : IGenericRepo<T> where T : class
         query = query.Take(pageSize);
         return await query.AsSplitQuery().Select(selector).ToListAsync();
     }
+
+
+    public async Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(Expression<Func<T, TResult>> selector, Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue, int pageSize = 10, bool ascending = true)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+
+        var parameter = cursorSelector.Parameters[0];
+        var memberAccess = cursorSelector.Body;
+        var constant = Expression.Constant(cursorValue);
+
+        BinaryExpression comparison = ascending
+            ? Expression.GreaterThan(memberAccess, constant)
+            : Expression.LessThan(memberAccess, constant);
+
+        var cursorCondition = Expression.Lambda<Func<T, bool>>(comparison, parameter);
+        query = query.Where(cursorCondition);
+
+        query = ascending
+            ? query.OrderBy(cursorSelector)
+            : query.OrderByDescending(cursorSelector);
+
+        query = query.Take(pageSize);
+        return await query.AsSplitQuery().Select(selector).ToListAsync();
+    }
+
+    public async Task<List<TResult>> GetCursorPaginatedSelectedColumnsAsync<TResult, TKey>(
+        Expression<Func<T, TResult>> selector, Expression<Func<T, TKey>> cursorSelector,
+        TKey cursorValue, Func<IQueryable<T>, IIncludableQueryable<T, object>> include, int pageSize = 10,
+        bool ascending = true)
+    {
+        IQueryable<T> query = _dbSet.AsNoTracking();
+
+        query = include(query);
+
+        var parameter = cursorSelector.Parameters[0];
+        var memberAccess = cursorSelector.Body;
+        var constant = Expression.Constant(cursorValue);
+
+        BinaryExpression comparison = ascending
+            ? Expression.GreaterThan(memberAccess, constant)
+            : Expression.LessThan(memberAccess, constant);
+
+        var cursorCondition = Expression.Lambda<Func<T, bool>>(comparison, parameter);
+        query = query.Where(cursorCondition);
+
+        query = ascending
+            ? query.OrderBy(cursorSelector)
+            : query.OrderByDescending(cursorSelector);
+
+        query = query.Take(pageSize);
+        return await query.AsSplitQuery().Select(selector).ToListAsync();
+    }
 }

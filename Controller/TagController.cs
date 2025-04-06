@@ -13,9 +13,10 @@ namespace Ecommerce_site.Controller;
 public class TagController(ITagService tagService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<ApiStandardResponse<List<AllTagResponse>>>> GetAllTag()
+    public async Task<ActionResult<ApiStandardResponse<List<AllTagResponse>>>> GetAllTag([FromQuery] int cursor,
+        [FromQuery] int pageSize)
     {
-        var response = await tagService.GetAllTagsAsync();
+        var response = await tagService.GetAllTagsAsync(cursor, pageSize);
         return response.Success
             ? Ok(response.Data)
             : StatusCode(response.StatusCode, new ProblemDetails
