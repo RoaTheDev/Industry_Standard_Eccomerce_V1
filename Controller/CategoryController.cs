@@ -53,9 +53,10 @@ public class CategoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CategoryListResponse>>> GetAllCategory()
+    public async Task<ActionResult<PaginatedCategoryResponse>> GetAllCategory([FromQuery] int cursor,
+        [FromQuery] int pageSize)
     {
-        var response = await _categoryService.GetCategoryListByIdAsync();
+        var response = await _categoryService.GetCategoryListAsync(cursor, pageSize);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails
@@ -106,10 +107,10 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<ActionResult<ConfirmationResponse>> CategoryStatusChanger(
-        [FromBody] CategoryStatusChangeRequest request)
+    public async Task<ActionResult<ConfirmationResponse>> CategoryStatusChanger( [FromQuery] long categoryId,[FromQuery] long adminId 
+        )
     {
-        var response = await _categoryService.CategoryStatusChangerAsync(request);
+        var response = await _categoryService.CategoryStatusChangerAsync(categoryId,adminId);
         if (!response.Success)
         {
             return StatusCode(response.StatusCode, new ProblemDetails

@@ -49,18 +49,30 @@ public class CategoryService : ICategoryService
         return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, category);
     }
 
-    public async Task<ApiStandardResponse<List<CategoryListResponse>?>> GetCategoryListByIdAsync()
+    public async Task<ApiStandardResponse<PaginatedCategoryResponse>> GetCategoryListAsync(int cursor = 0,
+        int pageSize = 10)
     {
-        var categories = await _categoryRepo.GetSelectedColumnsListsAsync(
+        if (cursor < 0) cursor = 0;
+        if (pageSize < 1) pageSize = 10;
+        var categories = await _categoryRepo.GetCursorPaginatedSelectedColumnsAsync(
             cate => new CategoryListResponse
             {
                 CategoryId = cate.CategoryId,
                 CategoryName = cate.CategoryName,
                 Description = cate.Description,
                 IsActive = cate.IsActive
-            });
-        
-        return new ApiStandardResponse<List<CategoryListResponse>?>(StatusCodes.Status200OK, categories);
+            },
+            c => c.CategoryId,
+            cursor,
+            pageSize
+        );
+
+        return new ApiStandardResponse<PaginatedCategoryResponse>(StatusCodes.Status200OK, new PaginatedCategoryResponse
+        {
+            Categories = categories,
+            Cursor = cursor,
+            PageSize = pageSize,
+        });
     }
 
     public async Task<ApiStandardResponse<CategoryCreateResponse?>> CreateCategoryAsync(CategoryCreateRequest request)
@@ -93,56 +105,50 @@ public class CategoryService : ICategoryService
     public async Task<ApiStandardResponse<CategoryResponse?>> UpdateCategoryAsync(long id,
         CategoryUpdateRequest request)
     {
-            var category = await _categoryRepo.GetByIdAsync(id);
+        var category = await _categoryRepo.GetByIdAsync(id);
 
-            if (category is null)
-                return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
-                    "The category does not exist");
+        if (category is null)
+            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status404NotFound,
+                "The category does not exist");
 
-            bool isAdmin = await _userRepo.EntityExistByConditionAsync(
-                ua => ua.UserId == request.UpdatedBy &&
-                      ua.Role.RoleName.ToUpper() == RoleEnums.Admin.ToString().ToUpper(),
-                uIn => uIn.Include(ur => ur.Role));
+        bool isAdmin = await _userRepo.EntityExistByConditionAsync(
+            ua => ua.UserId == request.UpdatedBy &&
+                  ua.Role.RoleName.ToUpper() == RoleEnums.Admin.ToString().ToUpper(),
+            uIn => uIn.Include(ur => ur.Role));
 
-            if (!isAdmin)
-                return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status403Forbidden,
-                    "Only the admin can modify the category");
+        if (!isAdmin)
+            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status403Forbidden,
+                "Only the admin can modify the category");
 
-            if (!string.IsNullOrWhiteSpace(request.CategoryName) && category.CategoryName != request.CategoryName)
-                category.CategoryName = request.CategoryName;
+        if (!string.IsNullOrWhiteSpace(request.CategoryName) && category.CategoryName != request.CategoryName)
+            category.CategoryName = request.CategoryName;
 
-            if (!string.IsNullOrWhiteSpace(request.Description) && category.Description != request.Description)
-                category.Description = request.Description;
+        if (!string.IsNullOrWhiteSpace(request.Description) && category.Description != request.Description)
+            category.Description = request.Description;
 
-            category.UpdatedBy = request.UpdatedBy;
-            category.UpdatedAt = DateTime.UtcNow;
+        category.UpdatedBy = request.UpdatedBy;
+        category.UpdatedAt = DateTime.UtcNow;
 
-            await _categoryRepo.UpdateAsync(category);
-            CategoryResponse response = _mapper.Map<CategoryResponse>(category);
-            return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, response);
+        await _categoryRepo.UpdateAsync(category);
+        CategoryResponse response = _mapper.Map<CategoryResponse>(category);
+        return new ApiStandardResponse<CategoryResponse?>(StatusCodes.Status200OK, response);
     }
 
     public async Task<ApiStandardResponse<ConfirmationResponse?>> CategoryStatusChangerAsync(
-        CategoryStatusChangeRequest request)
+        long id, long adminId)
     {
         var user = await _userRepo.GetByConditionAsync(
-            ua => ua.UserId == request.AdminId &&
+            ua => ua.UserId == adminId &&
                   ua.Role.RoleName.ToUpper() != RoleEnums.Admin.ToString().ToUpper(),
             uIn =>
-                uIn.Include(ur => ur.Role)
-                    .Include(ur => ur.CategoryCreatedByNavigations),
+                uIn.Include(ur => ur.Role),
             false);
 
         if (user is null)
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,
                 $"Only admin can make changes");
 
-        Category? category = null;
-        foreach (var c in user.CategoryCreatedByNavigations)
-        {
-            if (c.CategoryId == request.CategoryId)
-                category = c;
-        }
+        Category? category = await _categoryRepo.GetByIdAsync(id);
 
         if (category is null)
             return new ApiStandardResponse<ConfirmationResponse?>(StatusCodes.Status404NotFound,

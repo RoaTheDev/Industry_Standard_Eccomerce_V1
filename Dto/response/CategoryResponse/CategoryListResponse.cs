@@ -1,9 +1,14 @@
 namespace Ecommerce_site.Dto.response.CategoryResponse;
 
-public class CategoryListResponse
+public class CategoryListResponse : CategoryResponse
 {
     public required long CategoryId { get; set; }
-    public required string CategoryName { get; set; }
-    public required string Description { get; set; }
     public required bool IsActive { get; set; }
+}
+
+public class PaginatedCategoryResponse
+{
+    public required List<CategoryListResponse> Categories { get; set; }
+    public required int Cursor { get; set; }
+    public required int PageSize { get; set; }
 }
